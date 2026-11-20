@@ -1,0 +1,5 @@
+# 줄바꿈 고정 — 윈도우(autocrlf)에서 받아도 셸 스크립트 · 훅은 LF로 (CRLF면 bash가 깨진다)
+# 구역: eple / 근거: WU-01
+* text=auto
+*.sh text eol=lf
+.githooks/* text eol=lf

@@ -1,0 +1,41 @@
+{
+  "name": "pack-flow",
+  "version": "0.1.0",
+  "private": true,
+  "description": "PackFlow — 소규모 판매자의 구매 · 입고 · 재고 · 출고 미니 ERP (바이브 코딩 해커톤 2026)",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test:unit": "vitest run --project unit",
+    "test:db": "vitest run --project db",
+    "test:e2e": "playwright test",
+    "test:regression": "node tests/regression/run.ts",
+    "check:secrets": "bash scripts/check-secrets.sh --staged",
+    "prepare": "node scripts/install-hooks.mjs"
+  },
+  "dependencies": {
+    "@supabase/ssr": "0.12.7",
+    "@supabase/supabase-js": "2.119.2",
+    "next": "16.4.6",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "server-only": "0.0.1",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1",
+    "@types/node": "24.19.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "eslint": "9.39.5",
+    "eslint-config-next": "16.4.6",
+    "typescript": "5.9.3",
+    "vitest": "5.1.1"
+  }
+}
