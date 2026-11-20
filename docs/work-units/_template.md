@@ -29,6 +29,7 @@
 ## 다 됐다의 기준
 
 - [ ] `npm run lint` · `npm run typecheck` · `npm run test:unit` 통과
+- [ ] 주석 · 이력: 새 파일 머리(이력 첫 줄), 고친 파일 이력 한 줄, 내보내는 함수 주석 ([12](../12-coding-guide.md))
 - [ ] (기능 기준)
 
 ## 테스트 방법

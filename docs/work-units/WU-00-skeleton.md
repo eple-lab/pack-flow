@@ -26,8 +26,9 @@
 6. `.env.example`: 이름과 설명만 (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_DEV_PROJECT_REF`, `SUPABASE_SERVICE_ROLE_KEY`(eple 로컬 전용이라고 주석), `LLM_PROVIDER`, `LLM_MODEL`, `OLLAMA_BASE_URL`, `GEMINI_API_KEY`, `NEXT_PUBLIC_USE_MOCK`, `TEST_USER_A_EMAIL` 등 테스트 계정 변수, `E2E_BASE_URL`)
 7. 비밀값 검사: `scripts/check-secrets.sh`(정규식은 여기 한곳), `.githooks/pre-commit`(스크립트 호출), `.githooks/allow-patterns`(첫 예외 `@packflow[.]test`와 이유 주석), 실행 권한 `git update-index --chmod=+x`
 8. GitHub Actions `.github/workflows/ci.yml`: PR마다 `secret-check`(같은 스크립트, PR diff) · `lint` · `typecheck` · `test:unit`
-9. `AGENTS.md` · 루트 `README.md`는 **초안이 이미 저장소에 있다(11/20)**. 골격의 실제 경로 · 명령과 맞는지 확인해 고치고, `CLAUDE.md`(`@AGENTS.md` 한 줄)를 추가한다
-10. 이슈 양식 `.github/ISSUE_TEMPLATE/`(버그 · 결정 요청 · 구역 요청, [11 이슈 운영](../11-issues.md) 2절)과 라벨(`WU` · `bug` · `decision` · `request` · `docs` · `ai-case` · `step-1~5` · `blocked` · `after-mvp` · 담당자 아이디). 라벨 생성은 저장소 설정 변경이라 eple이 직접
+9. 골격에서 만드는 **모든 코드 파일에 머리와 이력 첫 줄**(`2026-11-2x  eple  처음 작성 — … (WU-0x)`)을 단다. 자리만 만든 팀원 구역 파일은 이력 첫 줄을 `eple  자리 생성 (WU-0x) — 구현은 <아이디> WU-xx`로 적어, 실제 구현자가 다음 줄에 `처음 구현`을 적게 한다([12](../12-coding-guide.md) ①)
+10. `AGENTS.md` · 루트 `README.md`는 **초안이 이미 저장소에 있다(11/20)**. 골격의 실제 경로 · 명령과 맞는지 확인해 고치고, `CLAUDE.md`(`@AGENTS.md` 한 줄)를 추가한다
+11. 이슈 양식 `.github/ISSUE_TEMPLATE/`(버그 · 결정 요청 · 구역 요청, [11 이슈 운영](../11-issues.md) 2절)과 라벨(`WU` · `bug` · `decision` · `request` · `docs` · `ai-case` · `step-1~5` · `blocked` · `after-mvp` · 담당자 아이디). 라벨 생성은 저장소 설정 변경이라 eple이 직접
 
 **다 됐다의 기준**
 - [ ] 새 폴더에 clone → `npm ci` → `npm run lint && npm run typecheck && npm run test:unit` 통과

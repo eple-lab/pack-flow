@@ -33,7 +33,7 @@
 | 일괄 등록 파싱 | `src/lib/bulk/**` | jkspawn |
 | 화면용 목 데이터 | `src/lib/mock/**` (API 계약을 비춘 것) | eple (값 추가는 요청) |
 | 에이전트 | `src/lib/llm.ts`, `src/lib/agent/**`, `src/app/api/agent/**`, `src/components/agent/**`, `src/lib/agent/prompts/**` | skygaul |
-| 문서 | `docs/` 00~11(09의 상태 칸 포함), `docs/wireframes.html`(화면 구성 원본), `DevelopDoc/`, 루트 `README.md` · `AGENTS.md` | eple |
+| 문서 | `docs/` 00~13(09의 상태 칸, 13 고친 기록 포함), `docs/wireframes.html`(화면 구성 원본), `DevelopDoc/`, 루트 `README.md` · `AGENTS.md` | eple |
 | 작업 단위 문서 · 기록 | `docs/work-units/WU-xx-*.md`의 '결과' 절, `docs/records/<계정>-*.md`, `docs/records/ai-cases-<계정>.md` | 그 WU 담당자 · 계정 주인 |
 | 공동 기록 (한 사람이 씀) | `docs/records/regression-*.md` · `performance.md` (sorek-charlie), `ai-cases.md` · `ai-limits.md` · `llm-usage.md` (skygaul), `security-check-*.md` (eple) | 표시된 사람 |
 
@@ -148,6 +148,10 @@ WU 번호: `0x` eple 골격, `1x` jkspawn, `2x` sorek-charlie, `3x` skygaul, `4x
 ### 다른 구역 파일을 건드렸나
 - 없음 / 있음: (파일, 주인 승인 여부)
 
+### 주석 · 이력 ([12 코드 작성 가이드](12-coding-guide.md))
+- [ ] 새 파일 머리(역할 · 근거 · 구역 · 이력 첫 줄), 고친 파일 이력 맨 아래 한 줄
+- [ ] 내보내는 함수 · 컴포넌트 · DB 함수 주석, 병합 뒤 고친 덩어리에 `[#이슈번호 종류]`
+
 ### 커밋 전 점검 (공개 저장소)
 - [ ] diff · 스크린샷 · 테스트 기록에 키 · 비밀번호 · 실제 이메일 · 실명 · 사용자 폴더 경로 없음
 - [ ] `.env*` 파일이 커밋에 없음 (`.env.example` 제외), pre-commit 검사를 `--no-verify`로 넘기지 않음
@@ -171,7 +175,7 @@ WU-11 대시보드 KPI · 재고 표
 | 오전 시작 | 짧은 공유(어제 한 것 · 오늘 할 것 · 막힌 것), eple이 패키지 요청 반영 |
 | 점심 전 | 1차 병합 → eple이 `main`을 demo에 배포 |
 | 오후 | 리뷰 · 수정 |
-| 마감 전 | 2차 병합 → **통합 버전 실행**(공통 안내 "매일 한 번은 합친 버전을 실행") → 결과를 계획서 2절 변경 이력에 한 줄 |
+| 마감 전 | 2차 병합 → **통합 버전 실행**(공통 안내 "매일 한 번은 합친 버전을 실행") → 결과를 계획서 2절 변경 이력에 한 줄 → 병합된 고친 이슈를 [13 고친 기록](13-fixes.md)에 모음(eple) |
 
 막혔을 때: 15분 혼자(에러 읽고 재현 단계 줄이기) → 15분 팀과(가설 3개) → 멘토 · 운영진(계획서 11절).
 
