@@ -31,11 +31,11 @@
 11. 이슈 양식 `.github/ISSUE_TEMPLATE/`(버그 · 결정 요청 · 구역 요청, [11 이슈 운영](../11-issues.md) 2절)과 라벨(`WU` · `bug` · `decision` · `request` · `docs` · `ai-case` · `step-1~5` · `blocked` · `after-mvp` · 담당자 아이디). 라벨 생성은 저장소 설정 변경이라 eple이 직접
 
 **다 됐다의 기준**
-- [ ] 새 폴더에 clone → `npm ci` → `npm run lint && npm run typecheck && npm run test:unit` 통과
-- [ ] `git config core.hooksPath` → `.githooks`
-- [ ] 가짜 키를 넣은 `.env.local`이 `git status`에 안 보임
-- [ ] 가짜 JWT · 가짜 Supabase secret 키 · 가짜 Gemini 키를 넣은 파일 커밋이 로컬 훅에서 막힘, 같은 파일로 연 시험 PR에서 Actions `secret-check` 빨간불 (시험 PR은 닫고 브랜치 삭제)
-- [ ] `@packflow.test` 예시가 있는 docs는 통과
+- [x] 새 폴더에 clone → `npm ci` → `npm run lint && npm run typecheck && npm run test:unit` 통과 ([기록](../records/eple-wu01-checks.md) C-01 · C-03)
+- [x] `git config core.hooksPath` → `.githooks` ([기록](../records/eple-wu01-checks.md) C-02)
+- [x] 가짜 키를 넣은 `.env.local`이 `git status`에 안 보임 ([기록](../records/eple-wu01-checks.md) C-05)
+- [x] 가짜 JWT · 가짜 Supabase secret 키 · 가짜 Gemini 키를 넣은 파일 커밋이 로컬 훅에서 막힘, 같은 파일로 연 시험 PR에서 Actions `secret-check` 빨간불 (시험 PR은 닫고 브랜치 삭제) ([기록](../records/eple-wu01-checks.md) H-01~03 · A-02 · A-03)
+- [x] `@packflow.test` 예시가 있는 docs는 통과 ([기록](../records/eple-wu01-checks.md) H-09)
 
 ## WU-02 Supabase 두 프로젝트 · 스키마 · 권한 · 계정
 
@@ -140,7 +140,9 @@ sorek-charlie가 월요일에 **테스트 케이스만** 쓰면 되도록 구조
 
 ## 결과 (eple이 채움)
 
-- 한 것:
-- 직접 확인한 것:
-- 확인 못 한 것:
-- 커밋:
+### WU-01 (2026-11-20 끝)
+
+- 한 것: Next.js 16.4.6 골격(버전 고정, D-30~33), `.gitignore` · `.gitattributes` · `.env.example`, 비밀값 검사(`scripts/check-secrets.sh` · `.githooks/` · Actions `ci.yml`), 팀원 구역 자리 파일 25개, `AGENTS.md` 보강 · `CLAUDE.md` · 이슈 양식 3종, 이슈 라벨 16개(`bug`는 기존), Secret scanning · Push protection 켜기(eple)
+- 직접 확인한 것: 테스트 케이스 26건 모두 통과 — [eple-wu01-checks.md](../records/eple-wu01-checks.md). 시험에서 검사 스크립트 결함 4건을 찾아 고친 뒤 다시 확인(같은 문서 2절)
+- 확인 못 한 것: 팀원 git 도구의 훅 동작(11/23 각자 시험), 맥 · 리눅스 PC의 `npm ci`
+- 커밋: `9568a05` · `1a52192` · `1287a16` · `60e2193` · `4643674`, 시험 PR #1(닫음)
