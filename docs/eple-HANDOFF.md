@@ -21,7 +21,7 @@
 | 기획 · 설계 문서 `docs/00~13`, `wireframes.html`, `work-units/`(WU 22개 + 양식) | 끝. 로컬 main에 커밋 |
 | 루트 `AGENTS.md` · `README.md` | 초안. 골격 경로 · 명령에 맞춰 WU-01에서 다듬는다 |
 | 코드 | **없음.** 다음 세션이 WU-01부터 |
-| 원격(origin) | 이 노트를 쓰는 시점에 push 대기(작성자 정리 후) — 마지막 상태는 `git log origin/main`으로 확인 |
+| 원격(origin) | 2026-11-20 push 완료. Claude 커밋은 모두 작성자 `eple-lab (Claude)`(push 전에 folia로 잘못 된 18개를 정리함) |
 | Supabase · Render · Gemini 계정 | 아직 안 만듦 |
 
 ## 2. 다음에 할 일 (순서대로)
