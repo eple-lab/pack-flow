@@ -102,6 +102,9 @@
   .bubble.me { background: var(--accent-soft); margin-left: auto; }
   .bubble.ai { background: var(--tid-bg); }
   .card { border: 1px solid var(--accent); border-radius: 8px; padding: 10px; margin: 8px 0; }
+  .ferr { display: block; color: var(--err); font-size: 12px; margin-top: 2px; }
+  .input.bad { border-color: var(--err); }
+  .fcol { display: inline-flex; flex-direction: column; vertical-align: top; }
   .login { max-width: 320px; margin: 0 auto; }
   .login .field { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
   .login .field span:first-child { width: 64px; font-size: 14px; }
@@ -146,7 +149,7 @@
   <a href="#agent">7. AI 에이전트 패널</a>
   <a class="sub" href="#draft">7.1 발주 초안</a>
   <a class="sub" href="#chat">7.2 대화</a>
-  <a href="#common">8. 공통 조각</a>
+  <a href="#common">8. 공통 조각 · 입력 · 실패 처리</a>
   <a href="#demo">9. 시연 순서</a>
 </nav>
 
@@ -163,6 +166,7 @@
     <li>담당 표시: <span class="owner eple">eple</span> <span class="owner jk">jkspawn</span> <span class="owner sky">skygaul</span></li>
     <li>모든 화면은 세 가지 상태를 갖는다: <b>로딩</b>(<code>Loading</code>), <b>빈 상태</b>(<code>EmptyState</code> — "아직 품목이 없어요. [시연 데이터 초기화]"), <b>오류</b>(<code>ErrorBanner</code> — 서버 <code>error.message</code> 그대로). 세 조각은 <code>src/components/common/</code> <span class="owner eple">eple</span></li>
     <li>숫자 예시는 <code>demo</code> 시드(계획서 7절: PRD-001~003, P-101, S-201 · 202) 기준이다.</li>
+    <li><b>입력 규칙 · 빈 값 처리 · 오류 문구의 원본은 <code>docs/04-api-contract.md</code> 4절</b>이다. 이 파일의 문구는 그 표를 따른다. 화면 공통 처리(칸 아래 오류 · 버튼 잠금 · 시간 초과 · 세션 만료 · 표시 형식)는 <a href="#common">8절</a>.</li>
   </ul>
 </section>
 
@@ -393,7 +397,8 @@
     <div class="row"><b class="grow">품목</b>검색 <span class="input">&nbsp;</span><span class="tid">item-search</span></div>
     <div class="box" style="margin-top:8px">
       <b class="small">+ 품목 등록</b><span class="tid">form-item</span>
-      <div class="row wrap small" style="margin-top:6px">코드 <span class="input">PRD-</span> 이름 <span class="input">&nbsp;</span> 매입 <span class="input" style="min-width:50px">&nbsp;</span> 판매 <span class="input" style="min-width:50px">&nbsp;</span> 안전재고 <span class="input" style="min-width:40px">&nbsp;</span> 구매처 메모(선택) <span class="input">&nbsp;</span> <span class="btn primary">등록</span><span class="tid">btn-submit-item</span></div>
+      <div class="row wrap small" style="margin-top:6px">코드 <span class="fcol"><span class="input bad">PRD-001</span><span class="ferr">이미 있는 품목코드예요 (PRD-001)</span></span> 이름 <span class="input">&nbsp;</span> 매입(원) <span class="fcol"><span class="input bad" style="min-width:50px">8,5</span><span class="ferr">숫자(정수)로 입력해 주세요</span></span> 판매(원) <span class="input" style="min-width:50px">&nbsp;</span> 안전재고 <span class="input" style="min-width:40px">&nbsp;</span> 구매처 메모(선택) <span class="input">&nbsp;</span> <span class="btn primary">등록</span><span class="tid">btn-submit-item</span></div>
+      <div class="small muted" style="margin-top:4px">예시: 칸 아래 오류(<code>FieldError</code>). 화면 검증이 먼저 막고, 서버가 같은 이유로 거부해도 같은 자리에 보인다.</div>
     </div>
     <table class="wt" style="margin-top:10px">
       <tr><th>코드</th><th>이름</th><th>매입</th><th>판매</th><th>안전</th><th>재고 (읽기 전용)</th><th>상태</th><th></th></tr>
@@ -515,8 +520,48 @@
     <tr><td><code>ConfirmDialog</code></td><td>취소류 · 초기화 · 발주 확인</td><td>결과를 한 문장으로("재고가 6개 돌아오고, 기록은 남아요"). testid <code>confirm-ok</code></td></tr>
     <tr><td><code>Toast</code></td><td>성공 알림</td><td>"PRD-001 재고 10 → 4" 형식, 3초</td></tr>
     <tr><td><code>ErrorBanner</code></td><td>모든 화면 · 패널</td><td>서버 <code>error.message</code>. <code>PF_INSUFFICIENT_STOCK</code>이면 남은 수량 문장 추가. testid <code>error-banner</code></td></tr>
-    <tr><td><code>Loading</code> · <code>EmptyState</code></td><td>모든 목록</td><td>빈 상태에는 다음 행동 버튼 하나</td></tr>
+    <tr><td><code>Loading</code> · <code>EmptyState</code></td><td>모든 목록</td><td>빈 상태에는 다음 행동 버튼 하나. 검색 결과가 없으면 "'{검색어}'에 맞는 품목이 없어요"</td></tr>
+    <tr><td><code>FieldError</code></td><td>모든 폼</td><td>칸 아래 빨간 글씨. 문구는 04 4.3절(<code>reason</code>별). testid <code>field-error-&lt;필드&gt;</code></td></tr>
+    <tr><td><code>SubmitButton</code></td><td>모든 저장 · 실행 버튼</td><td>요청 중 잠금 + "처리 중…". 두 번 눌러도 한 번</td></tr>
   </table>
+
+  <h3>8.1 입력 · 실패 상황 처리</h3>
+  <div class="meta">원본: 04 API 계약 4절(입력 규칙 · 빈 값 · 오류 문구)</div>
+  <div class="wf">
+    <div class="row wrap">
+      <div class="box" style="max-width:300px">
+        <b class="small">칸 아래 오류 · 버튼 잠금</b><br>
+        <span class="small">수량</span> <span class="fcol"><span class="input bad">0</span><span class="ferr">1 ~ 100000 사이로 입력해 주세요</span></span><br>
+        <span class="small">송장번호</span> <span class="fcol"><span class="input bad">INV-1001</span><span class="ferr">이미 등록된 송장번호예요 (INV-1001)</span></span><br>
+        <span class="btn primary" style="opacity:.6;margin-top:6px">처리 중…</span><span class="tid">field-error-sold_qty</span>
+      </div>
+      <div class="box grow">
+        <b class="small">연결 실패 · 시간 초과</b>
+        <div class="banner-err">서버에 연결하지 못했어요. 인터넷 연결을 확인하고 다시 시도해 주세요 <span class="btn" style="margin-left:6px">다시 시도</span></div>
+        <div class="banner-err">응답이 늦어요. 잠시 뒤 다시 시도해 주세요 (배포 서버가 깨어나는 중일 수 있어요)</div>
+        <b class="small">세션 만료</b>
+        <div class="small">어느 요청이든 401이면 배너 없이 <code>/login?next=/trades</code>로 이동 → 로그인 후 원래 화면으로</div>
+      </div>
+    </div>
+  </div>
+  <table>
+    <tr><th>상황</th><th>화면 처리</th></tr>
+    <tr><td>필수 칸이 비었음</td><td>보내지 않고 칸 아래 "필수 항목이에요"</td></tr>
+    <tr><td>선택 칸(송장번호 · 메모 · 구매처 메모)을 비움</td><td>공백을 지우고 <code>null</code>로 보냄. 빈 송장끼리는 중복이 아니다</td></tr>
+    <tr><td>숫자 칸에 쉼표 · 공백</td><td>지우고 숫자로 보냄. 소수 · 글자는 "숫자(정수)로 입력해 주세요"</td></tr>
+    <tr><td>범위 밖 (수량 0, 10만 초과, 금액 10억 초과)</td><td>"{min} ~ {max} 사이로 입력해 주세요"</td></tr>
+    <tr><td>서버가 칸 단위로 거부 (<code>detail.field</code>)</td><td>그 칸 아래에. 칸이 화면에 없으면 배너</td></tr>
+    <tr><td>재고 부족 · 허용 안 된 전이 · 남의 데이터</td><td>배너(04 4.4절 문구) + 목록 새로고침</td></tr>
+    <tr><td>네트워크 끊김 · 15초 초과</td><td>배너 + [다시 시도]. 입력값은 지우지 않음</td></tr>
+    <tr><td>세션 만료(401)</td><td><code>/login?next=</code>로 이동</td></tr>
+    <tr><td>저장 성공</td><td>Toast + 폼 비우기 + 첫 칸에 커서</td></tr>
+    <tr><td>응답 값이 비었음 (도착 수량 · 송장 · 시각)</td><td><code>—</code> 표시. 다음 페이지 없음이면 [더 보기] 숨김</td></tr>
+  </table>
+  <ul class="notes">
+    <li>브라우저 기본 <code>alert()</code> · <code>confirm()</code> · <code>prompt()</code>는 쓰지 않는다.</li>
+    <li>숫자 표시: 천 단위 쉼표(<code>12,000</code>), 금액 칸 머리글에 "(원)", 증감은 <code>+8</code> · <code>−6</code>.</li>
+    <li>날짜 · 시각: 한국 시간. 목록 <code>11/24 14:05</code>, 올해가 아니면 <code>2025-11-24</code>, 마우스를 올리면 전체 시각. 함수는 <code>src/lib/format.ts</code>(eple).</li>
+  </ul>
 </section>
 
 <!-- ================================================================ -->

@@ -24,14 +24,16 @@
 | 6 | 재고 이력 `/history` | `history` | jkspawn | WU-14 | F-14, F-15 |
 | 7.1 | 에이전트 › 발주 초안 | `draft` | skygaul | WU-33 | F-20, F-21, F-24 |
 | 7.2 | 에이전트 › 대화 | `chat` | skygaul | WU-34 | F-22, F-23 |
-| 8 | 공통 조각 (확인 창 · 토스트 · 오류 배너 · 빈 상태) | `common` | eple | WU-05 | — |
+| 8 | 공통 조각 (확인 창 · 토스트 · 오류 배너 · 빈 상태 · 칸 아래 오류 · 저장 버튼) | `common` | eple | WU-05 | F-30 |
+| 8.1 | 입력 · 실패 상황 처리 (빈 값 · 범위 · 연결 실패 · 시간 초과 · 세션 만료 · 표시 형식) — 원본은 04 4절 | `common` 안 | eple | WU-03 · 04 · 05 | F-29, F-30 |
 | 9 | 시연 순서 (출고 → 카드 → 입고) | `demo` | — | WU-15 | — |
 
 ## 꼭 지킬 것 (HTML의 요약)
 
 - 숫자는 서버 응답 그대로 보여 준다. 화면에서 재고 · 합계를 다시 계산하지 않는다.
 - 버튼 표시는 전이 상수(`PURCHASE_TRANSITIONS` · `SALE_TRANSITIONS`)로, 판정은 서버가 한다.
-- 오류는 공통 `ErrorBanner`, 확인은 `ConfirmDialog` — 새로 만들지 않는다.
+- 오류는 공통 `ErrorBanner` · `FieldError`(칸 아래), 확인은 `ConfirmDialog`, 저장 버튼은 `SubmitButton` — 새로 만들지 않는다. 브라우저 기본 `alert()` · `confirm()` 금지.
+- 입력 규칙 · 빈 값 · 오류 문구는 [04](04-api-contract.md) 4절이 원본이다. 폼은 `src/lib/validation/` 스키마를 그대로 쓴다.
 - 재고 수량 · 품목코드는 어떤 화면에서도 입력받지 않는다. 이력 행은 수정 · 삭제 버튼이 없다.
 - 에이전트의 변경은 [확인] · [실행]을 눌러야만. 문안 속 숫자보다 표의 숫자가 우선.
 - testid는 WU 문서와 HTML에 적힌 이름을 그대로 쓴다(E2E가 찾는다).
