@@ -35,11 +35,16 @@
 4. E2E `step1.spec.ts`: 초기화(demo) → S-201 출고 → 재고 4 · `alert-card-PRD-001` · 대시보드 숫자 → P-101 8개 입고 → 재고 12
 5. E2E `step2.spec.ts`: A 로그인 → 출고 → 로그아웃 · 재로그인 → 같은 값 / B 로그인 → A 품목 안 보임
 
+## 입력 · 오류 처리 ([04](../04-api-contract.md) 4절)
+
+- `step2.spec.ts`에 T-VAL-6을 넣는다: 로그인 → 세션 쿠키 삭제 → [출고] → `/login?next=/trades` → 다시 로그인 → `/trades`로 돌아옴
+
 ## 다 됐다의 기준
 
 - [ ] 세 벌 각각 초기화 직후 T-INV-1 0행, 대시보드 API 값 = `expected` (T-S4-1 정답 부분)
 - [ ] `npm run test:e2e -- step1 step2` 통과 (로컬)
 - [ ] 시드 파일에 실제 이름 · 이메일 없음
+- [ ] T-VAL-6 통과
 
 ## 테스트 방법
 

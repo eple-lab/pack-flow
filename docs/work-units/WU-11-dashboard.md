@@ -48,6 +48,11 @@
 | 파이프라인 칸 | `pipe-purchase-<상태>`, `pipe-sale-<상태>` (상태는 한글 그대로) |
 | 재고 표 행 | `stock-row-<sku_id>`, 재고 칸 `stock-qty-<sku_id>` |
 
+## 입력 · 오류 처리 ([04](../04-api-contract.md) 4절)
+
+- 숫자 · 날짜는 `src/lib/format.ts`로 표시(천 단위 쉼표, `+8` · `−6`, 한국 시간). 비어 있는 값은 `—`, 품절 임박이 없으면 `EmptyState` ([04](../04-api-contract.md) 4.5 · 4.6)
+- 로딩 · 오류는 공통 `Loading` · `ErrorBanner`. 연결 실패 · 시간 초과면 배너의 [다시 시도]
+
 ## 다 됐다의 기준
 
 - [ ] lint · typecheck · test:unit 통과
@@ -55,6 +60,7 @@
 - [ ] 실제 API(dev, 본인 테스트 계정, `demo` 시드): 화면 숫자 = `GET /api/dashboard` 응답 숫자
 - [ ] [발주서 초안 보기]가 `openAgentPanel`을 부름 (패널이 아직 비어 있어도 됨)
 - [ ] 위 testid 전부 있음
+- [ ] 금액 · 수량이 쉼표로, 시각이 한국 시간으로 보임
 
 ## 테스트 방법
 

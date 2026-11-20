@@ -45,12 +45,22 @@
 | 등록 폼 | `form-purchase`, `form-sale`, 제출 `btn-submit-purchase`, `btn-submit-sale` |
 | 오류 배너 | `error-banner` |
 
+## 입력 · 오류 처리 ([04](../04-api-contract.md) 4절)
+
+- 폼은 `src/lib/validation/`의 `purchaseCreate` · `saleCreate` · `receive` 스키마로 보내기 전에 검사하고, 틀린 칸 아래 `FieldError`(문구는 [04](../04-api-contract.md) 4.3). 서버가 `detail.field`로 거부해도 같은 칸 아래에
+- 선택 칸(송장번호)을 비우면 `null`로 보낸다. 숫자 칸의 쉼표 · 공백은 지우고 정수로
+- 저장 · 입고 확정 · 출고 버튼은 `SubmitButton`(요청 중 잠금). 성공하면 `Toast` + 폼 비우기, 실패하면 입력값 유지
+- 비어 있는 도착 수량 · 송장번호 · 시각은 `—` (4.5)
+
 ## 다 됐다의 기준
 
 - [ ] lint · typecheck · test:unit 통과
 - [ ] 실제 API(dev, `demo` 시드): S-201 출고 → 재고 10 → 4 알림, P-101 8개 입고 확정 → '부분 입고' 배지 (완료 판정 1 · 2를 화면으로)
 - [ ] 재고보다 많은 출고 시 `error-banner`에 남은 수량 안내, 목록 변화 없음
 - [ ] 위 testid 전부 있음
+- [ ] 수량 0 · 소수 · 10만 초과 입력 → 칸 아래 범위 · 정수 문구, 요청 안 나감
+- [ ] 송장번호를 비운 판매 두 건이 모두 등록됨 (T-VAL-1 화면 쪽)
+- [ ] testid `field-error-<필드>`가 칸 아래 오류에 있음
 
 ## 테스트 방법
 

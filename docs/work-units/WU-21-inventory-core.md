@@ -18,7 +18,7 @@ D-10: 재고 증감 · 전이 검사 · 이력 기록은 Postgres 함수 하나�
 ## 만들 · 고칠 파일 (내 구역만)
 
 - `supabase/migrations/*_inventory.sql`의 아래 함수 본문
-- `tests/db/receive.test.ts`, `tests/db/ship.test.ts`, `tests/db/invariants.test.ts` — 로그인 · 초기화 · 불변식 검사는 eple의 `tests/db/helpers.ts`(WU-08)를 **가져다 쓴다**. 도우미가 더 필요하면 eple에게 요청
+- `tests/db/receive.test.ts`, `tests/db/ship.test.ts`, `tests/db/invariants.test.ts`, `tests/db/validation.test.ts`(T-VAL-1) — 로그인 · 초기화 · 불변식 검사는 eple의 `tests/db/helpers.ts`(WU-08)를 **가져다 쓴다**. 도우미가 더 필요하면 eple에게 요청
 
 ## 하지 말 것
 
@@ -41,6 +41,11 @@ D-10: 재고 증감 · 전이 검사 · 이력 기록은 Postgres 함수 하나�
 8. 오류는 `raise exception '<코드>' using detail = json_build_object(...)::text`
 9. 호출 래퍼 `src/lib/inventory.ts`는 eple이 골격에서 완성해 두었다. 함수 인자 · 반환 모양을 [03](../03-data-model.md) 4절과 다르게 바꿔야 하면 **먼저 eple에게 요청**(래퍼와 계약을 같이 고친다)
 
+## 입력 · 오류 처리 ([04](../04-api-contract.md) 4절)
+
+- 함수도 [04](../04-api-contract.md) 4.2의 범위를 한 번 더 검사한다(수량 1~100,000, 금액 0~10억, 빈 문자열 금지 — 테이블 CHECK와 별개로 이유를 담은 `PF_VALIDATION` detail `{field, reason}`을 돌려준다)
+- 선택 텍스트 인자가 `''`로 오면 `null`로 바꿔 저장
+
 ## 다 됐다의 기준
 
 - [ ] `npm run test:db` 통과 (dev, 본인 테스트 계정)
@@ -51,6 +56,8 @@ D-10: 재고 증감 · 전이 검사 · 이력 기록은 Postgres 함수 하나�
   - `received_qty` 0 · 주문 초과 → `PF_VALIDATION`
   - 매 테스트 끝 T-INV-1(이력 합계 = 재고) 0행
 - [ ] eple이 dev에 마이그레이션 적용 후 다시 통과
+- [ ] T-VAL-1: 송장번호 `null` 판매 두 건 → 둘 다 성공, `''`로 보내도 `null` 저장
+- [ ] 수량 0 · 100,001로 함수 직접 호출 → `PF_VALIDATION` (`out_of_range`)
 
 ## 테스트 방법
 

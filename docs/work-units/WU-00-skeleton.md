@@ -39,7 +39,7 @@
 ## WU-02 Supabase 두 프로젝트 · 스키마 · 권한 · 계정
 
 1. `packflow-dev`, `packflow-demo` 생성. dev는 이메일 확인 끄기(가짜 주소로 테스트 계정), demo는 회원가입 닫기
-2. 마이그레이션(eple 소유): `<ts>_schema.sql`(4테이블 + `llm_usage`, 제약 · 복합 외래키 · 인덱스), `<ts>_rls.sql`(RLS 켜기, SELECT 정책, `items` 컬럼 UPDATE 권한, anon 권한 회수), `<ts>_core_functions.sql`(`pf_require_user`, `pf_llm_take`)
+2. 마이그레이션(eple 소유): `<ts>_schema.sql`(4테이블 + `llm_usage`, 제약 · 복합 외래키 · 인덱스, **[04](../04-api-contract.md) 4.2절과 같은 범위의 CHECK** — 수량 · 금액 상한, 글자 수, 텍스트 칸 `length(btrim(x)) > 0`로 빈 문자열 금지), `<ts>_rls.sql`(RLS 켜기, SELECT 정책, `items` 컬럼 UPDATE 권한, anon 권한 회수), `<ts>_core_functions.sql`(`pf_require_user`, `pf_llm_take`)
 3. sorek-charlie 소유 파일의 **자리**: `<ts>_inventory.sql`에 업무 함수(생성 · 입고 · 출고 · 취소 · 전이 판정)를 **이름 · 인자 · 반환형만** 두고 본문은 `raise exception 'PF_NOT_IMPLEMENTED'`. 파일 첫 줄에 "주인: sorek-charlie, 11/23부터 수정은 새 마이그레이션 또는 이 파일(적용 전)". `pf_bulk_apply` 자리는 eple 파일 `<ts>_bulk.sql`(WU-43에서 구현), `pf_reset_and_seed`는 WU-08에서 구현
 4. Supabase CLI로 dev → demo 순서로 적용
 5. 계정: demo에 시연 계정 A · B(대시보드에서 생성), dev에 테스트 계정 1인 2개 · 총 8개(`scripts/create-test-users.ts`: 환경변수에서만 읽음, `NEXT_PUBLIC_SUPABASE_URL`이 dev 프로젝트가 아니면 거부, 비밀번호 출력 안 함). 각자 계정 정보는 팀 비공개 채널로 개별 전달
@@ -61,18 +61,21 @@
    - `src/lib/env.ts`: 필요한 환경변수를 한곳에서 읽고 없으면 시작 때 오류. 서버 전용 값(`GEMINI_API_KEY` 등)은 `server-only`로 표시해 화면 코드에서 가져오면 빌드가 실패하게
    - `src/lib/time.ts`: `todayRangeKst()` 등 한국 시간 기준 '오늘' 계산
    - `src/lib/log.ts`: 로그 함수. 키 · 비밀번호 · 이메일 · 프롬프트 전문은 남기지 않음(길이 · 코드 · 지연만)
+8. 입력 검증 `src/lib/validation/`(eple 소유): [04](../04-api-contract.md) 4.1 정규화(공백 제거, 선택 칸 빈 값 → `null`, 숫자만, 대문자 품목코드, strict — 계약에 없는 필드 거부) + 4.2 필드 규칙을 zod 스키마로. 요청 종류마다 스키마 하나(`itemCreate`, `purchaseCreate`, `receive`, `saleCreate`, `bulkRow`, `chatMessage`, `poConfirm` …). 실패는 `PF_VALIDATION`의 `{field, reason, min, max}`(4.3)로
+9. `src/lib/api/errors.ts`의 문구는 [04](../04-api-contract.md) 4.4 표 그대로(`PF_INTERNAL` 포함). 서버 원문 오류는 로그에만
 
 **다 됐다의 기준**
 - [ ] 로그인 · 로그아웃 동작, 미로그인 `GET /api/me` → 401, `X-PF` 없는 POST → 403 `PF_CSRF`
 - [ ] `errors.ts` 단위 테스트: 함수 예외 코드 7종 → HTTP · 메시지 매핑
 - [ ] `inventory.ts`의 래퍼가 [03](../03-data-model.md) 4절 함수 전부를 덮음, 호출 시 stub의 `PF_NOT_IMPLEMENTED`가 501로 보임
 - [ ] 화면 컴포넌트에서 `env.ts`의 서버 전용 값을 가져오면 빌드 실패(한 번 시험 후 되돌림), `time.ts` 단위 테스트(자정 경계)
+- [ ] T-VAL-7: 검증 스키마 단위 테스트 — 필드마다 최소 · 최대 · 하나 넘음 · 빈 값 · 형식, `""` → `null`, 계약에 없는 필드 거부
 
 ## WU-04 API stub · 목 데이터 · 에이전트 자리
 
 1. [04](../04-api-contract.md) 3절의 **모든 라우트** 파일 생성. 각 라우트는 공통 handler를 거쳐 `501 PF_NOT_IMPLEMENTED`
 2. `src/lib/mock/`(eple 소유): `dashboard.ts` `items.ts` `purchases.ts` `sales.ts` `stockLogs.ts` + 에이전트 응답 목(`PoDraft`, `ChatReply`) — 계획서 7절 시드 예시(PRD-001~003, P-101, S-201 · 202) 기준, 타입은 `erp.ts` · `agent.ts`. 품절 임박 · 오류 응답 사례도 하나씩
-3. `src/lib/api-client.ts`(eple 소유, 화면 · 패널이 부르는 유일한 fetch 래퍼): `X-PF` 헤더 · `credentials` · 오류 `{error}` 해석을 여기서. `NEXT_PUBLIC_USE_MOCK=1`이면 목 응답, 아니면 실제 API. 라우트마다 함수 하나(`api.dashboard()`, `api.shipSale(id)` …)
+3. `src/lib/api-client.ts`(eple 소유, 화면 · 패널이 부르는 유일한 fetch 래퍼): `X-PF` 헤더 · `credentials` · 오류 `{error}` 해석을 여기서. `NEXT_PUBLIC_USE_MOCK=1`이면 목 응답, 아니면 실제 API. 라우트마다 함수 하나(`api.dashboard()`, `api.shipSale(id)` …). [04](../04-api-contract.md) 4.4 · 4.6대로: 15초 시간 초과 → `PF_TIMEOUT`, 연결 실패 → `PF_NETWORK`, 401 → `/login?next=<지금 경로>`, 오류 코드 → 문구
 4. `src/components/agent/open.ts` **완성**(eple 소유, 파트 간 계약): `openAgentPanel({ mode: 'draft-po' | 'chat', sku_ids? })` — 화면이 패널을 여는 유일한 입구(이벤트 또는 컨텍스트로 `<AgentSlot />`에 전달)
 5. 에이전트 자리(skygaul 소유): `src/lib/llm.ts`(함수 시그니처), `src/lib/agent/`(빈 파일), `src/app/api/agent/**`(501), `src/components/agent/AgentPanel.tsx`(빈 패널)
 
@@ -83,13 +86,14 @@
 ## WU-05 화면 자리
 
 1. `src/app/(app)/layout.tsx` + `src/components/layout/`(eple 소유): 상단 바(로그아웃 · 계정 표시 · 초기화 버튼 자리), 내비(대시보드 · 입출고 · 이력 · 품목), 오른쪽 `<AgentSlot />`(skygaul 패널이 들어갈 자리). 초기화 버튼 자리에는 jkspawn 폴더의 `src/components/demo/SeedResetButton.tsx`를 빈 컴포넌트로 만들어 꽂아 둔다(내용은 WU-15)
-2. 공통 조각 `src/components/common/`(eple 소유, 화면 · 패널이 같이 씀): `ConfirmDialog`, `Toast`, `ErrorBanner`(`error.message` 표시, `PF_INSUFFICIENT_STOCK`이면 남은 수량 문장, testid `error-banner`), `Loading`, `EmptyState`. 기본 스타일 토큰 `src/styles/`
+2. 공통 조각 `src/components/common/`(eple 소유, 화면 · 패널이 같이 씀): `ConfirmDialog`, `Toast`, `ErrorBanner`(`error.message` 표시, `PF_INSUFFICIENT_STOCK`이면 남은 수량 문장, 연결 실패 · 시간 초과면 [다시 시도], testid `error-banner`), `FieldError`(칸 아래 오류, 04 4.3 문구, testid `field-error-<필드>`), `SubmitButton`(요청 중 잠금 + "처리 중…"), `Loading`, `EmptyState`. 기본 스타일 토큰 `src/styles/`. 표시 형식 `src/lib/format.ts`(천 단위 쉼표, `+8` · `−6`, 한국 시간 날짜 — 04 4.6)
 3. 빈 페이지: `src/app/(app)/page.tsx`(대시보드), `trades/page.tsx`, `history/page.tsx`, `items/page.tsx` — 제목과 "준비 중"만. **페이지 내용부터는 jkspawn 소유**
 
 **다 됐다의 기준**
 - [ ] 로그인 후 네 페이지(대시보드 · 입출고 · 이력 · 품목)가 열리고 내비로 이동됨, 미로그인 시 `/login`
 - [ ] `openAgentPanel({mode:'chat'})`을 부르면 `<AgentSlot />`에 빈 패널이 열림
-- [ ] 공통 조각 5종을 빈 페이지에서 한 번씩 써 봄(확인 후 지움)
+- [ ] 공통 조각 7종(`ConfirmDialog` · `Toast` · `ErrorBanner` · `FieldError` · `SubmitButton` · `Loading` · `EmptyState`)을 빈 페이지에서 한 번씩 써 봄(확인 후 지움), `format.ts` 단위 테스트
+- [ ] 코드 전체에 `alert(` · `confirm(` · `prompt(` 호출 없음(검색)
 
 ## WU-06 Render 배포
 

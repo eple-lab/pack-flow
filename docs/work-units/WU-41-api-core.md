@@ -32,12 +32,18 @@
 4. `stockLogs.ts`: `(created_at, log_id)` 키셋 페이지네이션, `limit` 1~50, 기본 20, `next_cursor` 불투명 문자열(base64)
 5. `PATCH /api/items/{sku_id}`에 `stock_qty`가 오면 400
 
+## 입력 · 오류 처리 ([04](../04-api-contract.md) 4절)
+
+- 모든 변경 라우트는 `src/lib/validation/` 스키마를 **strict**로 쓴다(계약에 없는 필드 거부). JSON이 아니거나 100KB 초과면 400
+- 예상하지 못한 오류는 `PF_INTERNAL`(원문은 `log.ts`로만)
+
 ## 다 됐다의 기준
 
 - [ ] 목 없이(`NEXT_PUBLIC_USE_MOCK=0`) 화면에서 입고 → 출고 → 대시보드 갱신
 - [ ] `/api/dashboard` 값 = DB 직접 집계 (T-S1-3의 API 쪽, `demo` 시드 `expected`와 비교)
 - [ ] `large` 시드에서 `stock-logs` 20 · 20 · 10건으로 나뉨, 마지막 `next_cursor: null` (T-S4-2)
 - [ ] lint · typecheck · test:unit 통과
+- [ ] T-VAL-2 · T-VAL-3 · T-VAL-4 통과 (`tests/api/validation.test.ts`)
 
 ## 실제 동작 확인 항목 (리뷰어 sorek-charlie)
 

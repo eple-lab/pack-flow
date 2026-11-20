@@ -35,12 +35,18 @@
 4. [확인] → `/confirm` → `source: "agent"`로 줄마다 `pf_create_purchase` → 결과 "P-105 발주완료 1건" → 대시보드 새로고침
 5. testid: `agent-panel`, `draft-row-<sku_id>`, `draft-qty-<sku_id>`, `draft-message`, `draft-llm-error`, `btn-draft-confirm`, `btn-draft-cancel`
 
+## 입력 · 오류 처리 ([04](../04-api-contract.md) 4절)
+
+- `/confirm`의 줄은 `poConfirm` 스키마로 검사(수량 1~100,000, 금액 0~10억, 거래처 1~50자). 패널의 수정 칸은 `FieldError`로
+- LLM 오류 · 상한 문구는 04 4.4 표 그대로(`PF_LLM_UNAVAILABLE` · `PF_QUOTA_EXCEEDED`). [발주 등록]은 `SubmitButton`
+
 ## 다 됐다의 기준
 
 - [ ] T-AI-1: `demo` 시드 PRD-003 → 초안 → [확인] → `purchases`에 `발주완료` 1건 / [취소] → 건수 변화 없음
 - [ ] 초안 표의 재고 · 안전재고 · 단가 = DB 값, 추천 수량 = `reorder` 결과 (T-AI-3 초안 쪽)
 - [ ] T-AI-6(초안 쪽): `LLM_PROVIDER`를 잘못된 주소로 → 표는 보이고 문안 없음 · 오류 표시, 입출고 화면은 정상
 - [ ] B 계정으로 A의 sku로 `/confirm` → 404, 변화 없음
+- [ ] 추천 수량을 0으로 고치고 [확인] → 칸 아래 범위 문구, 저장 안 됨
 
 ## 테스트 방법
 

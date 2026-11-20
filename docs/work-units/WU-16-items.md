@@ -44,6 +44,12 @@
 | 수정 버튼 · 창 · 저장 | `btn-edit-item-<sku_id>`, `dialog-edit-item`, `btn-save-item` |
 | 검색 | `item-search` |
 
+## 입력 · 오류 처리 ([04](../04-api-contract.md) 4절)
+
+- 등록 · 수정 폼은 `itemCreate` · `itemUpdate` 스키마로 검사, 틀린 칸 아래 `FieldError`. 품목코드는 입력 중 대문자로 바꾼다
+- 단가 칸은 쉼표를 지우고 정수로. 구매처 메모를 비우면 `null`
+- `PF_DUPLICATE_SKU`는 품목코드 칸 아래에(04 4.4). 저장 버튼은 `SubmitButton`
+
 ## 다 됐다의 기준
 
 - [ ] lint · typecheck · test:unit 통과
@@ -51,6 +57,7 @@
 - [ ] 같은 품목코드 다시 등록 → `ErrorBanner`에 중복 안내, 목록 변화 없음
 - [ ] 안전재고를 5 → 20으로 수정 → 대시보드 '안전재고 미만' 수와 품절 임박 카드가 바뀜
 - [ ] 화면 어디에도 재고 수량 입력 칸이 없음
+- [ ] 단가에 `8,5`(소수) → "숫자(정수)로 입력해 주세요", 품목코드 소문자 입력 → 대문자로 저장
 
 ## 테스트 방법
 

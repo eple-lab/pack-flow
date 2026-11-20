@@ -37,6 +37,12 @@ Step 5 ② "요청을 정해진 액션으로만 해석, 변경은 실행 전 확
 6. 패널: 대화 목록, 제안 액션 카드 [실행] · [취소]
 7. testid: `chat-input`, `btn-chat-send`, `chat-reply-<n>`, `chat-action-card`, `btn-action-execute`, `btn-action-cancel`
 
+## 입력 · 오류 처리 ([04](../04-api-contract.md) 4절)
+
+- 메시지는 `chatMessage` 스키마(앞뒤 공백 제거 후 1~500자). 빈 메시지는 보내지 않는다
+- `/execute`의 액션 값(수량 등)도 같은 필드 규칙(04 4.2)으로 다시 검사
+- 거부 · 오류 문구는 04 4.4 표의 말을 쓴다(재고 부족 = "재고가 부족해요. … 남은 수량 N개")
+
 ## 다 됐다의 기준
 
 - [ ] `actions.test.ts`: 허용 6개 통과, 그 밖의 `type` · 필드 누락 · 음수 수량 거부
@@ -47,6 +53,7 @@ Step 5 ② "요청을 정해진 액션으로만 해석, 변경은 실행 전 확
   - T-AI-5: B 계정 "PRD-001 재고" → A의 값을 답하지 않음
   - `/execute`에 남의 `sale_id` → 404
 - [ ] 실제 Ollama로 같은 문장 5개를 돌린 결과를 `docs/records/ai-cases-skygaul.md`에 (모의 · 실제 구분)
+- [ ] 공백만 있는 메시지 → 보내기 버튼 비활성, API로 보내면 400
 
 ## 테스트 방법
 
