@@ -27,7 +27,7 @@
 | `PF_UNAUTHENTICATED` | 401 | 로그인 안 함 | — |
 | `PF_CSRF` | 403 | `X-PF` 없음 또는 다른 Origin | — |
 | `PF_NOT_FOUND` | 404 | 없음 또는 남의 것 | — |
-| `PF_VALIDATION` | 400 | 입력 형식 · 범위 오류 | `{ field, reason }` |
+| `PF_VALIDATION` | 400 | 입력 형식 · 범위 오류, JSON이 아닌 본문, 받지 않는 필드 | `{ field, reason, min?, max? }` — `reason`은 4.3절 목록 |
 | `PF_INVALID_TRANSITION` | 409 | 전이표에 없는 상태 변경 | `{ from, to, allowed: [] }` |
 | `PF_INSUFFICIENT_STOCK` | 409 | 재고보다 많이 출고 · 입고취소 | `{ sku_id, stock_qty, requested }` |
 | `PF_DUPLICATE_INVOICE` | 409 | 같은 송장번호 | `{ invoice_no }` |
@@ -35,6 +35,10 @@
 | `PF_QUOTA_EXCEEDED` | 429 | LLM 호출 상한 초과 (P-09) | `{ scope: "user" \| "global" }` |
 | `PF_LLM_UNAVAILABLE` | 503 | LLM 오류 · 시간 초과 | `{ provider }` |
 | `PF_NOT_IMPLEMENTED` | 501 | 아직 구현 전(stub) | — |
+| `PF_INTERNAL` | 500 | 예상하지 못한 서버 오류 (원문은 서버 로그에만) | — |
+| `PF_NETWORK` · `PF_TIMEOUT` | — | **화면 전용.** 서버에 닿지 못함 / 15초 안에 응답 없음 (`api-client`가 만든다) | — |
+
+화면에 보일 문구는 4.4절이 원본이다.
 
 ## 3. 라우트
 
@@ -188,6 +192,105 @@ type ChatReply = {
 - `sku_id`는 LLM이 지은 값을 믿지 않는다. 서버가 사용자의 품목 목록에서 이름 · 코드로 다시 찾고, 없으면 `refused`.
 - LLM 호출 전 `pf_llm_take()`로 상한을 확인한다. 넘으면 429.
 
-## 4. 타입 원본
+## 4. 입력 규칙 · 빈 값 · 오류 문구
+
+화면 · 서버 · DB 함수 · 에이전트가 **같은 기준**으로 검사한다. 원본 코드는 `src/lib/validation/`(eple 소유, zod 스키마) 하나이고, 화면 폼과 API 라우트가 같은 스키마를 가져다 쓴다. DB 함수와 테이블 CHECK는 같은 범위를 한 번 더 막는다(여러 겹 방어 — [05](05-security.md) 3절).
+
+### 4.1 공통 정규화 (검사 전에 먼저)
+
+| 규칙 | 내용 |
+|---|---|
+| 공백 | 모든 문자열은 앞뒤 공백을 지운다 |
+| 빈 값 | 지운 뒤 빈 문자열이면 **선택 칸은 `null`**, 필수 칸은 `required` 오류. 서버 · DB에는 빈 문자열 `""`이 저장되지 않는다 |
+| 숫자 | API는 JSON 숫자만 받는다(문자열 `"10"`은 `not_integer`). 화면은 입력의 쉼표 · 공백을 지우고 숫자로 바꿔 보낸다. 소수 · 지수 표기는 `not_integer` |
+| 대소문자 | 품목코드는 화면에서 대문자로 바꿔 보낸다. 서버는 대문자 형식만 받는다 |
+| 받지 않는 필드 | 계약에 없는 필드(`user_id`, `stock_qty`, `id` 등)가 오면 무시하지 않고 `not_allowed_field`로 거부(strict) |
+| 본문 | JSON이 아니거나 100KB 초과면 `PF_VALIDATION`(`field: "body"`) |
+
+### 4.2 필드 규칙
+
+| 필드 | 쓰는 곳 | 필수 | 규칙 | 빈 값 |
+|---|---|---|---|---|
+| `sku_id` | 품목 · 구매 · 판매 · 일괄 | 필수 | 영문 대문자 · 숫자 · 하이픈 3~20자, 영문 또는 숫자로 시작 (예 `PRD-001`) | `required` |
+| `item_name` | 품목 | 필수 | 1~100자 | `required` |
+| `unit_cost`, `sale_price` | 품목 | 필수 | 정수 0 ~ 1,000,000,000 | `required` |
+| `safety_stock` | 품목 | 필수 | 정수 0 ~ 100,000 | `required` |
+| `source_url` | 품목 | 선택 | 500자 이하, 글자로만 표시 | `null` |
+| `supplier` | 구매 | 필수 | 1~50자 | `required` (발주서 초안은 서버가 "미지정"을 채움) |
+| `order_qty` | 구매 | 필수 | 정수 1 ~ 100,000 | `required` |
+| `purchase_cost` | 구매 | 필수 | 정수 0 ~ 1,000,000,000 | `required` |
+| `received_qty` | 입고 확정 | 필수 | 정수 1 ~ 그 구매의 `order_qty` | `required` |
+| `channel` | 판매 | 필수 | 1~30자 | `required` |
+| `sold_qty` | 판매 | 필수 | 정수 1 ~ 100,000 | `required` |
+| `sale_amount` | 판매 | 필수 | 정수 0 ~ 1,000,000,000 | `required` |
+| `invoice_no` | 구매 · 판매 · 일괄 | 선택 | 1~50자, 영문 · 숫자 · `-` · `_` | **`null` — `null`끼리는 중복이 아니다** |
+| `memo` | 일괄 | 선택 | 200자 이하 | `null` |
+| `kind` | 일괄 | 필수 | `입고` · `출고` | `required` |
+| `to` | 상태 변경 | 필수 | 그 라우트가 받는 상태값만 | `required` |
+| `message` | 챗봇 | 필수 | 1~500자 | `required` |
+| `limit` · `cursor` | 이력 | 선택 | `limit` 정수 1~50(기본 20), `cursor` 200자 이하 불투명 문자열 | 기본값 |
+| `dataset` | 시드 | 필수 | `demo` · `small` · `large` | `required` |
+| 로그인 이메일 · 비밀번호 | 로그인 | 필수 | 이메일 형식, 비밀번호 1자 이상(판정은 Supabase) | 화면에서 막음 |
+
+상한(10만 개, 10억 원)은 시연용 안전선이다. 정수 넘침과 입력 실수(0 하나 더)를 막는다.
+
+### 4.3 `PF_VALIDATION`의 `reason` 목록
+
+| `reason` | 뜻 | 칸 아래 문구 |
+|---|---|---|
+| `required` | 비었음 | 필수 항목이에요 |
+| `too_long` | 글자 수 초과 | {max}자 이하로 입력해 주세요 |
+| `out_of_range` | 범위 밖 | {min} ~ {max} 사이로 입력해 주세요 |
+| `not_integer` | 정수가 아님 | 숫자(정수)로 입력해 주세요 |
+| `bad_format` | 형식 오류 | 형식이 맞지 않아요 (예: PRD-001) |
+| `not_allowed_value` | 허용 값이 아님 | 선택할 수 있는 값이 아니에요 |
+| `not_allowed_field` | 계약에 없는 필드 | 보낼 수 없는 항목이에요 (화면 버그 — 배너로) |
+
+### 4.4 오류 문구 (화면에 보이는 말)
+
+`src/lib/api/errors.ts`(서버)와 `src/lib/api-client.ts`(화면)가 이 표의 문구를 쓴다. `{ }`는 `detail` 값.
+
+| 코드 | 문구 | 어디에 |
+|---|---|---|
+| `PF_UNAUTHENTICATED` | 로그인이 필요해요. 다시 로그인해 주세요 | 배너 없이 `/login?next=<지금 경로>`로 보낸다. 로그인 뒤 돌아온다 |
+| `PF_CSRF` | 요청을 처리할 수 없어요. 새로고침한 뒤 다시 시도해 주세요 | 배너 |
+| `PF_NOT_FOUND` | 찾을 수 없어요. 목록을 새로고침해 주세요 | 배너 |
+| `PF_VALIDATION` | 입력값을 확인해 주세요 | `field`가 폼 칸이면 **그 칸 아래**(4.3 문구), 아니면 배너 |
+| `PF_INVALID_TRANSITION` | 지금 상태({from})에서는 {to}(으)로 바꿀 수 없어요 | 배너 + 목록 새로고침 |
+| `PF_INSUFFICIENT_STOCK` | 재고가 부족해요. {sku_id} 남은 수량 {stock_qty}개 | 배너 (출고 · 입고 취소) |
+| `PF_DUPLICATE_INVOICE` | 이미 등록된 송장번호예요 ({invoice_no}) | 송장번호 칸 아래 |
+| `PF_DUPLICATE_SKU` | 이미 있는 품목코드예요 ({sku_id}) | 품목코드 칸 아래 |
+| `PF_QUOTA_EXCEEDED` | 오늘 AI 사용 한도를 다 썼어요. 한국 시간 오후 5시 이후 다시 쓸 수 있어요 | 에이전트 패널 |
+| `PF_LLM_UNAVAILABLE` | AI가 지금 응답하지 않아요. 잠시 뒤 다시 시도해 주세요 (입출고는 그대로 쓸 수 있어요) | 에이전트 패널 |
+| `PF_NOT_IMPLEMENTED` | 아직 준비 중인 기능이에요 | 배너 |
+| `PF_INTERNAL` | 잠시 문제가 생겼어요. 다시 시도해 주세요 | 배너 |
+| `PF_NETWORK` | 서버에 연결하지 못했어요. 인터넷 연결을 확인하고 다시 시도해 주세요 | 배너 + [다시 시도] |
+| `PF_TIMEOUT` | 응답이 늦어요. 잠시 뒤 다시 시도해 주세요 (배포 서버가 깨어나는 중일 수 있어요) | 배너 + [다시 시도] |
+
+### 4.5 응답의 빈 값을 화면에 보이는 법
+
+| 값 | 언제 비나 | 화면 |
+|---|---|---|
+| `received_qty`, `received_at`, `shipped_at`, `invoice_no` | 입고 · 출고 전, 송장 없음 | `—` |
+| `source_url` | 메모 없음 | 칸을 비움 |
+| `supplier` = `"미지정"` | 발주 초안에서 최근 거래처 없음 | 그대로 + 수정 가능 |
+| `PoDraft.message` = `null` | LLM 실패 · 상한 | `PF_LLM_UNAVAILABLE` · `PF_QUOTA_EXCEEDED` 문구, 표는 그대로 |
+| `next_cursor` = `null` | 마지막 페이지 | [더 보기] 숨김 |
+| 빈 배열 | 목록 · 검색 결과 없음 | `EmptyState` (검색이면 "'{검색어}'에 맞는 품목이 없어요") |
+
+### 4.6 화면 공통 처리 (모든 화면 · 패널)
+
+| 규칙 | 내용 | 만드는 곳 |
+|---|---|---|
+| 알림 방식 | 브라우저 기본 `alert()` · `confirm()` · `prompt()` 금지. 확인은 `ConfirmDialog`, 성공은 `Toast`, 실패는 `ErrorBanner` · `FieldError` | eple `common/` |
+| 칸 아래 오류 | `FieldError`가 칸 아래 빨간 글씨로. 화면 검증(같은 스키마)으로 보내기 전에 먼저 보여 주고, 서버가 같은 이유로 거부해도 같은 자리에 | eple `common/` · `validation/` |
+| 저장 버튼 잠금 | 모든 저장 · 실행 버튼은 요청 중 잠그고 "처리 중…" 표시(두 번 눌러도 한 번) | eple `common/SubmitButton` |
+| 시간 초과 | `api-client`가 15초 뒤 `PF_TIMEOUT`. LLM 라우트는 서버 쪽 20초(WU-31) | eple `api-client` |
+| 세션 만료 | 어느 요청이든 401이면 `/login?next=` | eple `api-client` · middleware |
+| 숫자 · 금액 표시 | 천 단위 쉼표 `12,000`, 금액 칸 머리글에 "(원)". 증감은 `+8` · `−6` | eple `src/lib/format.ts` |
+| 날짜 · 시각 표시 | 한국 시간. 목록 `11/24 14:05`, 올해가 아니면 `2025-11-24`. 마우스를 올리면 전체 `2026-11-24 14:05:09` | eple `src/lib/format.ts` · `time.ts` |
+| 폼 초기화 | 저장 성공 뒤 폼을 비우고 첫 칸에 커서. 실패하면 입력값 유지 | 각 화면 |
+
+## 5. 타입 원본
 
 `src/types/erp.ts` (eple 소유)에 `Item`, `Purchase`, `Sale`, `StockLog`, `PurchaseStatus`, `SaleStatus`, `StockReason`, `PfErrorCode`, `Dashboard`, `BulkRow*`를 둔다. 에이전트 전용 타입(`PoDraft`, `AgentAction`, `ChatReply`)은 `src/types/agent.ts` (eple 소유 — 파트 간 계약이라 바꾸려면 PR, skygaul 리뷰)에 둔다. 서버 전용 값(키 · 서비스 설정)은 `src/lib/env.ts`로만 읽는다. 상태값 문자열은 이 파일의 상수만 쓰고, 코드에 직접 적지 않는다.
