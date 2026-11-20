@@ -14,6 +14,8 @@
 | 시나리오 (E2E) | Playwright | 완료 판정 테스트를 화면에서 | 로컬, 마지막에 배포 URL | sorek-charlie (`tests/e2e/`), 화면 선택자는 jkspawn과 약속 |
 | 직접 확인 | 사람 | 리뷰어가 배포 URL에서 '실제 동작 확인 항목' | 배포 URL | 리뷰어 |
 
+**테스트 기반(구조)은 eple, 케이스는 담당자.** 도구 설정, 로그인 · 초기화 도우미(`tests/**/helpers.ts`), 회귀 실행기 · 측정 스크립트는 eple이 만들고(WU-08 · WU-45), 테스트 케이스와 정답표, 회귀 실행 · 판정은 sorek-charlie가 한다.
+
 화면 테스트가 깨지지 않게 jkspawn은 버튼 · 카드 · 표에 `data-testid`를 단다(예: `kpi-below-safety`, `alert-card-PRD-001`, `btn-ship-S-201`). 이름 목록은 WU-11 · 12 문서에 둔다.
 
 ### 명령 (Wave 0에서 `package.json`에 만든다)
@@ -36,7 +38,7 @@
 | T-S1-3 | Step 1 | 입출고 직후 대시보드 KPI · 파이프라인 · 품목 재고 = DB 값 | E2E | `step1.spec.ts` | sorek-charlie |
 | T-S2-1 | Step 2 | 배포 URL에서 A 로그인 → 입출고 → 재로그인 후 같은 값 | E2E(배포) | `tests/e2e/step2.spec.ts` | sorek-charlie |
 | T-S2-2 | Step 2 | B 로그인 시 A 데이터 안 보임 | E2E | `step2.spec.ts` | sorek-charlie |
-| T-AUTH-1~8 | 완료 6 · Step 2 | [05 보안](05-security.md) 3절 | API + DB | `tests/db/rls.test.ts`, `tests/api/auth.test.ts` | eple |
+| T-AUTH-1~8 | 완료 6 · Step 2 | [05 보안](05-security.md) 3절 | API + DB | `tests/api/rls.test.ts`, `tests/api/auth.test.ts` | eple |
 | T-S3-1 | 완료 3 | 6개 출고 취소 → 재고 10, `출고취소` +6 추가, −6 기록 남음 | DB + E2E | `tests/db/cancel.test.ts`, `step3.spec.ts` | sorek-charlie |
 | T-S3-2 | 완료 4(직접) | 재고 4에 50개 출고 → 거부, 재고 · 이력 변화 없음 | DB | `tests/db/ship.test.ts` | sorek-charlie |
 | T-S3-3 | Step 3 | `입고완료→발주완료`, `취소→입고완료` 요청 → 거부 | DB | `tests/db/transition.test.ts` | sorek-charlie |
@@ -103,7 +105,9 @@
 통과 21 / 실패 1 / 건너뜀 0
 ```
 
-### AI 활용 · 디버깅 사례 (`docs/records/ai-cases.md`, 누구나 추가)
+### AI 활용 · 디버깅 사례 (각자 `docs/records/ai-cases-<계정>.md`, 11/25 skygaul이 `ai-cases.md`로 모음)
+
+한 파일을 네 명이 동시에 고치면 병합 충돌이 나므로 **사람별 파일**에 쓴다.
 
 제출물 'AI 활용 · 디버깅 사례 3개'와 피드백 기준 4번("실패 원인 · 수정 · 재검증")의 증거다. **성공 사례보다 실패 → 고침 → 재확인 사례**를 적는다.
 
@@ -136,5 +140,5 @@
 | 1 명확성 | 한 문장 · 대표 시나리오 | [00 개요](00-overview.md), 발표 1 |
 | 2 실제 동작 | 배포 URL 시연, `E2E_BASE_URL` 실행 결과 | 결과표, 시연 영상 |
 | 3 테스트 · 권한 | T-AUTH · 실패 사례 결과표 | `docs/records/regression-*.md` |
-| 4 AI 검토 | AI 사례 3개, 모의 · 실제 비교 | `docs/records/ai-cases.md`, `ai-limits.md` |
+| 4 AI 검토 | AI 사례 3개, 모의 · 실제 비교 | `docs/records/ai-cases.md`(모음) · `ai-cases-<계정>.md`, `ai-limits.md` |
 | 5 협업 · 전달 | 리뷰가 남은 PR, README만으로 재현 | GitHub PR 목록, README |

@@ -12,23 +12,29 @@
 |---|---|---|
 | 설정 · 의존성 · 스크립트 | `scripts/**`, `.gitignore`, `.githooks/**`(훅 · `allow-patterns`), `package.json`, `package-lock.json`, `tsconfig.json`, `next.config.*`, `eslint` · `vitest` · `playwright` 설정, `.github/`, `render.yaml`, `.env.example`, `AGENTS.md`, `README.md` | eple |
 | DB 스키마 · 권한 | `supabase/migrations/*_schema.sql`, `*_rls.sql`, `*_llm_usage.sql` | eple |
-| DB 재고 함수 · 시드 함수 | `supabase/migrations/*_inventory.sql`, `*_seed.sql` | sorek-charlie |
+| DB 재고 함수 (업무 규칙) | `supabase/migrations/*_inventory*.sql` (생성 · 입고 · 출고 · 취소 · 전이 판정) | sorek-charlie |
+| DB 구조 함수 | `supabase/migrations/*_seed.sql`(`pf_reset_and_seed`), `*_bulk.sql`(`pf_bulk_apply`) | eple |
 | 공통 타입 | `src/types/erp.ts` | eple |
-| 에이전트 타입 | `src/types/agent.ts` | skygaul |
+| 에이전트 계약 | `src/types/agent.ts`, `src/components/agent/open.ts`(패널 여는 입구) — 파트 간 계약 | eple (바꾸려면 PR, skygaul 리뷰) |
 | 인증 · DB 클라이언트 · API 공통 | `src/middleware.ts`, `src/lib/supabase/**`, `src/lib/api/**`, `src/app/login/**` | eple |
 | 업무 API 라우트 | `src/app/api/{health,me,items,purchases,sales,stock-logs,dashboard,bulk,seed}/**` | eple |
 | 조회 집계 | `src/lib/queries/**` (대시보드 · 이력 쿼리) | eple |
-| 재고 함수 호출층 | `src/lib/inventory.ts` | sorek-charlie |
-| 시드 데이터 · 정답표 | `src/lib/seed/**` | sorek-charlie |
-| 테스트 | `tests/db/**`, `tests/e2e/**`, `tests/regression/**`, `tests/fixtures/**` | sorek-charlie |
-| API 테스트 | `tests/api/auth.test.ts`, `tests/api/stock-logs.test.ts` / `tests/api/agent.test.ts` | eple / skygaul |
+| 재고 함수 호출층 | `src/lib/inventory.ts` (RPC 래퍼, 03 4절 시그니처 그대로) | eple (함수 인자가 바뀌면 sorek-charlie가 요청) |
+| 공통 유틸 | `src/lib/env.ts`(환경변수 검사 · 서버 전용), `src/lib/time.ts`(한국 시간 '오늘'), `src/lib/log.ts`(비밀값 안 남기는 로그) | eple |
+| 시드 데이터 · 정답표 | `src/lib/seed/*.json` | sorek-charlie |
+| 시드 로더 | `src/lib/seed/index.ts` | eple |
+| 테스트 기반 (구조) | `vitest.config.*`, `playwright.config.*`, `tests/db/helpers.ts`, `tests/e2e/helpers.ts`, `tests/regression/run.ts`, `tests/regression/measure.ts` | eple |
+| 테스트 케이스 | `tests/db/*.test.ts`, `tests/e2e/*.spec.ts`, `tests/regression/*.test.ts`, `tests/fixtures/**` | sorek-charlie |
+| API 테스트 | `tests/api/auth.test.ts`, `tests/api/rls.test.ts`, `tests/api/stock-logs.test.ts` / `tests/api/agent.test.ts` | eple / skygaul |
 | 각자 단위 테스트 | 자기 구역 파일 옆 `*.test.ts` | 그 구역 주인 |
-| 화면 | `src/app/(app)/**` (`/login` 제외), `src/components/{layout,dashboard,trades,bulk,common}/**`, `src/styles/**` | jkspawn |
+| 앱 뼈대 · 화면 공통 | `src/app/(app)/layout.tsx`, `src/components/layout/**`(상단 바 · 내비 · `<AgentSlot />`), `src/components/common/**`(확인 창 · 토스트 · 오류 배너 · 로딩), `src/lib/api-client.ts`(fetch 래퍼 · 목 전환), `src/styles/**`(기본 토큰) | eple (화면 · 패널이 같이 쓰는 것 — 필요한 조각은 eple에게 요청) |
+| 화면 | `src/app/(app)/{page.tsx,trades,history}/**`, `src/components/{dashboard,trades,bulk,history,demo}/**` | jkspawn |
 | 일괄 등록 파싱 | `src/lib/bulk/**` | jkspawn |
-| 화면용 목 데이터 | `src/lib/mock/**` | jkspawn (Wave 0 첫 판은 eple) |
+| 화면용 목 데이터 | `src/lib/mock/**` (API 계약을 비춘 것) | eple (값 추가는 요청) |
 | 에이전트 | `src/lib/llm.ts`, `src/lib/agent/**`, `src/app/api/agent/**`, `src/components/agent/**`, `src/lib/agent/prompts/**` | skygaul |
 | 문서 | `docs/` 00~08, `DevelopDoc/` | eple |
-| 작업 단위 문서 · 기록 | `docs/work-units/WU-xx-*.md`의 '결과' 절, `docs/records/<계정>-*.md` | 그 WU 담당자 |
+| 작업 단위 문서 · 기록 | `docs/work-units/WU-xx-*.md`의 '결과' 절, `docs/records/<계정>-*.md`, `docs/records/ai-cases-<계정>.md` | 그 WU 담당자 · 계정 주인 |
+| 공동 기록 (한 사람이 씀) | `docs/records/regression-*.md` · `performance.md` (sorek-charlie), `ai-cases.md` · `ai-limits.md` · `llm-usage.md` (skygaul), `security-check-*.md` (eple) | 표시된 사람 |
 
 ### 충돌이 나기 쉬운 곳과 규칙
 
@@ -37,7 +43,7 @@
 | `package.json` · lock | 11/23부터 새 패키지는 **eple에게 요청**하고, eple이 하루 한 번(오전) 모아서 넣는다. 각자 lock 파일을 커밋하지 않는다 |
 | `src/types/erp.ts` | 바꿔야 하면 이 문서가 아니라 [04](04-api-contract.md)와 함께 eple PR로 먼저. 병합 뒤 각자 `main`을 받아 쓴다 |
 | 마이그레이션 | 파일 이름 앞 타임스탬프가 달라 이름 충돌은 없다. 이미 적용된 파일은 고치지 않고 **새 파일**로 바꾼다. 적용은 eple(P-06) |
-| 화면 공통 레이아웃 | `src/components/layout/`은 jkspawn. 에이전트 패널을 넣을 자리(`<AgentSlot />`)는 Wave 0에서 미리 만든다 |
+| 화면 공통 레이아웃 · 조각 | `src/components/layout/` · `common/`은 eple. 에이전트 패널 자리(`<AgentSlot />`)와 시연 초기화 버튼 자리(jkspawn의 `components/demo/SeedResetButton`을 꽂음)는 Wave 0에서 미리 만든다. 새 공통 조각이 필요하면 eple에게 요청하고, 급하면 자기 폴더에 만든 뒤 나중에 옮긴다 |
 
 ## 2. Wave별 작업 단위
 
@@ -51,18 +57,19 @@ WU 번호: `0x` eple 골격, `1x` jkspawn, `2x` sorek-charlie, `3x` skygaul, `4x
 |---|---|---|
 | WU-01 | Next.js + TS 골격, 폴더 구조(1절 경로 전부 빈 파일 · 자리), lint · typecheck · `test:unit` 스크립트, `.nvmrc`, `.env.example`, `AGENTS.md`, `CLAUDE.md`(AGENTS.md 불러오기), Actions(P-11), `.gitignore`(`.env*` 무시 · `!.env.example`), 비밀값 검사 `.githooks/` + `scripts/check-secrets.sh` + Actions `secret-check`, `prepare` 스크립트로 훅 자동 설치([05](05-security.md) 2.2절) | 새 폴더에 clone → `npm ci` → `npm run lint && npm run typecheck && npm run test:unit` 통과 / `git config core.hooksPath`가 `.githooks` / 가짜 키를 넣은 `.env.local`이 `git status`에 안 보임 / 가짜 JWT · `sb_secret_` · `AIza` 키를 넣은 파일 커밋이 **로컬 훅과 Actions 양쪽에서** 막힘 / `@packflow.test` 예시는 통과 |
 | WU-02 | Supabase `packflow-dev` · `packflow-demo` 생성, 마이그레이션 `schema` · `rls` · `llm_usage`, 재고 함수 **이름 · 인자만 있는 stub**(`PF_NOT_IMPLEMENTED`), 시연 계정 A · B(demo, 대시보드에서 생성), 팀원 테스트 계정 1인 2개 · 총 8개(dev, `scripts/create-test-users.ts`, P-17), 스크립트 안전장치(D-20 ③) | 두 프로젝트에 같은 마이그레이션 적용, T-AUTH-4~6이 dev에서 통과 / demo 주소로 스크립트 실행 시 거부 / 스크립트 출력 · 커밋에 키 · 비밀번호 없음 |
-| WU-03 | `src/types/erp.ts`, `src/lib/supabase/{server,browser}.ts`, `src/lib/api/{errors,handler,csrf}.ts`, middleware, `/login` | 로그인 · 로그아웃, 미로그인 `/api/me` 401 |
-| WU-04 | [04](04-api-contract.md)의 모든 라우트 stub(계약 모양 + 501), `src/lib/mock/` 첫 판, `src/lib/llm.ts` · `src/lib/agent/` · `src/components/agent/` 빈 자리 | 모든 라우트가 501 또는 목 응답, typecheck 통과 |
-| WU-05 | 화면 자리: 레이아웃 · 내비 · `<AgentSlot />`, 빈 대시보드 · 입출고 · 이력 페이지 | 로그인 후 세 페이지가 열린다 |
+| WU-03 | `src/types/erp.ts` · `agent.ts`, `src/lib/supabase/{server,browser}.ts`, `src/lib/api/{errors,handler,csrf}.ts`, `src/lib/inventory.ts`(RPC 래퍼 완성), `src/lib/{env,time,log}.ts`, middleware, `/login` | 로그인 · 로그아웃, 미로그인 `/api/me` 401 |
+| WU-04 | [04](04-api-contract.md)의 모든 라우트 stub(계약 모양 + 501), `src/lib/mock/` · `src/lib/api-client.ts` 완성, `src/components/agent/open.ts` 완성, `src/lib/llm.ts` · `src/lib/agent/` · 패널 빈 자리 | 모든 라우트가 501 또는 목 응답, typecheck 통과 |
+| WU-05 | 앱 뼈대: `(app)/layout.tsx`, 레이아웃 · 내비 · `<AgentSlot />` · 초기화 버튼 자리, 공통 조각(`common/`), 기본 스타일 토큰, 빈 대시보드 · 입출고 · 이력 페이지 | 로그인 후 세 페이지가 열린다 |
 | WU-06 | Render 배포(`packflow-demo` 연결), `GET /api/health` | **배포 URL에서 로그인 → 빈 대시보드**. 1일차 '최소 화면 배포' 해소 |
-| WU-07 | 작업 단위 문서 `docs/work-units/WU-11~44`, `_template.md` | 팀원이 문서만 보고 시작할 수 있다(검토: 각 담당자가 월요일 오전에 읽고 질문) |
+| WU-08 | 테스트 기반: Vitest · Playwright 설정, `tests/db/helpers.ts`(테스트 계정 로그인 · 초기화 · 불변식 검사), `tests/e2e/helpers.ts`, `pf_reset_and_seed` · 시드 로더, 계획서 예시로 만든 임시 `demo.json` | `npm run test:db`가 샘플 테스트 1개로 dev에서 통과, 본인 계정만 초기화됨(T-AUTH-7) |
+| WU-07 | 작업 단위 문서 `docs/work-units/WU-11~45`, `_template.md` | 팀원이 문서만 보고 시작할 수 있다(검토: 각 담당자가 월요일 오전에 읽고 질문) |
 
 ### Wave 1 — Step 1 · 2 (11/23 월)
 
 | WU | 담당 | 내용 | 다 됐다의 기준 (요약) | 기대는 것 |
 |---|---|---|---|---|
-| WU-21 | sorek-charlie | `pf_create_item` · `pf_create_purchase` · `pf_receive_purchase` · `pf_create_sale` · `pf_set_sale_status` · `pf_ship_sale`, `src/lib/inventory.ts` | 완료 테스트 1 · 2가 `tests/db`에서 통과, T-INV-1 통과 | WU-02 |
-| WU-22 | sorek-charlie | 시드 3벌(demo · small · large) + `expected` 정답표, `pf_reset_and_seed` | 세 벌 모두 넣은 직후 T-INV-1 통과, `expected`와 일치 | WU-21 |
+| WU-21 | sorek-charlie | `pf_create_item` · `pf_create_purchase` · `pf_receive_purchase` · `pf_create_sale` · `pf_set_sale_status` · `pf_ship_sale` (SQL 본문, 호출 래퍼는 eple이 골격에서 완성) | 완료 테스트 1 · 2가 `tests/db`에서 통과, T-INV-1 통과 | WU-02 |
+| WU-22 | sorek-charlie | 시드 데이터 3벌(demo · small · large) + 손으로 구한 `expected` 정답표, E2E Step 1 · 2 케이스 | 세 벌 모두 넣은 직후 T-INV-1 통과, `expected`와 일치, `step1` · `step2` E2E 통과 | WU-08, WU-21, WU-11 · 12 |
 | WU-11 | jkspawn | 대시보드: KPI 카드 · 파이프라인 · 품목별 재고 표 · 품절 임박 카드 | 목 데이터로 화면 완성 → `NEXT_PUBLIC_USE_MOCK=0`에서 실제 값 표시 | WU-04 목, WU-41 |
 | WU-12 | jkspawn | 입출고 화면: 구매 · 판매 목록, 등록 폼, 입고 확정 · 출고 버튼, 오류 메시지 표시 | 화면에서 완료 테스트 1 · 2 재현 | WU-41 |
 | WU-31 | skygaul | `src/lib/llm.ts`(Ollama · Gemini, 시간 초과, 오류 → `PF_LLM_UNAVAILABLE`), `pf_llm_take` 연동, 팀 공통 Ollama 모델 확정 | 두 제공자 모두 같은 함수로 호출, 상한 초과 429 | WU-02 |
@@ -74,18 +81,19 @@ WU 번호: `0x` eple 골격, `1x` jkspawn, `2x` sorek-charlie, `3x` skygaul, `4x
 
 | WU | 담당 | 내용 | 다 됐다의 기준 (요약) |
 |---|---|---|---|
-| WU-23 | sorek-charlie | `pf_cancel_receipt` · `pf_cancel_shipment` · `pf_set_purchase_status` · 전이 판정 함수 · `pf_bulk_apply` | Step 3 통과 테스트 5개 중 화면 무관 4개가 `tests/db`에서 통과 |
+| WU-23 | sorek-charlie | `pf_cancel_receipt` · `pf_cancel_shipment` · `pf_set_purchase_status` · 전이 판정 함수, 일괄 반영 테스트 케이스(`bulk.test.ts`, 함수는 WU-43) | Step 3 통과 테스트 5개 중 화면 무관 4개가 `tests/db`에서 통과 |
 | WU-13 | jkspawn | 일괄 등록 탭: `src/lib/bulk/parse.ts`(TSV · CSV) + 미리보기 표 + 오류 사유 + 반영 | 오류 3행 섞인 10행 → 7행 반영, 사유 표시 |
 | WU-14 | jkspawn | 이력 화면(페이지네이션), 취소 버튼, 허용 전이 버튼만 표시 | 품목 A 이력에 −6 · +6 둘 다 보임 |
 | WU-33 | skygaul | `/api/agent/draft-po` · `/confirm`, 에이전트 패널(초안 표 · 문안 · 수정 · 확인/취소) | 완료 테스트 5, P-08(LLM 실패 시 계산 표만) |
 | WU-34 | skygaul | `/api/agent/chat` · `/execute`, 허용 액션 검사, 인젝션 · 수치 검증 | T-AI-1~6 통과 |
-| WU-43 | eple | bulk · seed 라우트 실제 연결, 중간 점검 기록(계획서 2절 변경 이력), demo DB에 마이그레이션 적용 | 배포 URL에서 Step 3 · 5 시연 가능 |
+| WU-43 | eple | `pf_bulk_apply`(재고 함수를 행마다 서브트랜잭션으로), bulk · seed 라우트 실제 연결, 중간 점검 기록(계획서 2절 변경 이력), demo DB에 마이그레이션 적용 | 배포 URL에서 Step 3 · 5 시연 가능, `bulk.test.ts`(sorek-charlie) 통과 |
+| WU-45 | eple | 회귀 실행기 `tests/regression/run.ts`(초기화 → test:db → test:e2e → 결과표 생성) · 측정 스크립트 `measure.ts` | `npm run test:regression`이 결과표 파일을 만든다(11/24 저녁 첫 실행은 sorek-charlie) |
 
 ### Wave 3 — Step 4 · 마무리 (11/25 수)
 
 | WU | 담당 | 내용 | 다 됐다의 기준 (요약) |
 |---|---|---|---|
-| WU-24 | sorek-charlie | 회귀 테스트 묶음 `npm run test:regression`(시드 초기화 → 전체 실행 → 결과표 파일), 소량 · 대량 응답 시간 측정 | 결과표가 `docs/records/regression-<날짜>.md`로 남고 전부 통과 |
+| WU-24 | sorek-charlie | E2E Step 3 케이스, 회귀 테스트 **실행 · 판정**(WU-45 실행기로 매일), 소량 · 대량 응답 시간 측정 실행 · 기록 | 결과표가 `docs/records/regression-<날짜>.md`로 남고 전부 통과 |
 | WU-15 | jkspawn | 시연 동선 정리(초기화 버튼 · 확인 창), 모바일 폭 확인, 백업 시연 영상 촬영 | 2분 영상, 시연 순서대로 끊김 없이 |
 | WU-35 | skygaul | Gemini 리허설(배포 URL), AI 한계 문서, 요청량 · 비용 기록, AI 디버깅 사례 정리 | `docs/records/ai-limits.md`, 사례 3개 |
 | WU-44 | eple | 최종 병합, `DevelopDoc/` 4개 파일, README(배포 URL · 테스트 방법 · 제출 커밋), 보안 점검 | FINAL_CHECKLIST 전부 체크 |
@@ -97,7 +105,7 @@ WU 번호: `0x` eple 골격, `1x` jkspawn, `2x` sorek-charlie, `3x` skygaul, `4x
 |---|---|
 | 화면 ← API | `NEXT_PUBLIC_USE_MOCK=1`로 목 응답(같은 타입)에 화면을 만든다. API가 붙으면 환경변수만 끈다 |
 | API ← DB 함수 | 함수 stub이 `PF_NOT_IMPLEMENTED`를 던지므로 API는 오류 매핑부터 만든다 |
-| 에이전트 ← 재고 함수 | 추천 수량 계산 · 프롬프트 · LLM 호출은 DB 없이 단위 테스트. 실행 액션은 `src/lib/inventory.ts`의 함수 이름만 보고 연결 |
+| 에이전트 ← 재고 함수 | 추천 수량 계산 · 프롬프트 · LLM 호출은 DB 없이 단위 테스트. 실행 액션은 `src/lib/inventory.ts`(골격에서 완성된 래퍼)로 연결 — 함수 본문이 오기 전에는 `PF_NOT_IMPLEMENTED` |
 | 테스트 ← 기능 | sorek-charlie가 완료 판정 테스트를 **먼저 실패하는 테스트로** 써 둔다. 기능이 붙으면 통과로 바뀐다 |
 
 ## 4. 브랜치 · 커밋 · PR (11/23부터)
@@ -203,7 +211,7 @@ WU-11 대시보드 KPI · 재고 표
 
 ## 결과 (담당자가 채움)
 - 한 것 / 직접 확인한 것 / 확인 못 한 것
-- AI가 틀린 것과 고친 과정 (있으면 → docs/records/ai-cases.md에도)
+- AI가 틀린 것과 고친 과정 (있으면 → docs/records/ai-cases-<내 계정>.md에도)
 ```
 
 AI 코딩 도구에 맡길 때는 이 WU 문서를 통째로 주고 "읽을 파일만 읽고, 만들 · 고칠 파일만 고치고, 다 됐다의 기준을 돌려서 보고해"라고 요청한다(공통 안내 'AI 요청': 목적 · 현재 구조 · 작은 범위 · 완료 테스트).
