@@ -54,7 +54,7 @@ flowchart LR
 
 | 모듈 | 하는 일 | 코드 위치 ([06](06-work-plan.md) 소유 구역) | 담당 |
 |---|---|---|---|
-| 인증 | 로그인 · 로그아웃, 세션 쿠키, 미로그인 차단 | `src/app/login/`, `src/middleware.ts`, `src/lib/supabase/` | eple |
+| 인증 | 로그인 · 로그아웃, 세션 쿠키, 미로그인 차단 | `src/app/login/`, `src/proxy.ts`, `src/lib/supabase/` | eple |
 | API 게이트 | 모든 변경 요청의 입구. 입력 검증, 오류 형식, CSRF 확인 | `src/app/api/**`, `src/lib/api/` | eple (에이전트 라우트는 skygaul) |
 | 재고 엔진 | 입고 확정 · 출고 · 취소 · 상태 전이 · 이력 기록. **한곳** | 함수 `supabase/migrations/*_inventory.sql`, 호출 래퍼 `src/lib/inventory.ts` | sorek-charlie(함수 본문), eple(래퍼) |
 | 앱 뼈대 · 공통 | 레이아웃 · 내비 · 에이전트 패널 자리, 공통 화면 조각, fetch 래퍼 · 목, 환경변수 · 시간 · 로그 유틸, 파트 간 계약 타입 | `src/app/(app)/layout.tsx`, `src/components/{layout,common}/`, `src/lib/{api-client,env,time,log}.ts`, `src/lib/mock/`, `src/types/`, `src/components/agent/open.ts` | eple |
@@ -75,7 +75,7 @@ flowchart LR
     end
 
     subgraph Render["Render (Node, 무료)"]
-        MW["middleware<br/>로그인 확인"]
+        MW["proxy<br/>로그인 확인"]
         API["API 라우트 /api/**<br/>검증 · 오류 형식 · CSRF"]
         AG["에이전트<br/>후보 계산 · 허용 액션 검사"]
         LLM["lib/llm.ts<br/>Gemini ↔ Ollama"]
@@ -103,7 +103,7 @@ flowchart LR
 ### 3.3 요청이 지나는 길 (출고 한 번)
 
 1. 화면이 `POST /api/sales/{id}/ship`을 보낸다(헤더 `X-PF: 1`).
-2. middleware가 세션을 확인한다. 없으면 401.
+2. proxy(Next 16의 옛 middleware)가 세션을 확인한다. 없으면 401.
 3. API 라우트가 입력을 검증하고, **사용자 JWT를 실은 Supabase 클라이언트**로 `pf_ship_sale(id)`를 부른다. 서비스 키는 쓰지 않는다(P-03).
 4. 함수가 한 트랜잭션에서: 판매 행 잠금 → 주인 확인(`auth.uid()`) → 전이 검사(`출고대기 → 출고완료`) → 품목 행 잠금 → 재고 확인 → `items.stock_qty` 감소 → `stock_logs` 한 줄 추가.
 5. 실패하면 전체가 되돌려지고, 함수가 정한 오류 코드가 API의 `{"error":{...}}`로 바뀐다([04](04-api-contract.md)).

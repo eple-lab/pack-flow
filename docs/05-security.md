@@ -66,7 +66,7 @@ healing-forest-trip의 `.githooks/pre-commit` + `allow-patterns` 방식을 가�
 | 겹 | 규칙 | 담당 |
 |---|---|---|
 | 화면 | 로그인 안 하면 `/login`. 버튼은 허용된 전이만 보여 준다(편의일 뿐, 보안 아님) | jkspawn · eple |
-| middleware | `/api/**` 미로그인 401, 변경 요청 `X-PF` · Origin 확인 | eple |
+| proxy (`src/proxy.ts`) | `/api/**` 미로그인 401, 변경 요청 `X-PF` · Origin 확인 | eple |
 | API 라우트 | 입력 형식 · 범위 검증(zod 등). `user_id`를 요청 본문에서 받지 않는다 | eple · skygaul |
 | DB 함수 | `pf_require_user()`, 모든 쿼리에 `user_id = uid`, 전이 · 재고 검사 | sorek-charlie |
 | DB 테이블 | RLS `user_id = auth.uid()`, 쓰기 권한 최소 | eple |

@@ -286,7 +286,7 @@ type ChatReply = {
 | 칸 아래 오류 | `FieldError`가 칸 아래 빨간 글씨로. 화면 검증(같은 스키마)으로 보내기 전에 먼저 보여 주고, 서버가 같은 이유로 거부해도 같은 자리에 | eple `common/` · `validation/` |
 | 저장 버튼 잠금 | 모든 저장 · 실행 버튼은 요청 중 잠그고 "처리 중…" 표시(두 번 눌러도 한 번) | eple `common/SubmitButton` |
 | 시간 초과 | `api-client`가 15초 뒤 `PF_TIMEOUT`. LLM 라우트는 서버 쪽 20초(WU-31) | eple `api-client` |
-| 세션 만료 | 어느 요청이든 401이면 `/login?next=` | eple `api-client` · middleware |
+| 세션 만료 | 어느 요청이든 401이면 `/login?next=` | eple `api-client` · proxy |
 | 숫자 · 금액 표시 | 천 단위 쉼표 `12,000`, 금액 칸 머리글에 "(원)". 증감은 `+8` · `−6` | eple `src/lib/format.ts` |
 | 날짜 · 시각 표시 | 한국 시간. 목록 `11/24 14:05`, 올해가 아니면 `2025-11-24`. 마우스를 올리면 전체 `2026-11-24 14:05:09` | eple `src/lib/format.ts` · `time.ts` |
 | 폼 초기화 | 저장 성공 뒤 폼을 비우고 첫 칸에 커서. 실패하면 입력값 유지 | 각 화면 |

@@ -56,7 +56,7 @@
 2. `src/types/agent.ts` 완성(eple 소유 — 파트 간 계약, [04](../04-api-contract.md) 3.8 타입 그대로)
 3. `src/lib/supabase/server.ts`(쿠키 → 사용자 JWT 클라이언트), `browser.ts`(로그인 화면용). 서비스 키를 읽는 코드는 `src/`에 두지 않는다
 4. `src/lib/api/`: `errors.ts`(함수 예외 → `{error}` + HTTP, [04](../04-api-contract.md) 2절), `handler.ts`(라우트 공통: 로그인 확인, JSON 파싱, 오류 변환), `csrf.ts`(`X-PF` · Origin)
-5. `src/middleware.ts`(화면 미로그인 → `/login`), `src/app/login/page.tsx`(이메일 · 비밀번호, 로그아웃 버튼은 레이아웃)
+5. `src/proxy.ts`(Next 16에서 middleware의 새 이름 — D-30. 화면 미로그인 → `/login`), `src/app/login/page.tsx`(이메일 · 비밀번호, 로그아웃 버튼은 레이아웃)
 6. `src/lib/inventory.ts` **완성**(eple 소유): [03](../03-data-model.md) 4절 함수마다 `supabase.rpc(...)` 래퍼와 반환 타입. 함수 본문이 stub이라 지금은 `PF_NOT_IMPLEMENTED`가 그대로 올라오고, sorek-charlie가 SQL 본문을 채우면 바로 동작
 7. 공통 유틸(eple 소유):
    - `src/lib/env.ts`: 필요한 환경변수를 한곳에서 읽고 없으면 시작 때 오류. 서버 전용 값(`GEMINI_API_KEY` 등)은 `server-only`로 표시해 화면 코드에서 가져오면 빌드가 실패하게

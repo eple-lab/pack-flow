@@ -16,7 +16,7 @@
 | DB 구조 함수 | `supabase/migrations/*_seed.sql`(`pf_reset_and_seed`), `*_bulk.sql`(`pf_bulk_apply`) | eple |
 | 공통 타입 | `src/types/erp.ts` | eple |
 | 에이전트 계약 | `src/types/agent.ts`, `src/components/agent/open.ts`(패널 여는 입구) — 파트 간 계약 | eple (바꾸려면 PR, skygaul 리뷰) |
-| 인증 · DB 클라이언트 · API 공통 | `src/middleware.ts`, `src/lib/supabase/**`, `src/lib/api/**`, `src/app/login/**` | eple |
+| 인증 · DB 클라이언트 · API 공통 | `src/proxy.ts`, `src/lib/supabase/**`, `src/lib/api/**`, `src/app/login/**` | eple |
 | 업무 API 라우트 | `src/app/api/{health,me,items,purchases,sales,stock-logs,dashboard,bulk,seed}/**` | eple |
 | 조회 집계 | `src/lib/queries/**` (대시보드 · 이력 쿼리) | eple |
 | 재고 함수 호출층 | `src/lib/inventory.ts` (RPC 래퍼, 03 4절 시그니처 그대로) | eple (함수 인자가 바뀌면 sorek-charlie가 요청) |
@@ -58,7 +58,7 @@ WU 번호: `0x` eple 골격, `1x` jkspawn, `2x` sorek-charlie, `3x` skygaul, `4x
 |---|---|---|
 | WU-01 | Next.js + TS 골격, 폴더 구조(1절 경로 전부 빈 파일 · 자리), lint · typecheck · `test:unit` 스크립트, `.nvmrc`, `.env.example`, `AGENTS.md`, `CLAUDE.md`(AGENTS.md 불러오기), Actions(P-11), `.gitignore`(`.env*` 무시 · `!.env.example`), 비밀값 검사 `.githooks/` + `scripts/check-secrets.sh` + Actions `secret-check`, `prepare` 스크립트로 훅 자동 설치([05](05-security.md) 2.2절) | 새 폴더에 clone → `npm ci` → `npm run lint && npm run typecheck && npm run test:unit` 통과 / `git config core.hooksPath`가 `.githooks` / 가짜 키를 넣은 `.env.local`이 `git status`에 안 보임 / 가짜 JWT · `sb_secret_` · `AIza` 키를 넣은 파일 커밋이 **로컬 훅과 Actions 양쪽에서** 막힘 / `@packflow.test` 예시는 통과 |
 | WU-02 | Supabase `packflow-dev` · `packflow-demo` 생성, 마이그레이션 `schema` · `rls` · `llm_usage`, 재고 함수 **이름 · 인자만 있는 stub**(`PF_NOT_IMPLEMENTED`), 시연 계정 A · B(demo, 대시보드에서 생성), 팀원 테스트 계정 1인 2개 · 총 8개(dev, `scripts/create-test-users.ts`, P-17), 스크립트 안전장치(D-20 ③) | 두 프로젝트에 같은 마이그레이션 적용, T-AUTH-4~6이 dev에서 통과 / demo 주소로 스크립트 실행 시 거부 / 스크립트 출력 · 커밋에 키 · 비밀번호 없음 |
-| WU-03 | `src/types/erp.ts` · `agent.ts`, `src/lib/supabase/{server,browser}.ts`, `src/lib/api/{errors,handler,csrf}.ts`, `src/lib/inventory.ts`(RPC 래퍼 완성), `src/lib/{env,time,log}.ts`, middleware, `/login` | 로그인 · 로그아웃, 미로그인 `/api/me` 401 |
+| WU-03 | `src/types/erp.ts` · `agent.ts`, `src/lib/supabase/{server,browser}.ts`, `src/lib/api/{errors,handler,csrf}.ts`, `src/lib/inventory.ts`(RPC 래퍼 완성), `src/lib/{env,time,log}.ts`, `src/proxy.ts`, `/login` | 로그인 · 로그아웃, 미로그인 `/api/me` 401 |
 | WU-04 | [04](04-api-contract.md)의 모든 라우트 stub(계약 모양 + 501), `src/lib/mock/` · `src/lib/api-client.ts` 완성, `src/components/agent/open.ts` 완성, `src/lib/llm.ts` · `src/lib/agent/` · 패널 빈 자리 | 모든 라우트가 501 또는 목 응답, typecheck 통과 |
 | WU-05 | 앱 뼈대: `(app)/layout.tsx`, 레이아웃 · 내비 · `<AgentSlot />` · 초기화 버튼 자리, 공통 조각(`common/`), 기본 스타일 토큰, 빈 대시보드 · 입출고 · 이력 페이지 | 로그인 후 세 페이지가 열린다 |
 | WU-06 | Render 배포(`packflow-demo` 연결), `GET /api/health` | **배포 URL에서 로그인 → 빈 대시보드**. 1일차 '최소 화면 배포' 해소 |

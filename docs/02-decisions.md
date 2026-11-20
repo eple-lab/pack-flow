@@ -35,6 +35,13 @@
 | D-24 | **입력 규칙 · 빈 값 · 오류 문구의 원본은 [04](04-api-contract.md) 4절.** 선택 칸 빈 값은 `null`(빈 송장끼리 중복 아님), 정수만, strict, 상한 수량 10만 · 금액 10억, 화면 · 서버가 같은 검증 스키마(`src/lib/validation/`), DB CHECK도 같은 범위, `alert()` 금지 | eple, 11/20 |
 | D-25 | **코드 작성 가이드 [12](12-coding-guide.md).** 파일 머리에 이력(첫 줄 최초 작성자 · 날짜 · 상세, 아래로 고친 사람 · 날짜 · 이유), 내보내는 함수 주석, 병합 뒤 고친 덩어리에 `[#이슈번호 종류]`, 고친 기록은 이슈 → eple이 [13](13-fixes.md)에 모음 | eple, 11/20 |
 | D-26 | **시연 순서는 출고 → 품절 임박 카드 → 입고.** `demo` 시드에서 입고를 먼저 하면 카드가 뜨지 않는다([wireframes.html](wireframes.html) 9절) | 11/20 발견, eple 확인 |
+| D-27 | **Gemini 키 발급자는 eple.** Render 환경변수도 eple이 직접 넣는다(키가 대화 · 메신저로 오가지 않게) (← Q-02) | eple, 11/20 |
+| D-28 | **Supabase · Render는 eple 계정.** dev 프로젝트에만 팀원을 초대하고(무료 플랜에서 되는 경우), demo는 eple만. 초대가 안 되면 팀원은 anon 키 + 개인 테스트 계정만 쓴다 (← Q-03) | eple, 11/20 |
+| D-29 | **팀원 Node 24 확인은 eple이 11/20 팀 채널에 요청**(`node -v` → v24.x) (← Q-05) | eple, 11/20 |
+| D-30 | **로그인 확인 파일은 `src/proxy.ts`.** Next.js 16에서 `middleware.ts`가 `proxy.ts`로 이름이 바뀌어 새 이름을 쓴다. 문서의 `middleware`는 모두 proxy를 뜻한다(계획서 8절 폴더 구조의 `middleware.ts` 포함) | eple, 11/20 (WU-01) |
+| D-31 | **스타일은 CSS 모듈 + 토큰.** 색 · 간격은 `src/styles/`의 CSS 변수, 컴포넌트마다 `*.module.css`. Tailwind 등 스타일 라이브러리는 쓰지 않는다 | eple, 11/20 (WU-01) |
+| D-32 | **Next 16 기본값 `cacheComponents` · `partialPrefetching`을 끈다.** 로그인 쿠키를 읽는 화면이 대부분이라 요청마다 그리는 방식이 단순하고, 팀원 에이전트가 익숙한 패턴과 같다 | Claude 제안, eple 확인 대기 (WU-01) |
+| D-33 | **버전 고정**: Node 24(`.nvmrc` · `engines`), Next 16.4.6 · React 19.3.0 · TypeScript 5.9.3 · ESLint 9 · Vitest 5.1.1 · Playwright 1.65.1 · supabase-js 2.119.2 · @supabase/ssr 0.12.7 · zod 4.6.7. `package.json`에 정확한 버전(^ 없이) | eple, 11/20 (WU-01, P-10) |
 
 ## 2. 제안에서 확정된 결정 (P-01~P-19, 2026-11-20 eple 승인)
 
@@ -82,3 +89,5 @@ P-01 · P-08 · P-12 · P-19는 D-16~19와 같은 내용이다(계획서 반영 
 | 2026-11-20 | eple 지시로 계획서 8군데 수정. P-01 · P-08 · P-12 · P-19를 D-16~19로 확정 |
 | 2026-11-20 | eple이 P-01~P-18 모두 승인 → 확정. 서비스 키 보호 다섯 겹을 D-20으로 추가 |
 | 2026-11-20 | 오후 결정 D-21~26 기록 (구조 집중, 품목 화면, 화면 원본 HTML, 입력 규칙, 코드 작성 가이드, 시연 순서) |
+| 2026-11-20 | 골격 전 결정 D-27~29 기록 (Gemini 키 발급자, 계정 주인 · 팀원 초대, Node 24 확인) |
+| 2026-11-20 | WU-01 골격 결정 D-30~33 기록 (proxy.ts, CSS 모듈, 캐시 컴포넌트 끔, 버전 고정) |
