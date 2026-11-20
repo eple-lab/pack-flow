@@ -69,6 +69,7 @@
 | [docs/06-work-plan.md](docs/06-work-plan.md) | 파일 소유 구역 · 브랜치 · PR 규칙 |
 | [docs/09-features.md](docs/09-features.md) · [docs/wireframes.html](docs/wireframes.html) | 기능 목록 · 화면 구성(브라우저로 열기) |
 | [docs/work-units/](docs/work-units/README.md) | 작업 단위 |
+| [docs/12-coding-guide.md](docs/12-coding-guide.md) | 코드 작성 가이드 (파일 머리 · 이력 · 주석 · 고친 줄 표시) |
 | [AGENTS.md](AGENTS.md) | AI 에이전트 공통 규칙 |
 
 ## 팀
