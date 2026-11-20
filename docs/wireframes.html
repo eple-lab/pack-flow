@@ -1,0 +1,537 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PackFlow 화면 구성</title>
+<!--
+  PackFlow 화면 구성 원본 (docs/10-screens.md의 원본).
+  외부 파일 · 라이브러리 없이 이 파일 하나로 열린다. 저장소를 받은 뒤 브라우저로 연다.
+  고칠 때: 이 파일이 원본이다. 10-screens.md의 화면 목록과 함께 고친다(문서 주인 eple).
+-->
+<style>
+  :root {
+    --bg: #f6f7f9; --panel: #ffffff; --ink: #1d2330; --muted: #5d6676; --line: #d5dae2;
+    --accent: #2f6fde; --accent-soft: #e6eefc; --warn: #c2410c; --warn-soft: #fff1e8;
+    --ok: #15803d; --ok-soft: #e8f6ed; --err: #b91c1c; --err-soft: #fdeceb;
+    --own-eple: #6d28d9; --own-jk: #0f766e; --own-sky: #b45309;
+    --tid-bg: #eef0f4; --tid-ink: #4b5563; --frame: #fbfcfd;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12151b; --panel: #1a1f27; --ink: #e6e9ef; --muted: #9aa3b2; --line: #2e3542;
+      --accent: #7aa7ff; --accent-soft: #1d2a44; --warn: #fb923c; --warn-soft: #3a2416;
+      --ok: #4ade80; --ok-soft: #14301f; --err: #f87171; --err-soft: #3a1b1b;
+      --own-eple: #c4b5fd; --own-jk: #5eead4; --own-sky: #fcd34d;
+      --tid-bg: #262c36; --tid-ink: #c3cad6; --frame: #151920;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 15px/1.6 "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif; }
+  .layout { display: grid; grid-template-columns: 230px 1fr; min-height: 100vh; }
+  nav.toc { position: sticky; top: 0; align-self: start; height: 100vh; overflow-y: auto;
+            padding: 20px 16px; border-right: 1px solid var(--line); background: var(--panel); }
+  nav.toc h1 { font-size: 16px; margin: 0 0 4px; }
+  nav.toc p { margin: 0 0 14px; color: var(--muted); font-size: 12px; }
+  nav.toc a { display: block; padding: 4px 8px; border-radius: 6px; color: var(--ink); text-decoration: none; font-size: 14px; }
+  nav.toc a.sub { padding-left: 20px; font-size: 13px; color: var(--muted); }
+  nav.toc a:hover { background: var(--accent-soft); }
+  main { padding: 28px 36px 80px; max-width: 1100px; }
+  section { margin-bottom: 48px; scroll-margin-top: 16px; }
+  h2 { font-size: 22px; margin: 0 0 6px; padding-top: 4px; }
+  h3 { font-size: 17px; margin: 28px 0 6px; }
+  .meta { color: var(--muted); font-size: 13px; margin-bottom: 12px; }
+  ul.notes { margin: 10px 0 0; padding-left: 20px; }
+  ul.notes li { margin: 3px 0; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; background: var(--panel); font-size: 14px; }
+  th, td { border: 1px solid var(--line); padding: 6px 9px; text-align: left; vertical-align: top; }
+  th { background: var(--accent-soft); font-weight: 600; }
+  code { font-family: Consolas, "D2Coding", monospace; font-size: 0.92em; background: var(--tid-bg); padding: 1px 5px; border-radius: 4px; }
+  .callout { border-left: 4px solid var(--accent); background: var(--panel); padding: 10px 14px; margin: 12px 0; border-radius: 0 8px 8px 0; }
+  .callout.warn { border-color: var(--warn); }
+  .owner { display: inline-block; font-size: 12px; font-weight: 600; padding: 1px 8px; border-radius: 99px; border: 1px solid currentColor; margin-left: 6px; vertical-align: 2px; }
+  .owner.eple { color: var(--own-eple); } .owner.jk { color: var(--own-jk); } .owner.sky { color: var(--own-sky); }
+
+  /* ---- 와이어프레임 공통 ---- */
+  .wf { border: 1px solid var(--line); border-radius: 10px; background: var(--frame); padding: 14px; margin: 12px 0; overflow-x: auto; }
+  .wf .label { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .box { border: 1px dashed var(--line); border-radius: 8px; padding: 10px; background: var(--panel); }
+  .row { display: flex; gap: 10px; align-items: stretch; }
+  .row.wrap { flex-wrap: wrap; }
+  .grow { flex: 1; min-width: 0; }
+  .tid { display: inline-block; font: 11px/1.4 Consolas, monospace; color: var(--tid-ink); background: var(--tid-bg);
+         border-radius: 4px; padding: 0 5px; margin-left: 4px; white-space: nowrap; }
+  .btn { display: inline-block; border: 1px solid var(--accent); color: var(--accent); border-radius: 6px; padding: 2px 10px; font-size: 13px; background: transparent; white-space: nowrap; }
+  .btn.primary { background: var(--accent); color: #fff; }
+  .btn.ghost { border-color: var(--line); color: var(--muted); }
+  .input { display: inline-block; min-width: 80px; border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px; color: var(--muted); font-size: 13px; background: var(--frame); }
+  .badge { display: inline-block; font-size: 12px; border-radius: 99px; padding: 0 8px; }
+  .badge.warn { background: var(--warn-soft); color: var(--warn); }
+  .badge.ok { background: var(--ok-soft); color: var(--ok); }
+  .badge.err { background: var(--err-soft); color: var(--err); }
+  .badge.info { background: var(--accent-soft); color: var(--accent); }
+  .muted { color: var(--muted); }
+  .small { font-size: 13px; }
+  table.wt { font-size: 13px; margin: 6px 0 0; }
+  table.wt th { background: var(--tid-bg); }
+
+  /* 앱 뼈대 */
+  .shell-top { display: flex; align-items: center; gap: 14px; padding: 8px 12px; border-bottom: 1px solid var(--line); background: var(--panel); border-radius: 8px 8px 0 0; flex-wrap: wrap; }
+  .shell-top .brand { font-weight: 700; }
+  .shell-top .nav a { margin-right: 10px; color: var(--ink); text-decoration: underline dotted; font-size: 14px; }
+  .shell-body { display: grid; grid-template-columns: 1fr 230px; min-height: 180px; border: 1px solid var(--line); border-top: 0; border-radius: 0 0 8px 8px; }
+  .shell-body > div { padding: 14px; }
+  .shell-body .agent { border-left: 1px dashed var(--own-sky); background: var(--panel); }
+
+  /* KPI */
+  .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  .kpi { border: 1px solid var(--line); border-radius: 8px; padding: 10px; background: var(--panel); }
+  .kpi .n { font-size: 22px; font-weight: 700; }
+  .alerts { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 10px; margin-top: 8px; }
+  .alert { border: 1px solid var(--warn); background: var(--warn-soft); border-radius: 8px; padding: 10px; }
+  .pipe { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin: 4px 0; }
+  .pipe .step { border: 1px solid var(--line); border-radius: 6px; padding: 2px 10px; background: var(--panel); font-size: 13px; }
+  .tabs span { display: inline-block; padding: 4px 12px; border: 1px solid var(--line); border-bottom: 0; border-radius: 6px 6px 0 0; font-size: 13px; margin-right: 2px; background: var(--panel); }
+  .tabs span.on { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  .tabpane { border: 1px solid var(--line); border-radius: 0 8px 8px 8px; padding: 12px; background: var(--panel); }
+  .banner-err { border: 1px solid var(--err); background: var(--err-soft); color: var(--err); border-radius: 6px; padding: 6px 10px; font-size: 13px; margin: 8px 0; }
+  .textarea { border: 1px solid var(--line); border-radius: 6px; padding: 8px; font: 12px/1.6 Consolas, monospace; color: var(--muted); background: var(--frame); white-space: pre; overflow-x: auto; }
+  .panel { max-width: 500px; border: 1px solid var(--own-sky); border-radius: 10px; background: var(--panel); padding: 12px; }
+  .bubble { border-radius: 10px; padding: 6px 10px; margin: 6px 0; font-size: 14px; max-width: 85%; }
+  .bubble.me { background: var(--accent-soft); margin-left: auto; }
+  .bubble.ai { background: var(--tid-bg); }
+  .card { border: 1px solid var(--accent); border-radius: 8px; padding: 10px; margin: 8px 0; }
+  .login { max-width: 320px; margin: 0 auto; }
+  .login .field { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+  .login .field span:first-child { width: 64px; font-size: 14px; }
+
+  /* 화면 지도 */
+  .map { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+  .node { border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; background: var(--panel); font-size: 14px; }
+  .node b { display: block; }
+  .arrow { color: var(--muted); font-size: 13px; }
+
+  @media (max-width: 820px) {
+    .layout { grid-template-columns: 1fr; }
+    nav.toc { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+    main { padding: 18px 16px 60px; }
+    .kpis { grid-template-columns: repeat(2, 1fr); }
+    .shell-body { grid-template-columns: 1fr; }
+    .shell-body .agent { border-left: 0; border-top: 1px dashed var(--own-sky); }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+<nav class="toc" aria-label="목차">
+  <h1>PackFlow 화면 구성</h1>
+  <p>docs/10-screens.md의 원본 · 2026-11-20</p>
+  <a href="#intro">읽는 법 · 기준</a>
+  <a href="#map">1. 화면 지도</a>
+  <a href="#shell">2. 앱 뼈대</a>
+  <a href="#login">3. 로그인</a>
+  <a href="#dashboard">4. 대시보드</a>
+  <a href="#trades">5. 입출고</a>
+  <a class="sub" href="#purchase">5.1 구매 · 입고</a>
+  <a class="sub" href="#sale">5.2 판매 · 출고</a>
+  <a class="sub" href="#bulk">5.3 일괄 등록</a>
+  <a class="sub" href="#items">5.4 품목</a>
+  <a href="#history">6. 재고 이력</a>
+  <a href="#agent">7. AI 에이전트 패널</a>
+  <a class="sub" href="#draft">7.1 발주 초안</a>
+  <a class="sub" href="#chat">7.2 대화</a>
+  <a href="#common">8. 공통 조각</a>
+  <a href="#demo">9. 시연 순서</a>
+</nav>
+
+<main>
+<!-- ================================================================ -->
+<section id="intro">
+  <h2>읽는 법 · 기준</h2>
+  <div class="callout">
+    기준은 <b>계획서 5절과 WU-11~16 · WU-33 · 34 문서</b>가 우선이다. 컨셉 자료의 화면 시안(의사결정 회의 자료 슬라이드 14 · 15 · 18 · 19)은 배치 감을 잡는 참고로만 썼다.
+  </div>
+  <ul class="notes">
+    <li>그림은 <b>영역 배치</b>만 보여 준다. 색 · 글꼴 · 간격은 eple의 기본 스타일 토큰(<code>src/styles/</code>)을 따른다.</li>
+    <li>회색 작은 글씨 <span class="tid">testid</span>는 E2E 테스트가 찾는 <code>data-testid</code>다. 전체 목록은 각 WU 문서에 있다.</li>
+    <li>담당 표시: <span class="owner eple">eple</span> <span class="owner jk">jkspawn</span> <span class="owner sky">skygaul</span></li>
+    <li>모든 화면은 세 가지 상태를 갖는다: <b>로딩</b>(<code>Loading</code>), <b>빈 상태</b>(<code>EmptyState</code> — "아직 품목이 없어요. [시연 데이터 초기화]"), <b>오류</b>(<code>ErrorBanner</code> — 서버 <code>error.message</code> 그대로). 세 조각은 <code>src/components/common/</code> <span class="owner eple">eple</span></li>
+    <li>숫자 예시는 <code>demo</code> 시드(계획서 7절: PRD-001~003, P-101, S-201 · 202) 기준이다.</li>
+  </ul>
+</section>
+
+<!-- ================================================================ -->
+<section id="map">
+  <h2>1. 화면 지도</h2>
+  <div class="wf">
+    <div class="map">
+      <div class="node"><b>/login</b>로그인</div>
+      <span class="arrow">→</span>
+      <div class="node"><b>/ 대시보드</b>KPI · 품절 임박</div>
+      <span class="arrow">→ 파이프라인 칸 클릭 →</span>
+      <div class="node"><b>/trades</b>입출고 (구매 · 판매 · 일괄 등록)</div>
+    </div>
+    <div class="map" style="margin-top:10px">
+      <div class="node"><b>/ 대시보드</b></div>
+      <span class="arrow">→ 재고 표 행 클릭 →</span>
+      <div class="node"><b>/history</b>재고 이력</div>
+      <span class="arrow">← [이력] ←</span>
+      <div class="node"><b>/items</b>품목 (목록 · 등록 · 수정)</div>
+    </div>
+    <div class="map" style="margin-top:10px">
+      <div class="node"><b>/ 대시보드</b></div>
+      <span class="arrow">→ [발주서 초안 보기] · [AI 에이전트에게 맡기기] →</span>
+      <div class="node" style="border-color:var(--own-sky)"><b>에이전트 패널</b>오른쪽, 모든 화면 공통</div>
+      <span class="arrow">→ [확인] · [실행] → 대시보드 갱신</span>
+    </div>
+  </div>
+  <table>
+    <tr><th>경로</th><th>화면</th><th>주인</th><th>WU</th><th>기능 (09)</th></tr>
+    <tr><td><code>/login</code></td><td>로그인</td><td>eple</td><td>WU-03</td><td>F-01</td></tr>
+    <tr><td>(공통)</td><td>앱 뼈대: 상단 바 · 내비 · 에이전트 자리</td><td>eple</td><td>WU-05</td><td>F-01, F-25</td></tr>
+    <tr><td><code>/</code></td><td>대시보드</td><td>jkspawn</td><td>WU-11</td><td>F-04, F-16</td></tr>
+    <tr><td><code>/trades</code></td><td>입출고 (구매 · 판매 · 일괄 등록 탭)</td><td>jkspawn</td><td>WU-12 · 13 · 14</td><td>F-06~13, F-17~19</td></tr>
+    <tr><td><code>/history</code></td><td>재고 이력</td><td>jkspawn</td><td>WU-14</td><td>F-14, F-15</td></tr>
+    <tr><td><code>/items</code></td><td>품목 (목록 · 등록 · 수정)</td><td>jkspawn</td><td>WU-16</td><td>F-04, F-05</td></tr>
+    <tr><td>(오른쪽 패널)</td><td>AI 에이전트 (발주 초안 · 대화)</td><td>skygaul</td><td>WU-33 · 34</td><td>F-20~24</td></tr>
+  </table>
+</section>
+
+<!-- ================================================================ -->
+<section id="shell">
+  <h2>2. 앱 뼈대 <span class="owner eple">eple · WU-05</span></h2>
+  <div class="meta">모든 화면 공통. <code>src/app/(app)/layout.tsx</code>, <code>src/components/layout/</code></div>
+  <div class="wf">
+    <div class="shell-top">
+      <span class="brand">PackFlow</span>
+      <span class="nav"><a>대시보드</a><a>입출고</a><a>이력</a><a>품목</a></span>
+      <span class="grow"></span>
+      <span class="btn ghost">시연 데이터 초기화</span><span class="tid">btn-seed-reset</span>
+      <span class="small muted">a@…</span>
+      <span class="btn ghost">로그아웃</span>
+    </div>
+    <div class="shell-body">
+      <div><span class="owner jk">jkspawn</span><br><br><span class="muted">페이지 내용</span></div>
+      <div class="agent"><span class="owner sky">skygaul</span><br><br><code>&lt;AgentSlot /&gt;</code><br><span class="small muted">에이전트 패널 · 닫힘이 기본 · 열리면 폭 380px</span></div>
+    </div>
+  </div>
+  <ul class="notes">
+    <li>계정 표시는 이메일 앞 몇 글자만(화면 녹화 · 캡처 대비).</li>
+    <li>휴대폰 폭에서는 내비가 위쪽 가로 스크롤, 에이전트 패널은 화면 전체를 덮는 시트로 열린다.</li>
+    <li>[시연 데이터 초기화]는 jkspawn의 <code>components/demo/SeedResetButton</code>(WU-15) — 확인 창 뒤 <code>POST /api/seed</code>. 자리는 eple이 상단 바에 미리 꽂아 둔다.</li>
+    <li>화면이 패널을 여는 입구는 <code>openAgentPanel({ mode, sku_ids? })</code> 하나(<code>src/components/agent/open.ts</code>, eple).</li>
+  </ul>
+</section>
+
+<!-- ================================================================ -->
+<section id="login">
+  <h2>3. 로그인 <span class="owner eple">eple · WU-03</span></h2>
+  <div class="meta"><code>/login</code> · 기능 F-01</div>
+  <div class="wf">
+    <div class="box login">
+      <div style="text-align:center;font-weight:700;margin-bottom:6px">PackFlow</div>
+      <div class="field"><span>이메일</span><span class="input grow">&nbsp;</span></div>
+      <div class="field"><span>비밀번호</span><span class="input grow">&nbsp;</span></div>
+      <div style="text-align:center;margin:10px 0"><span class="btn primary">로그인</span></div>
+      <div class="banner-err">이메일 또는 비밀번호가 맞지 않아요</div>
+    </div>
+  </div>
+  <ul class="notes">
+    <li>회원가입 링크 없음(demo 프로젝트는 가입이 닫혀 있다 — 05 보안, D-20).</li>
+    <li>오류는 어느 쪽이 틀렸는지 구분하지 않는다.</li>
+  </ul>
+</section>
+
+<!-- ================================================================ -->
+<section id="dashboard">
+  <h2>4. 대시보드 <span class="owner jk">jkspawn · WU-11</span></h2>
+  <div class="meta"><code>/</code> · 기능 F-04, F-16 · 데이터 <code>GET /api/dashboard</code></div>
+  <div class="callout">계획서 5절 "재고 현황판 — 감지 &amp; 제안 카드". 시안 슬라이드 14 · 18(창고장의 아침)의 동선: <b>열기 → 품절 임박 알림 → 에이전트에게 맡기기</b>.</div>
+  <div class="wf">
+    <div class="label">① KPI 카드 4개</div>
+    <div class="kpis">
+      <div class="kpi"><div class="small muted">품목</div><div class="n">12</div><span class="tid">kpi-item-count</span></div>
+      <div class="kpi"><div class="small muted">재고 합계</div><div class="n">486</div><span class="tid">kpi-stock-total</span></div>
+      <div class="kpi"><div class="small muted">안전재고 미만</div><div class="n">3 <span class="badge warn">경고</span></div><span class="tid">kpi-below-safety</span></div>
+      <div class="kpi"><div class="small muted">오늘 입고 / 출고</div><div class="n">2 / 5</div><span class="tid">kpi-today-in</span><span class="tid">kpi-today-out</span></div>
+    </div>
+
+    <div class="label" style="margin-top:14px">② 품절 임박 카드</div>
+    <div class="box">
+      <div class="row"><b class="grow">품절 임박</b><span class="btn">AI 에이전트에게 맡기기</span><span class="tid">btn-agent-all</span></div>
+      <div class="alerts">
+        <div class="alert">노트북 거치대<br><span class="small">재고 3 / 안전재고 4</span><br><span class="btn">발주서 초안 보기</span><br><span class="tid">alert-card-PRD-003</span><span class="tid">btn-draft-po-PRD-003</span></div>
+        <div class="alert">무선 마우스<br><span class="small">재고 4 / 안전재고 5</span><br><span class="btn">발주서 초안 보기</span><br><span class="tid">alert-card-PRD-001</span><span class="tid">btn-draft-po-PRD-001</span></div>
+      </div>
+    </div>
+
+    <div class="label" style="margin-top:14px">③ 파이프라인 (클릭 → <code>/trades?status=</code>)</div>
+    <div class="pipe"><b class="small" style="width:36px">구매</b><span class="step">발주완료 2</span>›<span class="step">이동·통관중 3</span>›<span class="step">입고완료 14</span><span class="tid">pipe-purchase-&lt;상태&gt;</span></div>
+    <div class="pipe"><b class="small" style="width:36px">판매</b><span class="step">출고대기 5</span>›<span class="step">출고완료 9</span><span class="tid">pipe-sale-&lt;상태&gt;</span></div>
+
+    <div class="row" style="margin-top:14px">
+      <div class="box grow">
+        <div class="label">④ 품목별 재고 (행 클릭 → <code>/history?sku_id=</code>)</div>
+        <table class="wt">
+          <tr><th>코드</th><th>이름</th><th>재고</th><th>안전</th><th>상태</th></tr>
+          <tr><td>PRD-001</td><td>무선 마우스</td><td>4</td><td>5</td><td><span class="badge warn">미만</span></td></tr>
+          <tr><td>PRD-002</td><td>USB-C 케이블</td><td>40</td><td>15</td><td></td></tr>
+          <tr><td>PRD-003</td><td>노트북 거치대</td><td>3</td><td>4</td><td><span class="badge warn">미만</span></td></tr>
+        </table>
+        <span class="tid">stock-row-&lt;sku&gt;</span><span class="tid">stock-qty-&lt;sku&gt;</span>
+      </div>
+      <div class="box" style="width:200px">
+        <div class="label">⑤ 최근 변경 5건</div>
+        <div class="small">14:02 PRD-001 <b>−6</b> 실판매출고</div>
+        <div class="small">13:40 PRD-002 <b>+8</b> 구매입고</div>
+        <div class="small muted">…</div>
+      </div>
+    </div>
+  </div>
+  <ul class="notes">
+    <li>숫자는 모두 <code>GET /api/dashboard</code> 값 그대로(화면에서 다시 계산하지 않음 — T-S1-3).</li>
+    <li>품절 임박 카드가 없으면 "지금 부족한 품목이 없어요"(빈 상태). 버튼은 <code>openAgentPanel(...)</code>만 부른다.</li>
+    <li>차트 자리 없음(MVP 이후). 표가 넓으면 가로 스크롤.</li>
+  </ul>
+</section>
+
+<!-- ================================================================ -->
+<section id="trades">
+  <h2>5. 입출고 <span class="owner jk">jkspawn · WU-12 · 13 · 14</span></h2>
+  <div class="meta"><code>/trades</code> · 탭 세 개: <b>구매 · 입고</b> / <b>판매 · 출고</b> / <b>일괄 등록</b>. URL <code>?tab=&amp;status=</code>로 상태 필터(대시보드 파이프라인에서 넘어옴).</div>
+
+  <h3 id="purchase">5.1 구매 · 입고 탭</h3>
+  <div class="meta">기능 F-06~09 · 테스트 T-S1-2, T-S3-3</div>
+  <div class="wf">
+    <div class="tabs"><span class="on">구매 · 입고</span><span>판매 · 출고</span><span>일괄 등록</span><span class="tid">tab-purchase</span><span class="tid">tab-sale</span></div>
+    <div class="tabpane">
+      <div class="box">
+        <b class="small">+ 발주 등록</b><span class="tid">form-purchase</span><br>
+        <div class="row wrap small" style="margin-top:6px">품목 <span class="input">PRD-001 ▾</span> 거래처 <span class="input">&nbsp;</span> 수량 <span class="input" style="min-width:40px">&nbsp;</span> 금액 <span class="input">&nbsp;</span> 송장번호(선택) <span class="input">&nbsp;</span> <span class="btn primary">등록</span><span class="tid">btn-submit-purchase</span></div>
+      </div>
+      <table class="wt" style="margin-top:10px">
+        <tr><th>번호</th><th>품목</th><th>거래처</th><th>주문</th><th>도착</th><th>상태</th><th>버튼</th></tr>
+        <tr><td>P-101</td><td>무선 마우스</td><td>가나물산</td><td>10</td><td>—</td><td>이동·통관중</td><td><span class="btn">입고 확정</span> <span class="btn ghost">발주 취소</span><br><span class="tid">btn-receive-P-101</span></td></tr>
+        <tr><td>P-100</td><td>USB-C 케이블</td><td>다라상사</td><td>20</td><td>18</td><td>입고완료 <span class="badge info">부분 입고</span></td><td><span class="btn ghost">입고 취소</span></td></tr>
+        <tr><td>P-099</td><td>노트북 거치대</td><td>가나물산</td><td>5</td><td>—</td><td>품절</td><td class="muted">(종료)</td></tr>
+      </table>
+      <div class="box small" style="margin-top:10px;max-width:320px">
+        <b>입고 확정 창</b><br>도착 수량 <span class="input">10</span><span class="tid">input-received-qty</span> (1 ~ 주문 수량)<br>
+        <span class="btn primary" style="margin-top:6px">확인</span><span class="tid">btn-receive-confirm</span>
+      </div>
+    </div>
+  </div>
+  <ul class="notes">
+    <li>버튼은 <code>PURCHASE_TRANSITIONS</code>의 다음 상태만 보여 준다(판정은 서버). [입고 확정] → 도착 수량 입력 창(기본값 = 주문 수량).</li>
+    <li>취소류는 확인 창: "입고를 취소하면 재고가 8개 줄고, 기록은 남아요". 재고가 부족하면 서버가 거부하고 배너로 보여 준다.</li>
+    <li><code>received_qty &lt; order_qty</code>면 '부분 입고' 배지.</li>
+  </ul>
+
+  <h3 id="sale">5.2 판매 · 출고 탭</h3>
+  <div class="meta">기능 F-10~13 · 테스트 T-S1-1, T-S3-1, T-S3-2</div>
+  <div class="wf">
+    <div class="tabs"><span>구매 · 입고</span><span class="on">판매 · 출고</span><span>일괄 등록</span></div>
+    <div class="tabpane">
+      <div class="box">
+        <b class="small">+ 판매 등록</b><span class="tid">form-sale</span><br>
+        <div class="row wrap small" style="margin-top:6px">품목 <span class="input">▾</span> 채널 <span class="input">스마트스토어 ▾</span> 수량 <span class="input" style="min-width:40px">&nbsp;</span> 금액 <span class="input">&nbsp;</span> <span class="btn primary">등록</span><span class="tid">btn-submit-sale</span></div>
+      </div>
+      <div class="banner-err">재고가 부족해요. PRD-001 남은 수량 4개 <span class="tid">error-banner</span></div>
+      <table class="wt">
+        <tr><th>번호</th><th>품목</th><th>채널</th><th>수량</th><th>상태</th><th>버튼</th></tr>
+        <tr><td>S-201</td><td>무선 마우스</td><td>스마트스토어</td><td>6</td><td>출고대기</td><td><span class="btn">출고</span> <span class="btn ghost">주문 취소</span><br><span class="tid">btn-ship-S-201</span><span class="tid">btn-order-cancel-S-201</span></td></tr>
+        <tr><td>S-200</td><td>USB-C 케이블</td><td>쿠팡</td><td>5</td><td>출고완료</td><td><span class="btn ghost">출고 취소</span><br><span class="tid">btn-cancel-shipment-S-200</span></td></tr>
+      </table>
+    </div>
+  </div>
+  <ul class="notes">
+    <li>[출고] 성공 → 짧은 알림 "PRD-001 재고 10 → 4". 버튼은 처리 중 잠금(빠르게 두 번 눌러도 한 번만).</li>
+    <li>오류는 <code>api-client</code>가 던진 것을 공통 <code>ErrorBanner</code>에 넘긴다. 남은 수량 문장은 배너가 만든다.</li>
+  </ul>
+
+  <h3 id="bulk">5.3 일괄 등록 탭 <span class="owner jk">WU-13</span></h3>
+  <div class="meta">기능 F-17~19 · 테스트 T-S3-5, T-S4-4 · 시안 슬라이드 15 · 19 참고</div>
+  <div class="wf">
+    <div class="tabs"><span>구매 · 입고</span><span>판매 · 출고</span><span class="on">일괄 등록</span></div>
+    <div class="tabpane">
+      <div class="small">엑셀에서 6열(구분 · 품목코드 · 수량 · 거래처 · 송장번호 · 비고)을 복사해 붙여 넣으세요.</div>
+      <div class="row" style="margin:8px 0"><span class="btn ghost">예시 붙여넣기</span><span class="btn ghost">CSV 파일 선택</span><span class="tid">bulk-csv-input</span></div>
+      <div class="textarea">출고	PRD-001	3	스마트스토어	INV-1001
+입고	PRD-999	10	가나물산	INV-1002
+출고	PRD-002	0	쿠팡	INV-1003
+출고	PRD-003	1	쿠팡	INV-1001</div>
+      <span class="tid">bulk-textarea</span>
+      <div style="text-align:right;margin:6px 0"><span class="btn">미리보기</span><span class="tid">btn-bulk-preview</span></div>
+      <table class="wt">
+        <tr><th>줄</th><th>구분</th><th>품목코드</th><th>수량</th><th>거래처</th><th>송장번호</th><th>결과</th></tr>
+        <tr><td>1</td><td>출고</td><td>PRD-001</td><td>3</td><td>스마트스토어</td><td>INV-1001</td><td><span class="badge ok">정상</span></td></tr>
+        <tr><td>2</td><td>입고</td><td>PRD-999</td><td>10</td><td>가나물산</td><td>INV-1002</td><td><span class="badge err">미등록 품목코드</span></td></tr>
+        <tr><td>3</td><td>출고</td><td>PRD-002</td><td>0</td><td>쿠팡</td><td>INV-1003</td><td><span class="badge err">수량이 0 이하</span></td></tr>
+        <tr><td>4</td><td>출고</td><td>PRD-003</td><td>1</td><td>쿠팡</td><td>INV-1001</td><td><span class="badge err">같은 붙여넣기 안 송장번호 중복</span></td></tr>
+      </table>
+      <span class="tid">bulk-row-&lt;line&gt;</span><span class="tid">bulk-row-error-&lt;line&gt;</span>
+      <div style="text-align:right;margin-top:8px"><span class="btn primary">유효한 1행 반영</span><span class="tid">btn-bulk-commit</span></div>
+      <div class="small" style="margin-top:6px">결과: 1행 반영, 3행 제외 <span class="tid">bulk-result</span></div>
+    </div>
+  </div>
+  <ul class="notes">
+    <li>미리보기는 저장하지 않는다. 반영 뒤 같은 내용을 다시 반영하면 "이미 등록된 송장번호" 경고(T-S4-4).</li>
+    <li>빈 붙여넣기: "행이 없어요", 반영 버튼 비활성. 500행 · 100KB를 넘으면 전체 거절.</li>
+    <li><code>=</code>, <code>+</code>, <code>-</code>, <code>@</code>로 시작하는 셀은 글자로만 다룬다.</li>
+    <li>시안에 있던 "출고 건 → 배송 단계 연결"은 MVP 범위 밖.</li>
+  </ul>
+
+  <h3 id="items">5.4 품목 <span class="owner jk">WU-16</span></h3>
+  <div class="meta"><code>/items</code> · 입출고 탭이 아니라 내비의 별도 화면 · 기능 F-04, F-05 · 계획서 5절 '품목 · 거래처 마스터 (최소화)'</div>
+  <div class="wf">
+    <div class="row"><b class="grow">품목</b>검색 <span class="input">&nbsp;</span><span class="tid">item-search</span></div>
+    <div class="box" style="margin-top:8px">
+      <b class="small">+ 품목 등록</b><span class="tid">form-item</span>
+      <div class="row wrap small" style="margin-top:6px">코드 <span class="input">PRD-</span> 이름 <span class="input">&nbsp;</span> 매입 <span class="input" style="min-width:50px">&nbsp;</span> 판매 <span class="input" style="min-width:50px">&nbsp;</span> 안전재고 <span class="input" style="min-width:40px">&nbsp;</span> 구매처 메모(선택) <span class="input">&nbsp;</span> <span class="btn primary">등록</span><span class="tid">btn-submit-item</span></div>
+    </div>
+    <table class="wt" style="margin-top:10px">
+      <tr><th>코드</th><th>이름</th><th>매입</th><th>판매</th><th>안전</th><th>재고 (읽기 전용)</th><th>상태</th><th></th></tr>
+      <tr><td>PRD-001</td><td>무선 마우스</td><td>8,000</td><td>15,000</td><td>5</td><td>4</td><td><span class="badge warn">미만</span></td><td><span class="btn ghost">수정</span> <span class="btn ghost">이력</span><br><span class="tid">btn-edit-item-PRD-001</span></td></tr>
+      <tr><td>PRD-002</td><td>USB-C 케이블</td><td>2,000</td><td>5,000</td><td>15</td><td>40</td><td></td><td><span class="btn ghost">수정</span> <span class="btn ghost">이력</span></td></tr>
+    </table>
+    <span class="tid">item-row-&lt;sku&gt;</span><span class="tid">item-stock-&lt;sku&gt;</span>
+    <div class="box small" style="margin-top:10px;max-width:360px">
+      <b>수정 창</b><span class="tid">dialog-edit-item</span><br>
+      품목코드 PRD-001 <span class="muted">(읽기 전용)</span><br>
+      이름 · 매입 · 판매 · 안전재고 · 구매처 메모만<br>
+      <span class="btn primary" style="margin-top:6px">저장</span><span class="tid">btn-save-item</span>
+    </div>
+  </div>
+  <ul class="notes">
+    <li>품목코드와 재고 수량은 바꿀 수 없다(설계 원칙 "재고는 이력의 합"). 서버도 <code>stock_qty</code>가 오면 400.</li>
+    <li>새 품목은 재고 0으로 등록되고, 구매 탭 품목 선택 목록에 바로 나타난다.</li>
+    <li>구매처 메모는 글자로만 보여 준다(링크로 열지 않음). 삭제 버튼 · 거래처 마스터 화면 없음(MVP).</li>
+  </ul>
+</section>
+
+<!-- ================================================================ -->
+<section id="history">
+  <h2>6. 재고 이력 <span class="owner jk">jkspawn · WU-14</span></h2>
+  <div class="meta"><code>/history</code> · 기능 F-14, F-15 · 테스트 T-S3-1, T-S3-4, T-S4-2</div>
+  <div class="wf">
+    <div class="row"><span>품목 <span class="input">PRD-001 무선 마우스 ▾</span><span class="tid">history-sku-select</span></span><span class="grow"></span><span class="small">현재 재고 <b>10</b> = 이력 합계 <b>10</b> <span class="badge ok">일치</span></span></div>
+    <table class="wt" style="margin-top:10px">
+      <tr><th>시각</th><th>변화</th><th>사유</th><th>참조</th></tr>
+      <tr><td>11/24 14:05</td><td><b>+6</b></td><td>출고취소</td><td>S-201</td></tr>
+      <tr><td>11/24 14:02</td><td><b>−6</b></td><td>실판매출고</td><td>S-201</td></tr>
+      <tr><td>11/24 09:00</td><td><b>+10</b></td><td>재고조정</td><td>seed</td></tr>
+    </table>
+    <span class="tid">log-row-&lt;log_id&gt;</span>
+    <div style="text-align:center;margin-top:8px"><span class="btn ghost">더 보기</span><span class="tid">btn-more-logs</span></div>
+  </div>
+  <ul class="notes">
+    <li>최근순 20건씩, [더 보기]로 다음 페이지(키셋 페이지네이션).</li>
+    <li>행 수정 · 삭제 버튼 없음(원장은 추가만).</li>
+    <li>검산 줄은 서버 값 두 개(<code>items.stock_qty</code>, 이력 합계)를 나란히 보여 준다. 화면에서 계산하지 않는다.</li>
+  </ul>
+</section>
+
+<!-- ================================================================ -->
+<section id="agent">
+  <h2>7. AI 에이전트 패널 <span class="owner sky">skygaul · WU-33 · 34</span></h2>
+  <div class="meta">오른쪽 패널 · 탭 두 개: <b>발주 초안</b> / <b>대화</b> · 시안 슬라이드 14 · 18의 "근거가 붙은 발주서 초안 → 수량 확인 → 승인" 동선</div>
+
+  <h3 id="draft">7.1 발주 초안</h3>
+  <div class="meta">기능 F-20, F-21, F-24 · 테스트 T-AI-1, T-AI-3, T-AI-6</div>
+  <div class="wf">
+    <div class="panel">
+      <div class="row"><b class="grow">AI 에이전트</b><span class="muted">×</span></div><span class="tid">agent-panel</span>
+      <div class="tabs" style="margin-top:8px"><span class="on">발주 초안</span><span>대화</span></div>
+      <div class="tabpane">
+        <table class="wt">
+          <tr><th>품목</th><th>재고</th><th>안전</th><th>추천</th><th>단가</th><th>거래처</th></tr>
+          <tr><td>노트북 거치대</td><td>3</td><td>4</td><td><span class="input" style="min-width:36px">5</span></td><td>12,000</td><td>가나물산</td></tr>
+        </table>
+        <span class="tid">draft-row-PRD-003</span><span class="tid">draft-qty-PRD-003</span>
+        <div class="small muted" style="margin-top:6px">근거: 최근 7일 출고 4개(하루 0.6개), 입고 예정 0개, 안전재고 4개 기준</div>
+        <hr style="border:0;border-top:1px solid var(--line);margin:10px 0">
+        <div class="small"><b>발주서 문안 (AI)</b><span class="tid">draft-message</span><br>가나물산 담당자님, 노트북 거치대 5개를 …</div>
+        <div class="small muted" style="margin-top:6px">※ 발송은 시연용이에요. 실제로 보내지 않아요</div>
+        <div style="text-align:right;margin-top:8px"><span class="btn ghost">취소</span> <span class="btn primary">발주 등록(확인)</span><br><span class="tid">btn-draft-cancel</span><span class="tid">btn-draft-confirm</span></div>
+      </div>
+    </div>
+    <div class="label" style="margin-top:12px">LLM 실패 · 호출 상한 초과일 때</div>
+    <div class="banner-err" style="max-width:420px">AI 문안을 만들지 못했어요(사유). 아래 계산 결과로 직접 발주할 수 있어요 <span class="tid">draft-llm-error</span></div>
+  </div>
+  <ul class="notes">
+    <li>표의 숫자는 서버 계산 값(<code>src/lib/agent/reorder.ts</code>). 문안 안의 숫자와 달라도 <b>저장은 표 값</b>.</li>
+    <li>LLM이 실패해도 표와 [발주 등록]은 그대로 보인다. 미리 써 둔 문안을 AI 결과처럼 보여 주지 않는다(P-08).</li>
+    <li>[확인]을 눌러야만 <code>purchases</code>에 <code>발주완료</code>로 저장된다. [취소]는 아무것도 바꾸지 않는다.</li>
+  </ul>
+
+  <h3 id="chat">7.2 대화</h3>
+  <div class="meta">기능 F-22, F-23 · 테스트 T-AI-2~5</div>
+  <div class="wf">
+    <div class="panel">
+      <div class="tabs"><span>발주 초안</span><span class="on">대화</span></div>
+      <div class="tabpane">
+        <div class="bubble me">무선 마우스 재고 몇 개야?</div>
+        <div class="bubble ai">무선 마우스(PRD-001) 재고는 4개예요. <span class="tid">chat-reply-&lt;n&gt;</span></div>
+        <div class="bubble me">50개 출고해 줘</div>
+        <div class="bubble ai">재고가 부족해서 출고할 수 없어요. 남은 수량 4개</div>
+        <div class="bubble me">3개 출고해 줘</div>
+        <div class="card">
+          <b class="small">이렇게 처리할까요?</b><span class="tid">chat-action-card</span><br>
+          <span class="small">무선 마우스 3개 직접 출고 · 재고 4 → 1</span><br>
+          <div style="text-align:right;margin-top:6px"><span class="btn ghost">취소</span> <span class="btn primary">실행</span><br><span class="tid">btn-action-cancel</span><span class="tid">btn-action-execute</span></div>
+        </div>
+        <div class="row" style="margin-top:8px"><span class="input grow">메시지 입력</span><span class="btn primary">보내기</span></div>
+        <span class="tid">chat-input</span><span class="tid">btn-chat-send</span>
+      </div>
+    </div>
+  </div>
+  <ul class="notes">
+    <li>변경은 카드의 [실행]을 눌러야만 한다. 조회는 바로 답한다(수치는 서버 조회 결과만).</li>
+    <li>허용 액션은 6개뿐(재고 조회 · 품절 임박 목록 · 수량 직접 출고 · 주문 출고 · 판매 상태 · 구매 상태). 그 밖의 요청("모든 재고를 0으로")은 "할 수 없는 요청이에요"로 답한다.</li>
+    <li>"B제품 5개 출고해 줘"는 새 판매(<code>직접출고</code>)를 만들고 바로 출고한다(P-14). 기존 주문은 "S-201 출고해 줘"처럼 번호가 있을 때만.</li>
+  </ul>
+</section>
+
+<!-- ================================================================ -->
+<section id="common">
+  <h2>8. 공통 조각 <span class="owner eple">eple · WU-05</span></h2>
+  <div class="meta"><code>src/components/common/</code> · 화면과 에이전트 패널이 같이 쓴다. 새 조각이 필요하면 eple에게 요청.</div>
+  <div class="wf">
+    <div class="row wrap">
+      <div class="box" style="max-width:280px"><b class="small">ConfirmDialog</b><br><span class="small">출고를 취소하면 재고가 6개 돌아오고, 기록은 남아요</span><br><span class="btn ghost">취소</span> <span class="btn primary">확인</span><span class="tid">confirm-ok</span></div>
+      <div class="box" style="max-width:220px"><b class="small">Toast</b><br><span class="badge ok">PRD-001 재고 10 → 4</span></div>
+      <div class="box grow"><b class="small">ErrorBanner</b><div class="banner-err">재고가 부족해요. PRD-001 남은 수량 4개</div><span class="tid">error-banner</span></div>
+      <div class="box" style="max-width:260px"><b class="small">EmptyState</b><br><span class="small muted">아직 품목이 없어요.</span> <span class="btn">시연 데이터 초기화</span></div>
+    </div>
+  </div>
+  <table>
+    <tr><th>조각</th><th>쓰는 곳</th><th>규칙</th></tr>
+    <tr><td><code>ConfirmDialog</code></td><td>취소류 · 초기화 · 발주 확인</td><td>결과를 한 문장으로("재고가 6개 돌아오고, 기록은 남아요"). testid <code>confirm-ok</code></td></tr>
+    <tr><td><code>Toast</code></td><td>성공 알림</td><td>"PRD-001 재고 10 → 4" 형식, 3초</td></tr>
+    <tr><td><code>ErrorBanner</code></td><td>모든 화면 · 패널</td><td>서버 <code>error.message</code>. <code>PF_INSUFFICIENT_STOCK</code>이면 남은 수량 문장 추가. testid <code>error-banner</code></td></tr>
+    <tr><td><code>Loading</code> · <code>EmptyState</code></td><td>모든 목록</td><td>빈 상태에는 다음 행동 버튼 하나</td></tr>
+  </table>
+</section>
+
+<!-- ================================================================ -->
+<section id="demo">
+  <h2>9. 시연 순서와 화면</h2>
+  <div class="meta">발표 · 백업 영상(WU-15)</div>
+  <div class="callout warn">ERP 주제 안내의 순서는 "로그인 → 입고 → 출고 → 품절 임박"이지만, <code>demo</code> 시드에서 P-101(PRD-001 입고)을 먼저 하면 재고가 18이 되어 출고 뒤에도 품절 임박 카드가 뜨지 않는다. 그래서 <b>출고 → 카드 → 입고</b> 순서로 보여 준다(WU-22 E2E <code>step1</code>과 같은 순서).</div>
+  <table>
+    <tr><th>순서</th><th>화면</th><th>보여 줄 것</th><th>기능</th></tr>
+    <tr><td>1</td><td>로그인</td><td>시연 계정 A</td><td>F-01</td></tr>
+    <tr><td>2</td><td>입출고 › 판매</td><td>S-201 출고 → 재고 10 → 4</td><td>F-12</td></tr>
+    <tr><td>3</td><td>대시보드</td><td>PRD-001 품절 임박 카드</td><td>F-16</td></tr>
+    <tr><td>4</td><td>에이전트 › 발주 초안</td><td>PRD-003 초안 → [확인] → 구매 목록에 <code>발주완료</code></td><td>F-21</td></tr>
+    <tr><td>5</td><td>입출고 › 구매</td><td>P-101 8개 입고 확정 → 부분 입고, PRD-001 재고 4 → 12</td><td>F-07</td></tr>
+    <tr><td>6</td><td>입출고 › 판매, 이력</td><td>50개 출고 거부 / S-201 출고 취소 → 이력 −6 · +6</td><td>F-12, F-13</td></tr>
+    <tr><td>7</td><td>에이전트 › 대화</td><td>"50개 출고해 줘" 거부, "3개 출고해 줘" → [실행]</td><td>F-23</td></tr>
+    <tr><td>8</td><td>로그인 B</td><td>A 데이터 안 보임, 직접 호출 거부(테스트 결과 화면)</td><td>F-02</td></tr>
+  </table>
+</section>
+</main>
+</div>
+</body>
+</html>
