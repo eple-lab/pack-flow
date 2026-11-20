@@ -37,7 +37,7 @@
   nav.toc a { display: block; padding: 4px 8px; border-radius: 6px; color: var(--ink); text-decoration: none; font-size: 14px; }
   nav.toc a.sub { padding-left: 20px; font-size: 13px; color: var(--muted); }
   nav.toc a:hover { background: var(--accent-soft); }
-  main { padding: 28px 36px 80px; max-width: 1100px; }
+  main { padding: 28px 36px 80px; max-width: 1100px; min-width: 0; }
   section { margin-bottom: 48px; scroll-margin-top: 16px; }
   h2 { font-size: 22px; margin: 0 0 6px; padding-top: 4px; }
   h3 { font-size: 17px; margin: 28px 0 6px; }
@@ -119,6 +119,11 @@
     .kpis { grid-template-columns: repeat(2, 1fr); }
     .shell-body { grid-template-columns: 1fr; }
     .shell-body .agent { border-left: 0; border-top: 1px dashed var(--own-sky); }
+    /* 좁은 폭: 표는 자기 안에서만 가로 스크롤, 줄은 접는다 */
+    table { display: block; overflow-x: auto; }
+    .row { flex-wrap: wrap; }
+    .row > .box { width: auto !important; max-width: 100% !important; }
+    .callout, ul.notes, p { overflow-wrap: anywhere; }
   }
 </style>
 </head>
