@@ -17,7 +17,7 @@
 
 - 파일마다 주인이 있다(`docs/06-work-plan.md` 1절). **WU 문서의 '만들 · 고칠 파일'만 고친다.**
 - 남의 구역 파일을 고쳐야 하면 고치지 말고 보고에 적는다. 특히 아래는 eple 소유라 읽기만 한다:
-  `package.json` · lock 파일 · 설정 파일, `supabase/migrations/*_schema|_rls|_core_functions|_seed|_bulk.sql`, `src/types/**`, `src/lib/{supabase,api,queries,mock}/**`, `src/lib/{inventory,api-client,env,time,log}.ts`, `src/components/{layout,common}/**`, `src/components/agent/open.ts`, `src/app/(app)/layout.tsx`, `tests/**/helpers.ts`, `tests/regression/{run,measure}.ts`, `.githooks/**`, `scripts/**`, `.github/**`
+  `package.json` · lock 파일 · 설정 파일, `supabase/migrations/*_schema|_rls|_core_functions|_seed|_bulk.sql`, `src/types/**`, `src/lib/{supabase,api,queries,mock}/**`, `src/lib/{inventory,api-client,env,time,log,format}.ts`, `src/lib/validation/**`, `src/components/{layout,common}/**`, `src/components/agent/open.ts`, `src/app/(app)/layout.tsx`, `tests/**/helpers.ts`, `tests/regression/{run,measure}.ts`, `.githooks/**`, `scripts/**`, `.github/**`
 - 새 패키지를 설치하지 않는다(사람이 eple에게 요청한다).
 - API 모양 · 공통 타입을 바꾸지 않는다. 바꿔야 하면 `docs/04-api-contract.md`와 `src/types/`를 먼저 고치는 PR이 필요하다(eple).
 
@@ -31,6 +31,8 @@
 - 상태값 · 사유 · 오류 코드 문자열은 `src/types/erp.ts` 상수만 쓴다. 이름 규칙은 `docs/09-features.md` 3절.
 - 환경변수는 `src/lib/env.ts`로만 읽는다. 로그는 `src/lib/log.ts`로만 남긴다(키 · 비밀번호 · 이메일 · 프롬프트 전문 금지).
 - 화면은 `src/lib/api-client.ts`로만 서버를 부른다. 공통 조각(`src/components/common/`)을 다시 만들지 않는다.
+- 입력 검사는 `src/lib/validation/`의 스키마를 화면 · 서버 모두 그대로 쓴다. 규칙 · 빈 값 처리 · 오류 문구는 `docs/04-api-contract.md` 4절이 원본이다(새 문구를 지어내지 않는다). 선택 칸의 빈 값은 `null`로, 빈 문자열을 저장하지 않는다.
+- 브라우저 기본 `alert()` · `confirm()` · `prompt()`를 쓰지 않는다. 칸 아래 오류는 `FieldError`, 저장 버튼은 `SubmitButton`, 숫자 · 날짜 표시는 `src/lib/format.ts`.
 - LLM 응답 · 사용자 입력은 글자로만 렌더링한다(`dangerouslySetInnerHTML` 금지). SQL을 문자열로 만들지 않는다.
 - 테스트 이름은 테스트 ID로 시작한다: `it('T-S1-1 재고 10에서 6개 출고 …')`. 화면 요소에는 WU 문서의 `data-testid`를 단다.
 - 이 PC의 절대 경로를 코드 · 문서에 적지 않는다.

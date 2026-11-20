@@ -21,7 +21,7 @@ PackFlow는 소규모 판매자(구매대행 · 부업 포함)가 엑셀과 메�
 | [06 작업 계획](06-work-plan.md) | Wave별 작업 단위, **파일 소유 구역**, 브랜치 · PR · 병합 규칙 | 전원 |
 | [07 테스트 전략](07-test-strategy.md) | 테스트 층, 완료 판정 테스트 배치, 결과표 · AI 사례 기록 양식 | 전원, 특히 sorek-charlie |
 | [08 열린 질문](08-open-questions.md) | 아직 정하지 않은 것과 추천 | eple |
-| [09 기능 목록](09-features.md) | 기능 F-01~28 → 화면 · API · DB 함수 · WU · 테스트 · 상태, 용어 · 이름 규칙 | 전원 |
+| [09 기능 목록](09-features.md) | 기능 F-01~30 → 화면 · API · DB 함수 · WU · 테스트 · 상태, 용어 · 이름 규칙 | 전원 |
 | [10 화면 구성](10-screens.md) → 원본 [wireframes.html](wireframes.html) | 화면 지도, 화면별 배치 그림 · 설명 · 상태 · testid, 시연 순서 (브라우저로 열기) | 전원, 특히 jkspawn · skygaul |
 | [11 이슈 운영](11-issues.md) | 이슈 종류 · 라벨 · 양식, 막혔을 때 흐름, 분쟁 · 문서 정리 | 전원 |
 | [../AGENTS.md](../AGENTS.md) | 모든 AI 에이전트가 가장 먼저 읽는 규칙 | 전원의 에이전트 |

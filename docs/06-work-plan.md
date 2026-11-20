@@ -20,12 +20,13 @@
 | 업무 API 라우트 | `src/app/api/{health,me,items,purchases,sales,stock-logs,dashboard,bulk,seed}/**` | eple |
 | 조회 집계 | `src/lib/queries/**` (대시보드 · 이력 쿼리) | eple |
 | 재고 함수 호출층 | `src/lib/inventory.ts` (RPC 래퍼, 03 4절 시그니처 그대로) | eple (함수 인자가 바뀌면 sorek-charlie가 요청) |
-| 공통 유틸 | `src/lib/env.ts`(환경변수 검사 · 서버 전용), `src/lib/time.ts`(한국 시간 '오늘'), `src/lib/log.ts`(비밀값 안 남기는 로그) | eple |
+| 공통 유틸 | `src/lib/env.ts`(환경변수 검사 · 서버 전용), `src/lib/time.ts`(한국 시간 '오늘'), `src/lib/log.ts`(비밀값 안 남기는 로그), `src/lib/format.ts`(숫자 · 금액 · 날짜 표시) | eple |
+| 입력 검증 | `src/lib/validation/**` (zod 스키마 — 화면 폼 · API 라우트 · 일괄 등록 행 · 에이전트 확인 요청이 같이 씀, [04](04-api-contract.md) 4절) | eple |
 | 시드 데이터 · 정답표 | `src/lib/seed/*.json` | sorek-charlie |
 | 시드 로더 | `src/lib/seed/index.ts` | eple |
 | 테스트 기반 (구조) | `vitest.config.*`, `playwright.config.*`, `tests/db/helpers.ts`, `tests/e2e/helpers.ts`, `tests/regression/run.ts`, `tests/regression/measure.ts` | eple |
 | 테스트 케이스 | `tests/db/*.test.ts`, `tests/e2e/*.spec.ts`, `tests/regression/*.test.ts`, `tests/fixtures/**` | sorek-charlie |
-| API 테스트 | `tests/api/auth.test.ts`, `tests/api/rls.test.ts`, `tests/api/stock-logs.test.ts` / `tests/api/agent.test.ts` | eple / skygaul |
+| API 테스트 | `tests/api/auth.test.ts`, `tests/api/rls.test.ts`, `tests/api/stock-logs.test.ts`, `tests/api/validation.test.ts` / `tests/api/agent.test.ts` | eple / skygaul |
 | 각자 단위 테스트 | 자기 구역 파일 옆 `*.test.ts` | 그 구역 주인 |
 | 앱 뼈대 · 화면 공통 | `src/app/(app)/layout.tsx`, `src/components/layout/**`(상단 바 · 내비 · `<AgentSlot />`), `src/components/common/**`(확인 창 · 토스트 · 오류 배너 · 로딩), `src/lib/api-client.ts`(fetch 래퍼 · 목 전환), `src/styles/**`(기본 토큰) | eple (화면 · 패널이 같이 쓰는 것 — 필요한 조각은 eple에게 요청) |
 | 화면 | `src/app/(app)/{page.tsx,trades,history,items}/**`, `src/components/{dashboard,trades,bulk,history,items,demo}/**` | jkspawn |

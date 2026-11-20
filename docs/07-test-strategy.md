@@ -55,6 +55,13 @@
 | T-AI-5 | Step 5 | B의 챗봇은 A의 재고를 답하지 않음 | API | `agent.test.ts` | skygaul |
 | T-AI-6 | Step 5 | LLM 차단(잘못된 주소 · 키) → 입출고는 정상, 패널에 오류, 가짜 초안 없음 | API + E2E | `agent.test.ts`, `step5.spec.ts` | skygaul |
 | T-AI-7 | P-09 | 하루 상한 넘으면 429 | 단위(상한 1로 설정) | `src/lib/llm.test.ts` | skygaul |
+| T-VAL-1 | 04 4.2 | 송장번호를 비운 판매 두 건 등록 → 둘 다 성공 (`null`끼리 중복 아님), `""`는 저장되지 않음 | DB | `tests/db/validation.test.ts` | sorek-charlie |
+| T-VAL-2 | 04 4.1 · 4.2 | 수량에 `"10"`(문자열) · `1.5` · `0` · `100001` → 400, `reason` = `not_integer` · `not_integer` · `out_of_range` · `out_of_range` | API | `tests/api/validation.test.ts` | eple |
+| T-VAL-3 | 04 4.1 | 계약에 없는 필드(`user_id`, `stock_qty`) → 400 `not_allowed_field`, DB 변화 없음 | API | `tests/api/validation.test.ts` | eple |
+| T-VAL-4 | 04 4.1 | 품목명 앞뒤 공백 → 지워서 저장, 빈 메모 `""` → `null` 저장 | API | `tests/api/validation.test.ts` | eple |
+| T-VAL-5 | 04 4.6 | 화면: 필수 칸을 비우고 [등록] → 요청이 나가지 않고 칸 아래 "필수 항목이에요" | E2E | `tests/e2e/step3.spec.ts` | sorek-charlie |
+| T-VAL-6 | 04 4.6 | 화면: 세션 쿠키를 지운 뒤 [출고] → `/login?next=/trades`로 이동, 로그인 후 돌아옴 | E2E | `tests/e2e/step2.spec.ts` | sorek-charlie |
+| T-VAL-7 | 04 4.2 · 4.3 | 검증 스키마 단위 테스트: 필드마다 경계값(최소 · 최대 · 하나 넘음) · 빈 값 · 형식 | 단위 | `src/lib/validation/*.test.ts` | eple |
 
 **LLM이 들어가는 테스트(T-AI-2~5)는 실제 LLM으로 돌리면 결과가 흔들린다.** 기본은 `LLM_PROVIDER=fake`(정해진 JSON을 돌려주는 가짜 제공자, `src/lib/llm.ts` 안)로 돌려 **서버의 검사 로직**을 확인하고, 실제 Ollama · Gemini로는 같은 문장 5개를 돌려 결과를 [AI 사례 기록](#5-기록-양식)에 남긴다. 둘을 구분해 발표한다("모의와 실제 구분", Step 3 역량).
 
@@ -62,7 +69,9 @@
 
 | 종류 | 테스트 |
 |---|---|
-| 빈 입력 | 빈 붙여넣기 → 미리보기 "행 없음", 반영 버튼 비활성 (T-S3-5에 포함) / 빈 챗봇 메시지 → 400 |
+| 빈 입력 | 빈 붙여넣기 → 미리보기 "행 없음", 반영 버튼 비활성 (T-S3-5에 포함) / 빈 챗봇 메시지 → 400 / 필수 칸 비움 (T-VAL-5) / 빈 송장 두 건 (T-VAL-1) |
+| 잘못된 형식 · 범위 | T-VAL-2, T-VAL-3, T-VAL-7 |
+| 세션 만료 | T-VAL-6 |
 | 권한 없음 | T-AUTH-1 · 2 |
 | 재고 초과 | T-S3-2, T-AI-2 |
 | 허용 안 된 전이 | T-S3-3 |
