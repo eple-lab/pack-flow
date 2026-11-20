@@ -82,12 +82,12 @@
 
 ## WU-05 화면 자리
 
-1. `src/app/(app)/layout.tsx` + `src/components/layout/`(eple 소유): 상단 바(로그아웃 · 계정 표시 · 초기화 버튼 자리), 내비(대시보드 · 입출고 · 이력), 오른쪽 `<AgentSlot />`(skygaul 패널이 들어갈 자리). 초기화 버튼 자리에는 jkspawn 폴더의 `src/components/demo/SeedResetButton.tsx`를 빈 컴포넌트로 만들어 꽂아 둔다(내용은 WU-15)
+1. `src/app/(app)/layout.tsx` + `src/components/layout/`(eple 소유): 상단 바(로그아웃 · 계정 표시 · 초기화 버튼 자리), 내비(대시보드 · 입출고 · 이력 · 품목), 오른쪽 `<AgentSlot />`(skygaul 패널이 들어갈 자리). 초기화 버튼 자리에는 jkspawn 폴더의 `src/components/demo/SeedResetButton.tsx`를 빈 컴포넌트로 만들어 꽂아 둔다(내용은 WU-15)
 2. 공통 조각 `src/components/common/`(eple 소유, 화면 · 패널이 같이 씀): `ConfirmDialog`, `Toast`, `ErrorBanner`(`error.message` 표시, `PF_INSUFFICIENT_STOCK`이면 남은 수량 문장, testid `error-banner`), `Loading`, `EmptyState`. 기본 스타일 토큰 `src/styles/`
-3. 빈 페이지: `src/app/(app)/page.tsx`(대시보드), `trades/page.tsx`, `history/page.tsx` — 제목과 "준비 중"만. **페이지 내용부터는 jkspawn 소유**
+3. 빈 페이지: `src/app/(app)/page.tsx`(대시보드), `trades/page.tsx`, `history/page.tsx`, `items/page.tsx` — 제목과 "준비 중"만. **페이지 내용부터는 jkspawn 소유**
 
 **다 됐다의 기준**
-- [ ] 로그인 후 세 페이지가 열리고 내비로 이동됨, 미로그인 시 `/login`
+- [ ] 로그인 후 네 페이지(대시보드 · 입출고 · 이력 · 품목)가 열리고 내비로 이동됨, 미로그인 시 `/login`
 - [ ] `openAgentPanel({mode:'chat'})`을 부르면 `<AgentSlot />`에 빈 패널이 열림
 - [ ] 공통 조각 5종을 빈 페이지에서 한 번씩 써 봄(확인 후 지움)
 

@@ -28,11 +28,11 @@
 | API 테스트 | `tests/api/auth.test.ts`, `tests/api/rls.test.ts`, `tests/api/stock-logs.test.ts` / `tests/api/agent.test.ts` | eple / skygaul |
 | 각자 단위 테스트 | 자기 구역 파일 옆 `*.test.ts` | 그 구역 주인 |
 | 앱 뼈대 · 화면 공통 | `src/app/(app)/layout.tsx`, `src/components/layout/**`(상단 바 · 내비 · `<AgentSlot />`), `src/components/common/**`(확인 창 · 토스트 · 오류 배너 · 로딩), `src/lib/api-client.ts`(fetch 래퍼 · 목 전환), `src/styles/**`(기본 토큰) | eple (화면 · 패널이 같이 쓰는 것 — 필요한 조각은 eple에게 요청) |
-| 화면 | `src/app/(app)/{page.tsx,trades,history}/**`, `src/components/{dashboard,trades,bulk,history,demo}/**` | jkspawn |
+| 화면 | `src/app/(app)/{page.tsx,trades,history,items}/**`, `src/components/{dashboard,trades,bulk,history,items,demo}/**` | jkspawn |
 | 일괄 등록 파싱 | `src/lib/bulk/**` | jkspawn |
 | 화면용 목 데이터 | `src/lib/mock/**` (API 계약을 비춘 것) | eple (값 추가는 요청) |
 | 에이전트 | `src/lib/llm.ts`, `src/lib/agent/**`, `src/app/api/agent/**`, `src/components/agent/**`, `src/lib/agent/prompts/**` | skygaul |
-| 문서 | `docs/` 00~11(09의 상태 칸 포함), `DevelopDoc/`, 루트 `README.md` · `AGENTS.md` | eple |
+| 문서 | `docs/` 00~11(09의 상태 칸 포함), `docs/wireframes.html`(화면 구성 원본), `DevelopDoc/`, 루트 `README.md` · `AGENTS.md` | eple |
 | 작업 단위 문서 · 기록 | `docs/work-units/WU-xx-*.md`의 '결과' 절, `docs/records/<계정>-*.md`, `docs/records/ai-cases-<계정>.md` | 그 WU 담당자 · 계정 주인 |
 | 공동 기록 (한 사람이 씀) | `docs/records/regression-*.md` · `performance.md` (sorek-charlie), `ai-cases.md` · `ai-limits.md` · `llm-usage.md` (skygaul), `security-check-*.md` (eple) | 표시된 사람 |
 
@@ -72,6 +72,7 @@ WU 번호: `0x` eple 골격, `1x` jkspawn, `2x` sorek-charlie, `3x` skygaul, `4x
 | WU-22 | sorek-charlie | 시드 데이터 3벌(demo · small · large) + 손으로 구한 `expected` 정답표, E2E Step 1 · 2 케이스 | 세 벌 모두 넣은 직후 T-INV-1 통과, `expected`와 일치, `step1` · `step2` E2E 통과 | WU-08, WU-21, WU-11 · 12 |
 | WU-11 | jkspawn | 대시보드: KPI 카드 · 파이프라인 · 품목별 재고 표 · 품절 임박 카드 | 목 데이터로 화면 완성 → `NEXT_PUBLIC_USE_MOCK=0`에서 실제 값 표시 | WU-04 목, WU-41 |
 | WU-12 | jkspawn | 입출고 화면: 구매 · 판매 목록, 등록 폼, 입고 확정 · 출고 버튼, 오류 메시지 표시 | 화면에서 완료 테스트 1 · 2 재현 | WU-41 |
+| WU-16 | jkspawn | 품목 화면 `/items`: 목록 · 등록 · 수정(재고 수량 · 품목코드는 읽기 전용, 삭제 없음) | 새 품목 등록 → 재고 0 · 구매 탭에 나타남, 안전재고 수정 → 대시보드 반영 | WU-41 |
 | WU-31 | skygaul | `src/lib/llm.ts`(Ollama · Gemini, 시간 초과, 오류 → `PF_LLM_UNAVAILABLE`), `pf_llm_take` 연동, 팀 공통 Ollama 모델 확정 | 두 제공자 모두 같은 함수로 호출, 상한 초과 429 | WU-02 |
 | WU-32 | skygaul | `src/lib/agent/reorder.ts` 추천 수량 계산(순수 함수) + 단위 테스트, 발주서 프롬프트 초안 | 계산 단위 테스트 통과(DB 없이) | — |
 | WU-41 | eple | 업무 API 라우트 실제 연결(items · purchases · sales · dashboard · stock-logs), 함수 오류 → HTTP 매핑 | 목 없이 화면에서 입고 → 출고 → 대시보드 갱신 | WU-21 |
