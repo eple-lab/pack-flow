@@ -60,6 +60,8 @@ flowchart LR
 | 앱 뼈대 · 공통 | 레이아웃 · 내비 · 에이전트 패널 자리, 공통 화면 조각, fetch 래퍼 · 목, 환경변수 · 시간 · 로그 유틸, 파트 간 계약 타입 | `src/app/(app)/layout.tsx`, `src/components/{layout,common}/`, `src/lib/{api-client,env,time,log}.ts`, `src/lib/mock/`, `src/types/`, `src/components/agent/open.ts` | eple |
 | 일괄 등록 | TSV · CSV 파싱 → 미리보기 → 유효 행만 반영 | 파싱 `src/lib/bulk/`, 반영 `pf_bulk_apply`(재고 엔진 함수를 묶어 부름) | jkspawn(화면 · 파싱), eple(반영 함수 · 라우트) |
 | 대시보드 | KPI, 파이프라인 건수, 품목별 재고, 품절 임박 | `src/app/(app)/page.tsx`, `src/components/dashboard/` | jkspawn |
+| 품목 화면 | 품목 목록 · 등록 · 수정(재고 · 코드 읽기 전용, D-22) | `src/app/(app)/items/`, `src/components/items/` | jkspawn |
+| 입력 검증 · 표시 | 화면 · 서버 공용 검증 스키마, 오류 문구, 숫자 · 날짜 표시 (04 4절, D-24) | `src/lib/validation/`, `src/lib/format.ts`, `src/lib/api/errors.ts` | eple |
 | AI 에이전트 | 발주 후보 계산(코드) → 초안 문안(LLM) → 확인 후 저장 / 자연어 → 허용 액션 → 확인 후 실행 | `src/lib/agent/`, `src/lib/llm.ts`, `src/app/api/agent/`, `src/components/agent/` | skygaul |
 | 시연 데이터 | 시드 3벌(시연 · 소량 · 대량), 원클릭 초기화(본인 데이터만) | 초기화 함수 `supabase/migrations/*_seed.sql` · 로더 `src/lib/seed/index.ts`, 데이터 `src/lib/seed/*.json` | eple(함수 · 로더), sorek-charlie(데이터 · 정답표) |
 | 테스트 기반 | 테스트 도구 설정, 로그인 · 초기화 도우미, 회귀 실행기 · 측정 스크립트 | `vitest` · `playwright` 설정, `tests/**/helpers.ts`, `tests/regression/run.ts` · `measure.ts` | eple (테스트 케이스는 각 담당, 회귀 실행 · 판정은 sorek-charlie) |

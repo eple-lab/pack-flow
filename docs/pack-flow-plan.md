@@ -89,6 +89,7 @@
 - (11/20) 변경: MVP를 공통 역량 기준 Step 1~5로 재구성, 인증 + RLS를 Step 2로 당김, 배포처 Render로 통일, 구매 상태값 확정, 역할 확정
 - (11/20) 변경: 차트는 Step 5 이후로 미룸(MVP 대시보드는 표), Step 6~10을 풀어 '고도화 후보'로 통합(Step 5 이후 각자 선택), 판매 상태값 확정, Step 4 데이터 규모를 소량(품목 5 · 이력 20) / 대량(품목 10 · 이력 50)으로 확정
 - (11/20) 변경: `docs/` 00~08 작업 문서 작성(엔터프라이즈 아키텍처 · API 계약 · 파일 소유 구역). 재고 처리는 Postgres 함수(RPC)로, Supabase 2개(dev · demo) + Vitest · Playwright, 앱은 저장소 루트, 브랜치 규칙(11/22까지 eple main 직접 → 11/23부터 전원 PR + merge commit) 확정. 사용자 · 문제를 한 문장으로 통일, LLM 실패 대안 정리
+- (11/20) 변경: 구조 작업을 eple로 모음(테스트 기반 · 초기화 · 일괄 반영 · 회귀 실행기 · 공통 층, D-21), 품목 화면 추가(WU-16, D-22), 화면 구성 원본을 `docs/wireframes.html`로(D-23), 입력 규칙 · 빈 값 · 오류 문구 계약(04 4절, D-24), 코드 작성 가이드 · 고친 기록(docs 12 · 13, D-25), 시연 순서를 출고 → 카드 → 입고로(D-26), 이슈 운영(docs 11) · 기능 목록(docs 09) · 루트 AGENTS · README 초안
 - (11/24 중간 점검 때 추가)
 
 **최종 결과 (달성 / 부분 달성 / 미달성)와 증거:** 달성 = Step 1~5 완료 / 부분 달성 = Step 1~5 중 하나라도 미완료 / 미달성 = Step 1 미완료. 증거는 13절 제출물에 첨부.
@@ -354,33 +355,36 @@ pack-flow/  (저장소 루트)
 ├── src/
 │   ├── middleware.ts                 # 로그인 확인 · CSRF (eple)
 │   ├── app/
-│   │   ├── login/                    # 로그인 (Step 2, eple)
-│   │   ├── (app)/                    # 대시보드 · 입출고 · 이력 화면 (jkspawn)
+│   │   ├── login/                    # 로그인 (eple)
+│   │   ├── (app)/
+│   │   │   ├── layout.tsx            # 앱 뼈대: 상단 바 · 내비 · 에이전트 자리 (eple)
+│   │   │   ├── page.tsx              # 대시보드 (jkspawn)
+│   │   │   ├── trades/ history/ items/   # 입출고 · 이력 · 품목 (jkspawn)
 │   │   └── api/                      # items · purchases · sales · stock-logs · dashboard · bulk · seed (eple)
-│   │       └── agent/                # AI 에이전트 (발주 초안 · 자연어 조회/상태 변경, skygaul)
+│   │       └── agent/                # AI 에이전트 라우트 (skygaul)
 │   ├── components/
-│   │   ├── layout/ dashboard/ trades/ bulk/ common/   # 화면 (jkspawn)
-│   │   └── agent/                    # AI 에이전트 패널 & 발주서 초안 뷰 (skygaul)
+│   │   ├── layout/ common/           # 앱 뼈대 · 공통 조각(확인 창 · 토스트 · 오류 배너 · 칸 오류 · 저장 버튼) (eple)
+│   │   ├── dashboard/ trades/ bulk/ history/ items/ demo/   # 화면 (jkspawn)
+│   │   └── agent/                    # 에이전트 패널 (skygaul) — open.ts는 eple(파트 간 계약)
 │   ├── lib/
-│   │   ├── supabase/                 # Supabase 클라이언트 server · browser (eple)
-│   │   ├── api/                      # 오류 형식 · 요청 처리 공통 (eple)
-│   │   ├── queries/                  # 대시보드 · 이력 조회 (eple)
-│   │   ├── inventory.ts              # 재고 함수(pf_*) 호출층 (sorek-charlie)
-│   │   ├── seed/                     # 시드 3벌 demo · small · large + 정답표 (sorek-charlie)
+│   │   ├── supabase/ api/ queries/   # DB 클라이언트 · API 공통 · 조회 (eple)
+│   │   ├── validation/               # 입력 검증 스키마 — 화면 · 서버 공용 (eple, docs/04 4절)
+│   │   ├── inventory.ts              # 재고 함수(pf_*) 호출 래퍼 (eple)
+│   │   ├── api-client.ts  mock/      # 화면 fetch 래퍼 · 목 응답 (eple)
+│   │   ├── env.ts time.ts log.ts format.ts   # 공통 유틸 (eple)
+│   │   ├── seed/                     # index.ts 로더(eple) · *.json 시드 데이터 · 정답표(sorek-charlie)
 │   │   ├── bulk/                     # TSV · CSV 파싱 (jkspawn)
-│   │   ├── mock/                     # 화면 개발용 목 응답 (jkspawn)
-│   │   ├── llm.ts                    # LLM 호출 한 곳 (Ollama ↔ Gemini 전환, skygaul)
-│   │   └── agent/                    # 추천 수량 계산 · 프롬프트 · 허용 액션 (skygaul)
+│   │   ├── llm.ts                    # LLM 호출 한 곳, Ollama ↔ Gemini (skygaul)
+│   │   └── agent/                    # 발주 후보 계산 · 프롬프트 · 허용 액션 (skygaul)
 │   └── types/
-│       ├── erp.ts                    # Items, Purchases, Sales, StockLogs 타입 · 상태값 · 오류 코드 (eple)
-│       └── agent.ts                  # 에이전트 타입 (skygaul)
-├── supabase/
-│   └── migrations/                   # 스키마 · RLS (eple) / 재고 함수 · 시드 함수 (sorek-charlie)
+│       ├── erp.ts  agent.ts          # 타입 · 상태값 · 오류 코드 · 파트 간 계약 (eple)
+├── supabase/migrations/              # 스키마 · RLS · 초기화 · 일괄 반영(eple) / 재고 함수(sorek-charlie)
 ├── tests/
-│   ├── db/ e2e/ regression/          # 완료 판정 · 회귀 테스트 (sorek-charlie)
-│   └── api/                          # 권한 (eple) · 에이전트 (skygaul) API 테스트
-├── docs/                             # 작업 문서 원본 (00~08, 작업 단위, 기록)
-├── DevelopDoc/                       # 제출용 PRD · TECH_SPEC · WORK_UNITS · FINAL_CHECKLIST (11/25 docs/에서 요약)
+│   ├── db/ e2e/ regression/          # 케이스: sorek-charlie / helpers · run.ts · measure.ts: eple
+│   └── api/                          # 권한 · 검증(eple) · 에이전트(skygaul)
+├── scripts/  .githooks/  .github/    # 테스트 계정 스크립트 · 비밀값 검사 · CI · 이슈 양식 (eple)
+├── docs/                             # 00~13 · wireframes.html(화면 구성) · work-units/ · records/
+├── DevelopDoc/                       # 제출용 4개 파일 (11/25 docs/에서 요약)
 ├── AGENTS.md                         # 팀 공통 AI 코딩 규칙
 ├── README.md
 ├── .env.example
