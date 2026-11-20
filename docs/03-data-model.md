@@ -153,8 +153,8 @@ D-10에 따라 **재고를 바꾸는 일은 아래 함수만** 한다. 모두 `s
 | `pf_set_sale_status(id, to_status)` | `출고대기`, `주문취소` | — | `PF_INVALID_TRANSITION` | sorek-charlie |
 | `pf_ship_sale(id)` | `출고완료` (`주문접수`에서 부르면 `출고대기`를 거쳐 한 번에) | `−sold_qty`, `실판매출고` | `PF_INSUFFICIENT_STOCK`(남은 수량을 detail로) | sorek-charlie |
 | `pf_cancel_shipment(id)` | `출고취소` | `+sold_qty`, `출고취소` | `PF_INVALID_TRANSITION` | sorek-charlie |
-| `pf_bulk_apply(rows jsonb)` | 일괄 등록 반영. 행마다 서브트랜잭션: 유효한 행만 반영, 실패 행은 사유 반환 (P-15) | 행마다 위 함수와 같은 규칙 | 행별 코드 | sorek-charlie |
-| `pf_reset_and_seed(data jsonb)` | **본인 데이터만** 지우고 시드를 다시 넣는다 | 초기 재고는 `재고조정` 기록, 이후 이력은 `events`를 위 함수로 차례대로 실행해 만든다 | `PF_VALIDATION` | sorek-charlie |
+| `pf_bulk_apply(rows jsonb)` | 일괄 등록 반영. 행마다 서브트랜잭션으로 위 함수를 부른다: 유효한 행만 반영, 실패 행은 사유 반환 (P-15) | 행마다 위 함수와 같은 규칙 | 행별 코드 | eple (구조 래퍼) |
+| `pf_reset_and_seed(data jsonb)` | **본인 데이터만** 지우고 시드를 다시 넣는다 | 초기 재고는 `재고조정` 기록, 이후 이력은 `events`를 위 함수로 차례대로 실행해 만든다 | `PF_VALIDATION` | eple (시드 데이터 · 정답표는 sorek-charlie) |
 | `pf_llm_take(user_limit, global_limit)` | 오늘 호출 수 +1, 넘으면 false | — | — | eple (Wave 0) |
 | `pf_require_user()` | `auth.uid()`가 없으면 `PF_UNAUTHENTICATED` | — | — | eple (Wave 0) |
 
@@ -211,7 +211,7 @@ group by i.sku_id, i.stock_qty
 having i.stock_qty <> coalesce(sum(l.change_qty), 0);
 ```
 
-## 7. 시드 데이터 (sorek-charlie)
+## 7. 시드 데이터 (데이터 · 정답표 sorek-charlie, 초기화 함수 · 로더 eple)
 
 | 벌 | 파일 | 규모 | 쓰임 |
 |---|---|---|---|

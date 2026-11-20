@@ -4,7 +4,7 @@
 
 - 한쪽만 바꾸지 않는다. 바꿔야 하면 **이 문서와 `src/types/erp.ts`를 먼저 고치는 PR**(eple 리뷰)을 올리고, 병합된 뒤 양쪽 코드를 고친다.
 - Wave 0에서 eple이 모든 라우트를 **이 모양 그대로 돌려주는 자리(stub)**로 만든다. 아직 구현이 없으면 `501 NOT_IMPLEMENTED`. 그래서 화면 · 에이전트는 첫날부터 이 계약을 기준으로 만들 수 있다.
-- 화면 개발용 목(mock) 응답은 `src/lib/mock/`에 같은 타입으로 둔다(환경변수 `NEXT_PUBLIC_USE_MOCK=1`).
+- 화면 개발용 목(mock) 응답은 `src/lib/mock/`에 같은 타입으로 둔다(환경변수 `NEXT_PUBLIC_USE_MOCK=1`). 목과 `src/lib/api-client.ts`는 계약을 비춘 것이라 eple 소유다.
 
 ## 1. 공통 규칙
 
@@ -136,7 +136,7 @@ type BulkRowInput = {
 
 | 메서드 · 경로 | 요청 | 응답 `data` | 담당 |
 |---|---|---|---|
-| `POST /api/seed` | `{ dataset: "demo" \| "small" \| "large" }` | `{ items, purchases, sales, logs }` 건수 | eple(라우트) → `pf_reset_and_seed`(sorek-charlie) |
+| `POST /api/seed` | `{ dataset: "demo" \| "small" \| "large" }` | `{ items, purchases, sales, logs }` 건수 | eple(라우트 · `pf_reset_and_seed`), 시드 데이터는 sorek-charlie |
 
 **로그인한 사용자 본인의 데이터만** 지우고 다시 넣는다. 화면에서는 확인 창을 한 번 띄운다.
 
@@ -190,4 +190,4 @@ type ChatReply = {
 
 ## 4. 타입 원본
 
-`src/types/erp.ts` (eple 소유)에 `Item`, `Purchase`, `Sale`, `StockLog`, `PurchaseStatus`, `SaleStatus`, `StockReason`, `PfErrorCode`, `Dashboard`, `BulkRow*`를 둔다. 에이전트 전용 타입(`PoDraft`, `AgentAction`, `ChatReply`)은 `src/types/agent.ts` (skygaul 소유)에 둔다. 상태값 문자열은 이 파일의 상수만 쓰고, 코드에 직접 적지 않는다.
+`src/types/erp.ts` (eple 소유)에 `Item`, `Purchase`, `Sale`, `StockLog`, `PurchaseStatus`, `SaleStatus`, `StockReason`, `PfErrorCode`, `Dashboard`, `BulkRow*`를 둔다. 에이전트 전용 타입(`PoDraft`, `AgentAction`, `ChatReply`)은 `src/types/agent.ts` (eple 소유 — 파트 간 계약이라 바꾸려면 PR, skygaul 리뷰)에 둔다. 서버 전용 값(키 · 서비스 설정)은 `src/lib/env.ts`로만 읽는다. 상태값 문자열은 이 파일의 상수만 쓰고, 코드에 직접 적지 않는다.
