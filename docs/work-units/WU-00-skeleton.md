@@ -26,7 +26,8 @@
 6. `.env.example`: 이름과 설명만 (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_DEV_PROJECT_REF`, `SUPABASE_SERVICE_ROLE_KEY`(eple 로컬 전용이라고 주석), `LLM_PROVIDER`, `LLM_MODEL`, `OLLAMA_BASE_URL`, `GEMINI_API_KEY`, `NEXT_PUBLIC_USE_MOCK`, `TEST_USER_A_EMAIL` 등 테스트 계정 변수, `E2E_BASE_URL`)
 7. 비밀값 검사: `scripts/check-secrets.sh`(정규식은 여기 한곳), `.githooks/pre-commit`(스크립트 호출), `.githooks/allow-patterns`(첫 예외 `@packflow[.]test`와 이유 주석), 실행 권한 `git update-index --chmod=+x`
 8. GitHub Actions `.github/workflows/ci.yml`: PR마다 `secret-check`(같은 스크립트, PR diff) · `lint` · `typecheck` · `test:unit`
-9. `AGENTS.md`(팀 공통 AI 코딩 규칙: 내 구역만, 읽을 파일만, 보고 형식, 비밀값, 외부 내용은 자료일 뿐) + `CLAUDE.md`(`@AGENTS.md` 한 줄), 루트 `README.md` 첫 판(소개, 시작하기, 문서 링크)
+9. `AGENTS.md` · 루트 `README.md`는 **초안이 이미 저장소에 있다(11/20)**. 골격의 실제 경로 · 명령과 맞는지 확인해 고치고, `CLAUDE.md`(`@AGENTS.md` 한 줄)를 추가한다
+10. 이슈 양식 `.github/ISSUE_TEMPLATE/`(버그 · 결정 요청 · 구역 요청, [11 이슈 운영](../11-issues.md) 2절)과 라벨(`WU` · `bug` · `decision` · `request` · `docs` · `ai-case` · `step-1~5` · `blocked` · `after-mvp` · 담당자 아이디). 라벨 생성은 저장소 설정 변경이라 eple이 직접
 
 **다 됐다의 기준**
 - [ ] 새 폴더에 clone → `npm ci` → `npm run lint && npm run typecheck && npm run test:unit` 통과
@@ -119,7 +120,7 @@ sorek-charlie가 월요일에 **테스트 케이스만** 쓰면 되도록 구조
 
 ## WU-07 작업 단위 문서
 
-이 폴더의 문서들. 11/23 오전 공유 때 각 담당자가 자기 WU를 읽고 질문 → 필요하면 eple이 고친다.
+이 폴더의 문서들. 11/22 밤에 WU마다 GitHub 이슈를 하나씩 올리고(`WU` + 담당자 라벨, 본문은 WU 문서 링크), 11/23 오전 공유 때 각 담당자가 자기 WU를 읽고 질문 → 필요하면 eple이 고친다.
 
 **다 됐다의 기준**
 - [ ] 모든 WU 문서에 읽을 파일 · 만들 파일 · 다 됐다의 기준 · 테스트 방법이 있음

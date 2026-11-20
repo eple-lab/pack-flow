@@ -32,7 +32,7 @@
 | 일괄 등록 파싱 | `src/lib/bulk/**` | jkspawn |
 | 화면용 목 데이터 | `src/lib/mock/**` (API 계약을 비춘 것) | eple (값 추가는 요청) |
 | 에이전트 | `src/lib/llm.ts`, `src/lib/agent/**`, `src/app/api/agent/**`, `src/components/agent/**`, `src/lib/agent/prompts/**` | skygaul |
-| 문서 | `docs/` 00~08, `DevelopDoc/` | eple |
+| 문서 | `docs/` 00~11(09의 상태 칸 포함), `DevelopDoc/`, 루트 `README.md` · `AGENTS.md` | eple |
 | 작업 단위 문서 · 기록 | `docs/work-units/WU-xx-*.md`의 '결과' 절, `docs/records/<계정>-*.md`, `docs/records/ai-cases-<계정>.md` | 그 WU 담당자 · 계정 주인 |
 | 공동 기록 (한 사람이 씀) | `docs/records/regression-*.md` · `performance.md` (sorek-charlie), `ai-cases.md` · `ai-limits.md` · `llm-usage.md` (skygaul), `security-check-*.md` (eple) | 표시된 사람 |
 
