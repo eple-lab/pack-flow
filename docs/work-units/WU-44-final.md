@@ -1,0 +1,36 @@
+# WU-44 최종 병합 · DevelopDoc · 제출
+
+- 담당: eple / 검증: sorek-charlie / 전 Step / Wave 3 · 11/25(수) ~ 11/26(목) 10:00
+- 브랜치: `feat/WU-44-final` (문서), 병합은 각 PR
+- 의존: 전부
+
+## 왜 (근거)
+
+해커톤 메인 4절 제출물, 계획서 13절 체크리스트, D-12(DevelopDoc은 docs/ 요약).
+
+## 만들 · 고칠 파일 (내 구역만)
+
+- `DevelopDoc/PRD.md` ← [00](../00-overview.md) + 계획서 2 · 3절
+- `DevelopDoc/TECH_SPEC.md` ← [01](../01-enterprise-architecture.md) · [03](../03-data-model.md) · [04](../04-api-contract.md) · [05](../05-security.md) 요약
+- `DevelopDoc/WORK_UNITS.md` ← 이 폴더의 WU 목록 + 각 '다 됐다의 기준' 체크 상태
+- `DevelopDoc/FINAL_CHECKLIST.md` ← 계획서 13절 + 피드백 기준 5개별 증거 위치([07](../07-test-strategy.md) 6절)
+- 루트 `README.md`: 소개, 배포 URL, 테스트 방법(시연 계정은 "요청 시 제공", 비밀번호 없음), 제출 커밋, 문서 링크, 출처 · 라이선스
+
+## 고치는 방법
+
+1. 11/25 오전: 열린 PR 정리 → 병합 → 기능 고정 선언
+2. 회귀 테스트(WU-24) 전부 통과 확인, 배포 URL E2E 1회
+3. 보안 점검: `eple-security-check` 체크리스트 → `docs/records/security-check-1125.md`, 저장소 이력 전체 비밀값 검색
+4. DevelopDoc 4개 작성, README 갱신
+5. 발표 자료에 역할 분담 · 개발 일정 확인
+6. 11/26 오전: demo를 `demo` 시드로 초기화, Render · Supabase 깨워 두기, 제출 커밋 해시 기록 → 10:00 전 제출
+
+## 다 됐다의 기준
+
+- [ ] FINAL_CHECKLIST 전 항목 체크
+- [ ] 다른 PC(팀원)에서 README만 보고 실행 성공 (피드백 기준 5)
+- [ ] 저장소 전체에 키 · 비밀번호 · 실제 이메일 · 실명 없음
+
+## 결과
+
+- 한 것 / 직접 확인한 것 / 확인 못 한 것 / 제출 커밋:
