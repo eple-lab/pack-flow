@@ -1,0 +1,65 @@
+# PR마다(그리고 main에 push될 때) 비밀값 검사 · lint · typecheck · 단위 테스트.
+#
+# 하는 일
+# 1. secret-check: 로컬 pre-commit 훅과 같은 scripts/check-secrets.sh로 이번 변경의 추가된 줄을 검사한다.
+#    훅을 건너뛴 PC · 도구가 있어도 여기서 잡힌다(D-20 ④). 빨간불인 PR은 병합하지 않는다(D-15 팀 약속).
+# 2. check: npm ci → lint → typecheck → test:unit. DB가 필요한 테스트는 돌리지 않는다(P-11 — Actions에 비밀값 없음).
+#
+# 근거: P-11 · D-20 ④ · docs/05-security.md 2.2 · WU-01
+# 구역: eple (docs/06-work-plan.md 1절)
+#
+# 이력
+# 2026-11-20  eple  처음 작성 — secret-check · lint · typecheck · test:unit (WU-01)
+
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  secret-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: 비밀값 검사 (추가된 줄)
+        env:
+          EVENT: ${{ github.event_name }}
+          PR_BASE: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          PUSH_BEFORE: ${{ github.event.before }}
+          PUSH_AFTER: ${{ github.sha }}
+        run: |
+          if [ "$EVENT" = "pull_request" ]; then
+            range="$PR_BASE...$PR_HEAD"
+          elif [ -n "$PUSH_BEFORE" ] && [ "$PUSH_BEFORE" != "0000000000000000000000000000000000000000" ]; then
+            range="$PUSH_BEFORE...$PUSH_AFTER"
+          else
+            # 새 브랜치의 첫 push 등 이전 커밋이 없으면 마지막 커밋 하나만 본다
+            range="$PUSH_AFTER~1...$PUSH_AFTER"
+          fi
+          echo "검사 범위: $range"
+          bash scripts/check-secrets.sh --range "$range"
+
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run test:unit

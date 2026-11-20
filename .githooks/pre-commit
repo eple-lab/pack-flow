@@ -1,0 +1,16 @@
+#!/bin/sh
+# 커밋 전 비밀값 · 개인정보 검사 — 본체는 scripts/check-secrets.sh (Actions와 같은 스크립트).
+# npm install · npm ci 때 core.hooksPath=.githooks로 자동으로 켜진다 (scripts/install-hooks.mjs).
+# --no-verify 금지 (docs/05-security.md 2.2).
+#
+# 근거: D-20 ④ · WU-01 / 구역: eple
+# 이력
+# 2026-11-20  eple  처음 작성 — 검사 스크립트 호출, 출력이 끊겨도(| head 등) 결과 코드를 지킴 (WU-01)
+
+# 출력 파이프가 닫혀도 훅이 SIGPIPE로 죽어 커밋이 통과되지 않게 한다(시험에서 발견).
+trap '' PIPE
+root="$(git rev-parse --show-toplevel)" || exit 1
+out="$(bash "$root/scripts/check-secrets.sh" --staged 2>&1)"
+rc=$?
+[ -n "$out" ] && { printf '%s\n' "$out" >&2; } 2>/dev/null
+exit $rc
