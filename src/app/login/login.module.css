@@ -1,0 +1,80 @@
+/*
+ * 로그인 화면 스타일 (CSS 모듈).
+ *
+ * 하는 일: 가운데 정렬된 작은 폼. 색 · 간격 토큰(src/styles/)은 5단계에서 생기므로 그 전까지는
+ *          globals.css의 --background · --foreground와 대체값을 쓴다. 토큰이 생기면 eple가 바꾼다.
+ *
+ * 근거: D-31(CSS 모듈 + 토큰), WU-03 5번
+ * 구역: eple (docs/06-work-plan.md 1절 '로그인')
+ *
+ * 이력
+ * 2026-11-23  eple  처음 작성 — 로그인 화면 스타일 (WU-03)
+ */
+.page {
+  width: 100%;
+  max-width: 360px;
+  margin: 12vh auto 0;
+  padding: 0 16px;
+}
+
+.title {
+  margin: 0 0 24px;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.input {
+  padding: 10px 12px;
+  font: inherit;
+  color: var(--foreground);
+  background: var(--background);
+  border: 1px solid #8884;
+  border-radius: 6px;
+}
+
+.input[aria-invalid='true'] {
+  border-color: #d93025;
+}
+
+.fieldError {
+  margin: 0;
+  font-size: 0.8125rem;
+  color: #d93025;
+}
+
+.banner {
+  margin: 4px 0 0;
+  padding: 10px 12px;
+  font-size: 0.875rem;
+  color: #d93025;
+  background: #d9302514;
+  border-radius: 6px;
+}
+
+.submit {
+  margin-top: 8px;
+  padding: 10px 12px;
+  font: inherit;
+  font-weight: 600;
+  color: #fff;
+  background: #1a73e8;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.submit:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
