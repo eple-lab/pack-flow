@@ -20,7 +20,7 @@
 |---|---|
 | 기획 · 설계 문서 `docs/00~13`, `wireframes.html`, `work-units/`(WU 22개 + 양식) | 끝. 로컬 main에 커밋 |
 | 루트 `AGENTS.md` · `README.md` | 초안. 골격 경로 · 명령에 맞춰 WU-01에서 다듬는다 |
-| 코드 | **없음.** 다음 세션이 WU-01부터 |
+| 코드 | 2026-11-23: WU-01 · 02 · 03 · 04 · 05 · 08 코드 커밋 끝(`b757e8b`까지). 남은 것: Supabase 연결 · 적용 · 실제 로그인 확인, WU-06 Render 배포, WU-07 이슈. 검토 기록 [records/eple-skeleton-review.md](records/eple-skeleton-review.md) |
 | 원격(origin) | 2026-11-20 push 완료. Claude 커밋은 모두 작성자 `eple-lab (Claude)`(push 전에 folia로 잘못 된 18개를 정리함) |
 | Supabase · Render · Gemini 계정 | 아직 안 만듦 |
 
