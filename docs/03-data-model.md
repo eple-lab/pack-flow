@@ -157,7 +157,7 @@ D-10에 따라 **재고를 바꾸는 일은 아래 함수만** 한다. 모두 `s
 | `pf_cancel_shipment(id)` | `출고취소` | `+sold_qty`, `출고취소` | `PF_INVALID_TRANSITION` | sorek-charlie |
 | `pf_bulk_apply(rows jsonb)` | 일괄 등록 반영. 행마다 서브트랜잭션으로 위 함수를 부른다: 유효한 행만 반영, 실패 행은 사유 반환 (P-15) | 행마다 위 함수와 같은 규칙 | 행별 코드 | eple (구조 래퍼) |
 | `pf_reset_and_seed(data jsonb)` | **본인 데이터만** 지우고 시드를 다시 넣는다 | 초기 재고는 `재고조정` 기록, 이후 이력은 `events`를 위 함수로 차례대로 실행해 만든다 | `PF_VALIDATION` | eple (시드 데이터 · 정답표는 sorek-charlie) |
-| `pf_llm_take(user_limit, global_limit)` | 오늘 호출 수 +1, 넘으면 false | — | — | eple (Wave 0) |
+| `pf_llm_take(p_user_limit, p_global_limit)` | 오늘(한국 시간) 호출 수 +1, 반환은 오늘 내 호출 수 | — | `PF_QUOTA_EXCEEDED`(detail `scope`: user · global) | eple (Wave 0) |
 | `pf_require_user()` | `auth.uid()`가 없으면 `PF_UNAUTHENTICATED` | — | — | eple (Wave 0) |
 
 ### 함수 안 순서 (출고 예)
