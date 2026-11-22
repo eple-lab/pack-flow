@@ -1,0 +1,16 @@
+/*
+ * FieldError 스타일 — 칸 아래 빨간 글씨. 색 · 간격은 src/styles/tokens.css 변수만 쓴다.
+ *
+ * 하는 일
+ * 1. .error: 위험 글자 색, 작은 글자, 칸 바로 아래 여백 최소.
+ *
+ * 근거: docs/04-api-contract.md 4.6 · WU-05 / 구역: eple
+ *
+ * 이력
+ * 2026-11-23  eple  처음 작성 — FieldError 스타일 (WU-05)
+ */
+.error {
+  margin: var(--space-1) 0 0;
+  color: var(--color-danger);
+  font-size: var(--font-sm);
+}

@@ -1,0 +1,80 @@
+/*
+ * ConfirmDialog 스타일 — 오버레이 · 상자 · 버튼 두 개. 색 · 간격은 토큰 변수만 쓴다(D-31).
+ *
+ * 하는 일
+ * 1. 오버레이는 화면 전체를 덮고 상자를 가운데 둔다.
+ * 2. 취소는 바탕형(ghost), 확인은 강조형(primary)으로 보인다.
+ *
+ * 근거: docs/04-api-contract.md 4.6 · docs/wireframes.html 8절 · WU-05
+ * 구역: eple (docs/06-work-plan.md 1절 '앱 뼈대')
+ *
+ * 이력
+ * 2026-11-23  eple  처음 작성 — ConfirmDialog 스타일 (WU-05)
+ */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background: var(--color-overlay);
+}
+
+.box {
+  width: 100%;
+  max-width: 360px;
+  padding: var(--space-5);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  color: var(--color-text);
+  box-shadow: var(--shadow-md);
+}
+
+.message {
+  margin: 0 0 var(--space-5);
+  font-size: var(--font-md);
+  line-height: 1.5;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.cancel,
+.ok {
+  min-width: 88px;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-sm);
+  cursor: pointer;
+}
+
+.cancel {
+  border: 1px solid var(--color-border);
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+.ok {
+  border: 1px solid var(--color-primary);
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+}
+
+.cancel:disabled,
+.ok:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.cancel:focus-visible,
+.ok:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}

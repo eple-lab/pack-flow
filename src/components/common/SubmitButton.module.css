@@ -1,0 +1,33 @@
+/*
+ * SubmitButton 스타일 — 강조형 버튼 하나. 색 · 간격은 토큰 변수만 쓴다(D-31).
+ *
+ * 하는 일
+ * 1. 기본은 강조색 바탕에 흰 글자, 잠기면 흐리게 보인다.
+ *
+ * 근거: docs/04-api-contract.md 4.6 · docs/wireframes.html 8절 · WU-05
+ * 구역: eple (docs/06-work-plan.md 1절 '앱 뼈대')
+ *
+ * 이력
+ * 2026-11-23  eple  처음 작성 — SubmitButton 스타일 (WU-05)
+ */
+
+.button {
+  min-width: 96px;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  background: var(--color-primary);
+  color: var(--color-primary-contrast);
+  font-size: var(--font-sm);
+  cursor: pointer;
+}
+
+.button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.button:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}

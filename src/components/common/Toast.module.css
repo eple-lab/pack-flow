@@ -1,0 +1,28 @@
+/*
+ * Toast 스타일 — 우하단 고정 알림 한 줄. 색 · 간격은 토큰 변수만 쓴다(D-31).
+ *
+ * 하는 일
+ * 1. 화면 우하단에 고정하고 다른 내용 위에 올린다.
+ * 2. 바탕은 면 색, 그림자는 --shadow-md.
+ *
+ * 근거: docs/04-api-contract.md 4.6 · docs/wireframes.html 8절 · WU-05
+ * 구역: eple (docs/06-work-plan.md 1절 '앱 뼈대')
+ *
+ * 이력
+ * 2026-11-23  eple  처음 작성 — Toast 스타일 (WU-05)
+ */
+
+.toast {
+  position: fixed;
+  right: var(--space-5);
+  bottom: var(--space-5);
+  z-index: 1100;
+  max-width: min(360px, calc(100vw - var(--space-4) * 2));
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  font-size: var(--font-sm);
+  box-shadow: var(--shadow-md);
+}

@@ -2,24 +2,19 @@
  * 전역 기본 스타일 (초기화 · 배경 · 글자색).
  *
  * 하는 일: 브라우저 기본 여백을 없애고 밝은 · 어두운 모드 배경을 정한다.
- *          색 · 간격 토큰과 공통 조각 스타일은 src/styles/ (WU-05). 화면별 스타일은 각자 *.module.css
+ *          색 · 간격 토큰은 src/styles/tokens.css (WU-05). 화면별 스타일은 각자 *.module.css
  *
  * 근거: WU-01 · 스타일은 CSS 모듈 + 토큰(골격 결정)
  * 구역: eple (docs/06-work-plan.md 1절 '앱 뼈대')
  *
  * 이력
  * 2026-11-20  eple  처음 작성 — create-next-app 기본에서 글꼴을 시스템 한글 글꼴로 (WU-01)
+ * 2026-11-23  eple  배경 · 글자색을 tokens.css 토큰으로 연결, 어두운 모드 변수는 토큰 쪽으로 이동 (WU-05)
  */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* 기존 이름 유지 — 값은 tokens.css의 토큰을 따른다 */
+  --background: var(--color-bg);
+  --foreground: var(--color-text);
 }
 
 html {
