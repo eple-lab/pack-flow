@@ -18,7 +18,7 @@
 
 - 파일마다 주인이 있다(`docs/06-work-plan.md` 1절). **WU 문서의 '만들 · 고칠 파일'만 고친다.**
 - 남의 구역 파일을 고쳐야 하면 고치지 말고 보고에 적는다. 특히 아래는 eple 소유라 읽기만 한다:
-  `package.json` · lock 파일 · 설정 파일(`next.config.ts` · `tsconfig.json` · `eslint.config.mjs` · `vitest.config.mts` · `playwright.config.ts` · `.gitignore` · `.gitattributes` · `.env.example`), `src/proxy.ts`, `src/app/login/**`, `src/app/layout.tsx` · `globals.css`, `src/styles/**`, `supabase/migrations/*_schema|_rls|_core_functions|_seed|_bulk.sql`, `src/types/**`, `src/lib/{supabase,api,queries,mock}/**`, `src/lib/{inventory,api-client,env,time,log,format}.ts`, `src/lib/validation/**`, `src/components/{layout,common}/**`, `src/components/agent/open.ts`, `src/app/(app)/layout.tsx`, `tests/**/helpers.ts`, `tests/regression/{run,measure}.ts`, `.githooks/**`, `scripts/**`, `.github/**`
+  `package.json` · lock 파일 · 설정 파일(`next.config.ts` · `tsconfig.json` · `eslint.config.mjs` · `vitest.config.mts` · `playwright.config.ts` · `.gitignore` · `.gitattributes` · `.env.example`), `src/proxy.ts`, `src/app/login/**`, `src/app/layout.tsx` · `globals.css`, `src/styles/**`, `supabase/migrations/*_schema|_rls|_core_functions|_seed|_bulk.sql`, `src/types/**`, `src/lib/{supabase,api,queries,mock}/**`, `src/lib/{inventory,api-client,env,env-server,time,log,format}.ts`, `src/lib/validation/**`, `src/components/{layout,common}/**`, `src/components/agent/open.ts`, `src/app/(app)/layout.tsx`, `tests/**/helpers.ts`, `tests/regression/{run,measure}.ts`, `.githooks/**`, `scripts/**`, `.github/**`
 - 새 패키지를 설치하지 않는다(사람이 eple에게 요청한다).
 - API 모양 · 공통 타입을 바꾸지 않는다. 바꿔야 하면 `docs/04-api-contract.md`와 `src/types/`를 먼저 고치는 PR이 필요하다(eple).
 
@@ -30,7 +30,7 @@
   3. **권한은 DB에서** — 서버는 사용자 JWT 클라이언트(`src/lib/supabase/server.ts`)만 쓴다. 서비스 키를 쓰는 코드를 `src/`에 만들지 않는다. `user_id`를 요청 본문에서 받지 않는다.
   4. **계산은 코드, 초안은 AI, 실행은 사람** — 수량 · 단가 · 재고는 코드가 정하고, LLM 응답으로 DB를 바로 바꾸지 않는다.
 - 상태값 · 사유 · 오류 코드 문자열은 `src/types/erp.ts` 상수만 쓴다. 이름 규칙은 `docs/09-features.md` 3절.
-- 환경변수는 `src/lib/env.ts`로만 읽는다. 로그는 `src/lib/log.ts`로만 남긴다(키 · 비밀번호 · 이메일 · 프롬프트 전문 금지).
+- 환경변수는 `src/lib/env.ts`(화면 · 서버 공통)와 `src/lib/env-server.ts`(서버 전용, `server-only` — 화면에서 가져오면 빌드 실패)로만 읽는다. 로그는 `src/lib/log.ts`로만 남긴다(키 · 비밀번호 · 이메일 · 프롬프트 전문 금지).
 - 화면은 `src/lib/api-client.ts`로만 서버를 부른다. 공통 조각(`src/components/common/`)을 다시 만들지 않는다.
 - 입력 검사는 `src/lib/validation/`의 스키마를 화면 · 서버 모두 그대로 쓴다. 규칙 · 빈 값 처리 · 오류 문구는 `docs/04-api-contract.md` 4절이 원본이다(새 문구를 지어내지 않는다). 선택 칸의 빈 값은 `null`로, 빈 문자열을 저장하지 않는다.
 - 스타일은 **CSS 모듈 + 토큰**(D-31): 색 · 간격은 `src/styles/`의 CSS 변수를 쓰고, 컴포넌트 스타일은 옆에 `*.module.css`. Tailwind 등 스타일 라이브러리를 들이지 않는다.
