@@ -1,0 +1,19 @@
+{
+  "items": [
+    { "sku_id": "PRD-001", "item_name": "무선 마우스", "unit_cost": 8000, "sale_price": 15000, "initial_qty": 10, "safety_stock": 5 },
+    { "sku_id": "PRD-002", "item_name": "USB-C 케이블", "unit_cost": 2000, "sale_price": 5000, "initial_qty": 40, "safety_stock": 15 },
+    { "sku_id": "PRD-003", "item_name": "노트북 거치대", "unit_cost": 12000, "sale_price": 25000, "initial_qty": 3, "safety_stock": 4 }
+  ],
+  "purchases": [
+    { "purchase_id": "P-101", "sku_id": "PRD-001", "supplier": "가나물산", "order_qty": 10, "purchase_cost": 80000, "status": "이동·통관중" }
+  ],
+  "sales": [
+    { "sale_id": "S-201", "sku_id": "PRD-001", "channel": "스마트스토어", "sold_qty": 6, "sale_amount": 90000, "fulfillment_status": "출고대기" },
+    { "sale_id": "S-202", "sku_id": "PRD-002", "channel": "쿠팡", "sold_qty": 5, "sale_amount": 25000, "fulfillment_status": "주문접수" }
+  ],
+  "events": [],
+  "expected": {
+    "kpi": { "item_count": 3, "stock_total": 53, "below_safety": 1 },
+    "stock": { "PRD-001": 10, "PRD-002": 40, "PRD-003": 3 }
+  }
+}

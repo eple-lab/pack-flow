@@ -13,6 +13,7 @@
  *
  * 이력
  * 2026-11-23  eple  처음 작성 — 재고 함수 rpc 래퍼 (WU-03)
+ * 2026-11-23  eple  pf_reset_and_seed SQL이 생겨 '아직 SQL 없음' 안내 제거 (WU-08)
  */
 import { fromSupabaseError, PfError } from '@/lib/api/errors';
 import type {
@@ -47,7 +48,6 @@ export type Rpc = {
 /**
  * 래퍼가 부르는 함수 이름 → rpc 인자 이름(p_… 순서 그대로).
  * 마이그레이션 파일과 정확히 같아야 한다(테스트 T-INV-1이 확인한다).
- * pf_reset_and_seed는 아직 SQL이 없다(6단계에서 생김) — 그때까지 본문 대신 이 목록에만 둔다.
  */
 export const RPC_PARAMS: Record<string, readonly string[]> = {
   pf_create_item: ['p_sku_id', 'p_item_name', 'p_unit_cost', 'p_sale_price', 'p_safety_stock', 'p_source_url'],
@@ -61,7 +61,6 @@ export const RPC_PARAMS: Record<string, readonly string[]> = {
   pf_cancel_shipment: ['p_id'],
   pf_bulk_apply: ['p_rows'],
   pf_llm_take: ['p_user_limit', 'p_global_limit'],
-  // 아직 SQL 없음 (6단계에서 생김)
   pf_reset_and_seed: ['p_data'],
 };
 
@@ -234,8 +233,8 @@ export function llmTake(supabase: Rpc, input: { user_limit: number; global_limit
 }
 
 /**
- * 시드 데이터 초기화 후 넣기. 아직 SQL 함수가 없다(6단계에서 생김) — 지금 DB를 부르면 함수 없음 오류가 나고,
- * 그 오류는 코드 목록에 없으므로 PF_INTERNAL로 바뀐다.
+ * 시드 데이터 초기화 후 넣기 — 본인 데이터만 지우고 다시 넣는다(SQL: 20261123100000_seed.sql).
+ * 던지는 오류: PF_VALIDATION(입력 모양 · 값) · PF_UNAUTHENTICATED · PF_NOT_IMPLEMENTED(events가 아직 stub인 재고 함수를 부를 때).
  */
 export function resetAndSeed(supabase: Rpc, input: { data: Record<string, unknown> }): Promise<SeedResult> {
   return call<SeedResult>(supabase, 'pf_reset_and_seed', {

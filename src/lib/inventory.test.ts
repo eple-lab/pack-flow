@@ -9,6 +9,7 @@
  *
  * 이력
  * 2026-11-23  eple  처음 작성 — 재고 함수 래퍼 시험 (WU-03)
+ * 2026-11-23  eple  시드 SQL 파일을 비교 대상에 넣고 NO_SQL_YET을 비움 (WU-08)
  */
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -57,11 +58,12 @@ const MIGRATIONS = [
   'supabase/migrations/20261120100200_inventory.sql',
   'supabase/migrations/20261120100300_bulk.sql',
   'supabase/migrations/20261120100100_core_functions.sql',
+  'supabase/migrations/20261123100000_seed.sql',
 ];
 /** 래퍼를 만들지 않는 내부 함수(T-INV-1에서 뺀다). */
 const NO_WRAPPER = ['pf_require_user', 'pf_purchase_transition_ok', 'pf_sale_transition_ok'];
-/** 래퍼는 있으나 SQL은 아직 없는 함수(6단계에서 생김). */
-const NO_SQL_YET = ['pf_reset_and_seed'];
+/** 래퍼는 있으나 SQL은 아직 없는 함수. 시드 SQL(20261123100000_seed.sql)이 생겨 지금은 비어 있다. */
+const NO_SQL_YET: string[] = [];
 
 /** 마이그레이션 파일들에서 함수 이름 → 인자 이름(순서대로) 목록을 뽑는다. */
 function readMigrationFunctions(): Map<string, string[]> {
