@@ -11,6 +11,8 @@
  *
  * 이력
  * 2026-11-23  skygaul  처음 작성 — 발주서 초안 패널 렌더 시험 (WU-33)
+ * 2026-11-23  skygaul  chat 모드가 챗봇 화면이 돼 P-2 기대를 바꿈 (WU-34)
+ * 2026-11-23  skygaul  탭 이름이 와이어프레임대로 '발주 초안'이 돼 P-1 기대를 바꿈 (WU-34)
  */
 import { renderToString } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
@@ -136,13 +138,14 @@ describe('P: AgentPanel', () => {
     const html = plain(renderToString(<AgentPanel request={{ mode: 'draft-po', sku_ids: ['PRD-003'] }} />));
     expect(html).toContain('data-testid="agent-panel"');
     expect(html).toContain('data-mode="draft-po"');
-    expect(html).toContain('발주서 초안');
+    expect(html).toContain('발주 초안'); // 탭 이름(와이어프레임 7절)
     expect(html).toContain('data-testid="loading"');
   });
 
-  it('P-2 chat 모드는 아직 준비 중(WU-34)', () => {
+  it('P-2 chat 모드는 챗봇 화면(WU-34): 입력 칸이 있고 준비 중이 아니다', () => {
     const html = plain(renderToString(<AgentPanel request={{ mode: 'chat' }} />));
     expect(html).toContain('data-mode="chat"');
-    expect(html).toContain('준비 중');
+    expect(html).toContain('data-testid="chat-input"');
+    expect(html).not.toContain('준비 중');
   });
 });
