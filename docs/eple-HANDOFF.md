@@ -1,6 +1,6 @@
 # eple 이어받기 노트
 
-마지막 갱신: 2026-11-23 저녁 · 쓴 세션: eple의 Wave 0 마무리 세션(Claude, 11/23) · **다음 세션(eple의 Wave 0 마무리: demo · Render · 이슈)이 이 파일의 0절부터 읽는다.**
+마지막 갱신: 2026-11-23 오후 · 쓴 세션: eple의 Wave 0 마무리 세션(Claude, 11/23) · **다음 세션(eple의 WU-41 업무 API 연결)이 이 파일의 0절부터 읽는다.**
 
 팀원이 여러 명이라 파일 이름 앞에 `eple-`을 붙였다. 이 노트는 **eple의 작업 흐름**을 이어받기 위한 것이다(팀원 각자의 진행은 work-units와 이슈로 본다).
 
@@ -11,22 +11,65 @@
 | 목적 | 해커톤 계획서(`pack-flow-plan.md`)를 엔터프라이즈 아키텍처 관점의 작업 문서로 나누고, 4명이 **파일이 겹치지 않게 병렬로** 일하며 각자 에이전트가 문서만 보고 움직일 수 있게 한다 |
 | 작업 위치 | 저장소 `eple-lab/pack-flow`(공개), 폴더 `docs/`, 루트 `AGENTS.md` · `README.md` |
 | 참고한 곳 | `assignment/바이브 코딩 해커톤`(해커톤 안내 · ERP 주제), `task-hive`(문서 구조 · 파일 머리 · 고친 기록), `healing-forest-trip`(이슈 양식 · 바꾼 줄 주석 · 훅), `pack-flow-workspace/concept`(화면 시안, 참고만) |
-| 관련 세션 | 11/19~20 문서 정리 세션 → 11/20~23 골격 세션(코드 2~6단계는 Sonnet 하위 세션이 작성, 관리 세션이 검토 · 커밋) → 다음: Wave 0 마무리 세션. 팀원 세션은 11/23부터 각자 |
+| 관련 세션 | 11/19~20 문서 정리 세션 → 11/20~23 골격 세션(코드 2~6단계는 Sonnet 하위 세션이 작성, 관리 세션이 검토 · 커밋) → 11/23 Wave 0 마무리 세션(demo · Render · 이슈 · 리뷰 · 1차 병합) → 다음: WU-41 세션. 팀원 세션은 11/23부터 각자 |
 | 남은 기간 | 11/22(일)까지 골격 → 11/23(월) 팀원 합류 → 11/24 14시 기능 동결 → 11/26 10:00 제출 |
 
-## 0. 최신 상태 (2026-11-23 저녁 — 다음 세션은 여기부터)
+## 0. 최신 상태 (2026-11-23 오후 — 다음 세션은 여기부터)
 
-- 골격 코드: WU-01 · 02 · 03 · 04 · 05 · 08 커밋 · push 끝(`8dd8fe0`까지). 검토 기록 [records/eple-skeleton-review.md](records/eple-skeleton-review.md)
-- Supabase dev: 설정 · 마이그레이션 6개 적용 · 테스트 계정 8개 · 실제 권한 시험 10건 통과 · 로그인 확인. 기록 [records/eple-supabase-setup.md](records/eple-supabase-setup.md), [records/eple-wu02-checks.md](records/eple-wu02-checks.md). 결정 D-35
-- 로컬 확인 끝(11/23, eple): 네 페이지 이동 · 로그아웃 → `/login` · 비로그인 직접 접근 → `/login`
-- WU-06: `render.yaml`(`fb6fe0b`) → **배포 완료 https://pack-flow.onrender.com (dev 값으로 임시)**, eple 로그인 확인, health ok — [records/eple-wu06-checks.md](records/eple-wu06-checks.md)
-- 올리는 방식: render.yaml과 기록 2건까지 main 직접(D-36, `fb6fe0b` · `d0f7695`). **그 뒤로는 eple도 브랜치 + PR(리뷰어 sorek-charlie, D-13)**
-- 팀원: 시작 공지문을 workspace 저장소 `guide/01-start-notice.md`에 작성(11/23). 화면 담당 AI가 workspace 저장소를 코드 저장소로 착각해 "뼈대 만들기"를 제안한 일이 있어 공지 0절에 적음
-- 남은 순서 (Render 먼저 끝냄, 이제 demo)
-  1. demo 프로젝트 만들기(설정 기록 1~3절과 같게) → `supabase link`를 demo로 바꿔 dry-run → **eple 확인 후** 적용 → dev와 비교 → 다시 dev로 link
-  2. demo 시연 계정 A · B(대시보드), demo 주소로 계정 스크립트 거부 확인 → Render 값을 demo로 바꿔 다시 배포 → 배포 URL에서 계정 A 로그인
-  3. WU-06 남은 확인(C-05 · 08 · 09 · 10) → WU-07 이슈 올리기 · 공지 게시 → WU-00 'Wave 0 끝 점검'
-- 주의: CLI는 `npx supabase@3.2.0 … --remote`(빼면 로컬 Docker를 찾음). `.env.local`은 열거나 출력하지 않는다(값은 셸 안 비교만)
+### 끝난 것 (Wave 0)
+
+- 골격 WU-01~05 · 08, Supabase dev(마이그레이션 6개 · 테스트 계정 8개 · 권한 시험 10건) — [records/eple-skeleton-review.md](records/eple-skeleton-review.md), [records/eple-supabase-setup.md](records/eple-supabase-setup.md)
+- **WU-06 배포 끝 (기준 3개 모두 체크)** — [records/eple-wu06-checks.md](records/eple-wu06-checks.md)
+  - Render 서비스 두 개(D-37): `pack-flow` https://pack-flow.onrender.com (Supabase **dev**, 팀 테스트 · 배포 URL E2E) / `pack-flow-demo` https://pack-flow-demo.onrender.com (Supabase **demo**, 시연). `render.yaml` · `render.demo.yaml`, main 병합 때마다 둘 다 재배포
+  - Supabase demo(`pack-flow-demo`, 싱가포르): 마이그레이션 6개 적용 · dev와 구조 지문 같음, 회원가입 끔, 시연 계정 A · B(주소 · 비밀번호는 eple 비밀번호 관리자), 계정 스크립트 거부 확인. eple 로컬 `.env.demo`(git 무시 확인)
+  - CLI link는 **dev**로 돌려 둠
+- **WU-07:** WU 이슈 20건 #7~#26(라벨 `WU` · 담당자 · `step-N`, 담당 지정 없음). 남은 것: WU 문서 7개(WU-15 · 35 · 41~45)에 '테스트 방법' 절 없음, WU-44는 '읽을 파일'도 없음
+- 팀 안내: workspace 저장소 `guide/01-start-notice.md`(시작 공지) · `guide/02-commit-review-rules.md`(커밋 · 리뷰 규칙), 디스코드 파트별 공지
+- 리뷰 · 병합: eple이 PR #3(WU-32) · #6(WU-31) 리뷰 · 승인(브랜치를 받아 실행 + 리뷰용 임시 시험). **1차 병합 6건**(#27 · #30 · #3 · #6 · #4 · #5, merge commit) → 합친 main `4fb5626`에서 lint · typecheck · test:unit 517 통과
+- 결정: D-36(11/23 Wave 0 마무리 main 직접 — 예외, 지금은 끝), D-37(Render dev · demo 두 서비스). 계획서 최종 판정 기준 겹침 정리(PR #31)
+
+### 열린 PR · 기다리는 것 (11/23 16시 무렵)
+
+| PR | 내용 | 상태 |
+|---|---|---|
+| #31 | WU-44 일자별 기록 `docs/daily/day-01 · 02`(공개용 사본, 실명 → GitHub 아이디) · 계획서 판정 기준 | sorek-charlie 리뷰 대기 |
+| #32 | WU-06 demo 적용 · 시연 서비스 확인 기록 | sorek-charlie 리뷰 대기 |
+| (이 노트) | 이어받기 노트 갱신 | 리뷰 대기 |
+| #29 | **WU-21 재고 함수 1 (sorek-charlie)** — 새 마이그레이션 `20261123120000_inventory.sql` | jkspawn 리뷰 대기 |
+| #28 | WU-16 품목 화면 (jkspawn) | 승인됨, 병합 전 |
+
+- jkspawn이 **병합 뒤** `feat/WU-11-dashboard`(3개) · `feat/WU-12-trades`(1개)에 결과 절 문서 커밋을 더 push함 → main에 안 들어감. 새 PR 필요(전달할 것)
+- 일자별 기록은 이제 `docs/daily/`가 원본(assignment 저장소의 원본 양식은 eple 관리). 3~5일차도 여기에
+
+### 다음 세션: WU-41 업무 API 실제 연결 (eple, 리뷰 sorek-charlie, 이슈 #22)
+
+- 문서: [work-units/WU-41-api-core.md](work-units/WU-41-api-core.md), 계약 [04](04-api-contract.md) 1~3.5 · 4절, 테스트 ID [07](07-test-strategy.md)(T-S1-3 · T-S4-2 · T-VAL-2~4)
+- 골격에 있는 것: 라우트 13개가 `createHandler` + 검증 스키마로 묶여 있고 `run: stubRun()`(501)만 바꾸면 된다. 재고 래퍼 `src/lib/inventory.ts` 완성. 없는 것: `src/lib/queries/`, `tests/api/`
+- 브랜치 `feat/WU-41-api-core`. 단계(각 단계 기대 결과 먼저 — D-34):
+  1. 조회 라우트(items + `below_safety`, items/[sku_id], purchases · sales status 필터) — WU-21 불필요
+  2. `src/lib/queries/dashboard.ts` + 라우트(KPI · 파이프라인 · 품절 임박 · 최근 5건, 오늘 = Asia/Seoul)
+  3. `src/lib/queries/stockLogs.ts` 키셋 페이지네이션(limit 1~50 기본 20, `next_cursor` base64, 잘못된 값 400) · T-S4-2
+  4. 변경 라우트 8개 → `inventory.ts`(가짜 rpc 단위 시험), `PATCH items`의 `stock_qty` → 400
+  5. `tests/api/validation.test.ts` T-VAL-2 · 3 · 4
+  6. 통합: **#29 병합 → eple 확인 후 dev에 새 마이그레이션 적용**(`npx supabase@3.2.0 db push --remote`, 에이전트 실행이면 확인 뒤 `--yes`) → `test:db` → 로컬 `NEXT_PUBLIC_USE_MOCK=0`으로 입고 → 출고 → 대시보드 갱신 → **demo에도 같은 마이그레이션 적용**(link를 demo로 바꿨다 되돌림)
+  7. lint · typecheck · test:unit → PR(리뷰어 sorek-charlie, `Refs #22`)
+- 방식(추천): 관리 세션이 단계마다 기준을 주고 Sonnet 하위 에이전트에 구현을 맡기고, 반복 검사는 Haiku. 결과는 관리 세션이 기준 명령을 다시 돌려 확인한 뒤 커밋(아래 '배운 것')
+
+### 그 밖에 남은 일 (eple)
+
+- WU-42 권한 테스트 · 배포 검증(WU-41 · WU-22 뒤, 배포 URL `pack-flow`에서 sorek-charlie가 E2E)
+- WU 문서 7개 '테스트 방법' 절 보충(WU-07 기준) — Haiku에 맡기기 좋음
+- WU-00 'Wave 0 끝 점검' 체크리스트 체크 · 결과 절
+- 저녁: 2차 병합(#28 · #29 · 문서 PR들) → 합친 버전 실행 → `docs/daily/day-02.md` 저녁 갱신(완료 판정 체크) · 계획서 변경 이력 한 줄
+- 3일차(11/24 14시 기능 동결) 줄일 순서 A/B안 — 팀 결정(`decision` 이슈)
+
+### 주의
+
+- CLI는 `npx supabase@3.2.0 … --remote`(빼면 로컬 Docker를 찾음 — 11/23에도 한 번 빠뜨림). 원격 변경은 에이전트 실행에서 확인 단계가 있어 eple 승인 뒤 `--yes`, 읽기 조회는 `db query --remote --read-only`
+- `.env.local` · `.env.demo`는 열거나 출력하지 않는다(읽기 시도는 권한 확인에서 거부됨). demo 값이 필요한 시험은 eple 터미널에서 돌린다
+- 시연 계정 주소는 공개 문서 · 캡처에 넣지 않는다(비밀값 훅이 이메일로 잡음)
+- 병합할 때 브랜치를 지워도 작성자가 다시 push할 수 있다 — 병합 뒤 남은 커밋 확인
+- 승인 · 병합 · 이슈 같은 외부 작업은 매번 확인받는다. 리뷰 댓글 문구도 먼저 보여 준다
 
 ### 골격 세션에서 배운 것 (11/20~23)
 
