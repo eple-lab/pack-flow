@@ -16,12 +16,14 @@
  * 이력
  * 2026-11-20  eple     자리 생성 (WU-01) — 구현은 skygaul WU-33
  * 2026-11-23  skygaul  처음 구현 — 초안 만들기(조회 · 계산 · 문안) · 확정(재검증 · 구매 등록) (WU-33)
+ * 2026-11-23  skygaul  확정 중간 실패 시 저장된 건수 · 번호를 detail에 덧붙임 — 리뷰 후속(중복 발주 방지) (WU-33)
  */
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { fromSupabaseError, messageFor, PfError } from '@/lib/api/errors';
 import { getServerEnv, type LlmProviderSetting } from '@/lib/env-server';
 import { createPurchase } from '@/lib/inventory';
 import { generate, type LlmRequest, type LlmResponse } from '@/lib/llm';
+import { log } from '@/lib/log';
 import { kstDateString } from '@/lib/time';
 import { LIMITS } from '@/lib/validation';
 import type { LlmProvider, PoConfirmLine, PoDraft } from '@/types/agent';
@@ -155,11 +157,15 @@ function assertLine(line: PoConfirmLine): void {
  *
  * 순서: 모든 줄 값 검사 → 품목이 모두 본인 것인지 확인(하나라도 아니면 아무것도 저장하지 않음) → 줄마다 등록.
  * 등록은 줄마다 DB 함수 한 번씩이라 중간 줄이 거부되면 앞 줄은 이미 저장돼 있다(함수 사이를 묶는 트랜잭션은 없다).
+ * 그때는 오류 코드는 그대로 던지되 `detail`에 `saved_count`(저장된 건수)와 `saved`(구매 번호)를 덧붙인다 —
+ * 화면이 저장된 줄을 표에서 빼서 다시 눌러도 중복 발주가 되지 않게 하려는 것이다(WU-33 리뷰 요청).
+ * `detail`의 이 두 칸은 04 3.8 계약에는 없는 추가 칸이다(기존 detail 칸은 건드리지 않는다).
  *
  * @param supabase 사용자 JWT 클라이언트
  * @param lines 사용자가 고친 값(`poConfirm` 스키마를 지난 것). 문안(LLM)은 받지 않는다
  * @returns 만들어진 구매(발주완료), 입력 순서대로
- * @throws PfError PF_VALIDATION(값 범위) · PF_NOT_FOUND(남의 품목 · 없는 품목) · pf_create_purchase가 던지는 코드
+ * @throws PfError PF_VALIDATION(값 범위) · PF_NOT_FOUND(남의 품목 · 없는 품목) · pf_create_purchase가 던지는 코드.
+ *         앞 줄이 이미 저장된 뒤라면 detail에 saved_count · saved가 있다
  */
 export async function confirmPoLines(supabase: SupabaseClient, lines: readonly PoConfirmLine[]): Promise<{ purchases: Purchase[] }> {
   for (const line of lines) assertLine(line);
@@ -174,16 +180,30 @@ export async function confirmPoLines(supabase: SupabaseClient, lines: readonly P
 
   const purchases: Purchase[] = [];
   for (const line of lines) {
-    purchases.push(
-      await createPurchase(supabase, {
-        sku_id: line.sku_id,
-        supplier: line.supplier,
-        order_qty: line.order_qty,
-        purchase_cost: line.purchase_cost,
-        invoice_no: null,
-        source: 'agent',
-      }),
-    );
+    try {
+      purchases.push(
+        await createPurchase(supabase, {
+          sku_id: line.sku_id,
+          supplier: line.supplier,
+          order_qty: line.order_qty,
+          purchase_cost: line.purchase_cost,
+          invoice_no: null,
+          source: 'agent',
+        }),
+      );
+    } catch (error) {
+      // 줄 사이를 묶는 트랜잭션이 없어 앞 줄은 이미 저장됐다. 화면이 같은 줄을 다시 보내 중복 발주가 되지 않도록
+      // 오류 코드는 그대로 두고 저장된 건수와 번호를 detail에 덧붙인다(원래 detail은 보존).
+      if (error instanceof PfError && purchases.length > 0) {
+        log.warn('po.confirm_partial', { code: error.code, saved_count: purchases.length, total: lines.length });
+        throw new PfError(error.code, {
+          ...(error.detail ?? {}),
+          saved_count: purchases.length,
+          saved: purchases.map((purchase) => purchase.purchase_id),
+        });
+      }
+      throw error;
+    }
   }
   return { purchases };
 }
