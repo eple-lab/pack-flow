@@ -146,3 +146,9 @@ sorek-charlie가 월요일에 **테스트 케이스만** 쓰면 되도록 구조
 - 직접 확인한 것: 테스트 케이스 26건 모두 통과 — [eple-wu01-checks.md](../records/eple-wu01-checks.md). 시험에서 검사 스크립트 결함 4건을 찾아 고친 뒤 다시 확인(같은 문서 2절)
 - 확인 못 한 것: 팀원 git 도구의 훅 동작(11/23 각자 시험), 맥 · 리눅스 PC의 `npm ci`
 - 커밋: `9568a05` · `1a52192` · `1287a16` · `60e2193` · `4643674`, 시험 PR #1(닫음)
+
+### WU-06 (2026-11-23 진행 중)
+
+- 한 것: `render.yaml`(무료 Web Service · Node 24 · 싱가포르 · `/api/health` 상태 확인, 환경변수는 이름만 · 서비스 키 칸 없음) — 커밋 `fb6fe0b`. `/api/health`는 WU-04에서 이미 DB 확인까지 구현
+- 직접 확인한 것: 로컬에서 같은 빌드 · 시작 명령으로 health 200 `ok/ok`, 비로그인 `/items` → `/login` — [eple-wu06-checks.md](../records/eple-wu06-checks.md)
+- 확인 못 한 것: Render 실제 빌드 · 배포 URL · 시연 계정 로그인(11/23 eple 결정으로 Render를 demo보다 먼저 — 첫 배포는 Supabase 값 선택에 따름) — 배포 뒤 채움

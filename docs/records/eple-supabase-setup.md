@@ -56,7 +56,7 @@
 | 4 | dev 적용(`supabase db push`) | Claude (eple 확인 후) | 테이블 · 정책 · 함수 목록 | 끝 (11/23) |
 | 5 | 테스트 계정 8개(`npm run users:create`) | Claude | 비밀번호는 `.env.testusers.local`에만, 화면 출력 없음 | 끝 (11/23, eple 실행 · 전달 뒤 파일 삭제) |
 | 6 | 실제 REST 시험: T-AUTH-4~6, 재고 함수 → `PF_NOT_IMPLEMENTED`, anon 조회 거부, `npm run test:db` | Claude | [eple-wu02-checks.md](eple-wu02-checks.md)에 결과 추가 | 끝 (11/23, 10건 통과) |
-| 7 | 로그인 → 네 페이지 이동 (로컬 `npm run dev`) | eple · Claude | 화면 | 로그인 · 준비 중 화면 확인 (11/23), 네 페이지 이동 · 로그아웃 확인 대기 |
+| 7 | 로그인 → 네 페이지 이동 (로컬 `npm run dev`) | eple · Claude | 화면 | 끝 (11/23, eple 확인: 네 페이지 이동 · 로그아웃 → `/login` · 로그아웃 뒤 `/items` 직접 입력 → `/login`) |
 | 8 | demo 적용 → dev와 목록 비교(`db diff`) | Claude (eple 확인 후) | 차이 없음 | |
 | 9 | demo 시연 계정 A · B (대시보드에서) | eple | — | |
 | 10 | demo 주소로 계정 스크립트 실행 → 거부 | Claude | 거부 메시지, 계정 안 생김 | |

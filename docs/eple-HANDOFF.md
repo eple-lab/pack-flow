@@ -1,6 +1,6 @@
 # eple 이어받기 노트
 
-마지막 갱신: 2026-11-23 · 쓴 세션: eple의 골격(Wave 0) 세션(Claude, 11/20~23) · **다음 세션(eple의 Wave 0 마무리: demo · Render · 이슈)이 이 파일의 0절부터 읽는다.**
+마지막 갱신: 2026-11-23 저녁 · 쓴 세션: eple의 Wave 0 마무리 세션(Claude, 11/23) · **다음 세션(eple의 Wave 0 마무리: demo · Render · 이슈)이 이 파일의 0절부터 읽는다.**
 
 팀원이 여러 명이라 파일 이름 앞에 `eple-`을 붙였다. 이 노트는 **eple의 작업 흐름**을 이어받기 위한 것이다(팀원 각자의 진행은 work-units와 이슈로 본다).
 
@@ -14,17 +14,19 @@
 | 관련 세션 | 11/19~20 문서 정리 세션 → 11/20~23 골격 세션(코드 2~6단계는 Sonnet 하위 세션이 작성, 관리 세션이 검토 · 커밋) → 다음: Wave 0 마무리 세션. 팀원 세션은 11/23부터 각자 |
 | 남은 기간 | 11/22(일)까지 골격 → 11/23(월) 팀원 합류 → 11/24 14시 기능 동결 → 11/26 10:00 제출 |
 
-## 0. 최신 상태 (2026-11-23 오후 — 다음 세션은 여기부터)
+## 0. 최신 상태 (2026-11-23 저녁 — 다음 세션은 여기부터)
 
 - 골격 코드: WU-01 · 02 · 03 · 04 · 05 · 08 커밋 · push 끝(`8dd8fe0`까지). 검토 기록 [records/eple-skeleton-review.md](records/eple-skeleton-review.md)
 - Supabase dev: 설정 · 마이그레이션 6개 적용 · 테스트 계정 8개 · 실제 권한 시험 10건 통과 · 로그인 확인. 기록 [records/eple-supabase-setup.md](records/eple-supabase-setup.md), [records/eple-wu02-checks.md](records/eple-wu02-checks.md). 결정 D-35
+- 로컬 확인 끝(11/23, eple): 네 페이지 이동 · 로그아웃 → `/login` · 비로그인 직접 접근 → `/login`
+- WU-06: `render.yaml` push(`fb6fe0b`), 로컬 빌드 · health 확인 — [records/eple-wu06-checks.md](records/eple-wu06-checks.md). Render 서비스는 아직 안 만듦
+- 올리는 방식: 11/23 Wave 0 마무리는 main 직접 push(D-36, D-13 예외)
 - 팀원: 계정 정보 받음, "아직 개발하지 말고 문서만" 상태 — dev 적용이 끝났으니 시작 공지 가능
-- 남은 순서
-  1. eple: 로컬에서 네 페이지 이동 · 로그아웃 확인
+- 남은 순서 (11/23 eple 결정: Render 먼저, demo는 뒤로)
+  1. WU-06 Render: Blueprint로 서비스 만들기 → 환경변수 입력(eple) → 배포 → `/api/health` · 배포 URL 확인. 첫 배포의 Supabase 값(dev 임시 / demo)과 Gemini 준비 여부(아니면 `LLM_PROVIDER=fake`)는 eple 선택 대기
   2. demo 프로젝트 만들기(설정 기록 1~3절과 같게) → `supabase link`를 demo로 바꿔 dry-run → **eple 확인 후** 적용 → dev와 비교 → 다시 dev로 link
-  3. demo 시연 계정 A · B(대시보드), demo 주소로 계정 스크립트 거부 확인
-  4. WU-06 Render: 환경변수(demo 주소 · publishable 키, `LLM_PROVIDER=gemini`, `GEMINI_API_KEY`, AI Studio의 Flash-Lite 모델 ID) → 배포 → `/api/health` · 배포 URL 로그인
-  5. WU-07 이슈 올리기 · 팀 시작 공지 → WU-00 'Wave 0 끝 점검'
+  3. demo 시연 계정 A · B(대시보드), demo 주소로 계정 스크립트 거부 확인 → Render 값을 demo로 바꿔 다시 배포 → 배포 URL에서 계정 A 로그인
+  4. WU-07 이슈 올리기 · 팀 시작 공지 → WU-00 'Wave 0 끝 점검'
 - 주의: CLI는 `npx supabase@3.2.0 … --remote`(빼면 로컬 Docker를 찾음). `.env.local`은 열거나 출력하지 않는다(값은 셸 안 비교만)
 
 ### 골격 세션에서 배운 것 (11/20~23)
