@@ -1,4 +1,4 @@
-# render.yaml — Render 배포 설정(Blueprint). 대시보드에서 이 파일로 서비스를 만든다.
+# render.yaml — Render 개발(dev) 서비스 설정(Blueprint). 시연 서비스는 `render.demo.yaml`(D-37).
 #
 # 하는 일
 # 1. Next.js 앱 하나를 Render 무료 Web Service로 띄운다. 빌드 `npm ci && npm run build`, 시작 `npm start`.
@@ -14,6 +14,7 @@
 #
 # 이력
 # 2026-11-23  eple  처음 작성 — Render Web Service 설정 (WU-06)
+# 2026-11-23  eple  dev 서비스로 역할 정리 — 시연은 render.demo.yaml로 분리 (D-37)
 
 services:
   - type: web
@@ -30,7 +31,7 @@ services:
       # .nvmrc · package.json engines와 같은 메이저
       - key: NODE_VERSION
         value: "24"
-      # ── Supabase: 배포는 demo 프로젝트 값(D-11). eple이 입력 ──
+      # ── Supabase: dev 프로젝트 값(D-37 — 시연은 render.demo.yaml). eple이 입력 ──
       - key: NEXT_PUBLIC_SUPABASE_URL
         sync: false
       - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
