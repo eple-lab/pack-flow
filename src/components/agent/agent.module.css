@@ -89,9 +89,26 @@
 
 .table {
   width: 100%;
-  min-width: 520px;
+  min-width: 720px;
   border-collapse: collapse;
   font-size: var(--font-sm);
+}
+
+/* 옆 패널이 좁아 칸이 한 글자 폭으로 쪼그라드는 것을 막는다: 품목 · 추천 수량 · 거래처 칸에 최소 폭 */
+.table th:nth-child(1),
+.table td:nth-child(1) {
+  min-width: 112px;
+  word-break: keep-all;
+}
+
+.table th:nth-child(3),
+.table td:nth-child(3) {
+  min-width: 132px;
+}
+
+.table th:nth-child(6),
+.table td:nth-child(6) {
+  min-width: 120px;
 }
 
 .table th,
