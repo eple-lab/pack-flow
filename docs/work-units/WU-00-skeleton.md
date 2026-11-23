@@ -103,7 +103,7 @@
 3. `GET /api/health` 실제 구현(DB 연결 확인)
 
 **다 됐다의 기준**
-- [ ] 배포 URL에서 시연 계정 A 로그인 → 빈 대시보드 (1일차 '최소 화면 배포' 해소)
+- [x] 배포 URL에서 시연 계정 A 로그인 → 빈 대시보드 (1일차 '최소 화면 배포' 해소) (11/23, `pack-flow-demo` — eple-wu06-checks C-08)
 - [x] `/api/health` → `{status:"ok", db:"ok"}` (11/23, 배포 URL)
 - [x] Render 환경변수 목록에 서비스 키가 없음 (11/23, 캡처 — eple-wu06-checks C-10)
 
@@ -152,4 +152,5 @@ sorek-charlie가 월요일에 **테스트 케이스만** 쓰면 되도록 구조
 - 한 것: `render.yaml`(무료 Web Service · Node 24 · 싱가포르 · `/api/health` 상태 확인, 환경변수는 이름만 · 서비스 키 칸 없음) — 커밋 `fb6fe0b`. `/api/health`는 WU-04에서 이미 DB 확인까지 구현
 - 직접 확인한 것: 로컬에서 같은 빌드 · 시작 명령으로 health 200 `ok/ok`, 비로그인 `/items` → `/login` — [eple-wu06-checks.md](../records/eple-wu06-checks.md)
 - 배포(11/23): https://pack-flow.onrender.com, eple이 Blueprint로 생성 · dev 값으로 첫 배포 · 로그인 확인. health 200 ok/ok · 비로그인 리다이렉트 · 401 확인(C-05~11)
-- 확인 못 한 것: 시연 계정 A(demo) 로그인 — demo 교체 뒤 채움 (C-05 · 09 · 10은 11/23 통과, 캡처 첨부)
+- 시연 서비스(11/23, D-37): https://pack-flow-demo.onrender.com — demo 적용 · dev와 구조 같음 · 시연 계정 A · B · 계정 스크립트 거부 · 시연 계정 A 로그인 확인 (D-01~07 · C-08)
+- 확인 못 한 것: 없음 (WU-06 기준 3개 모두 체크). 대시보드 실제 값은 WU-41 뒤
