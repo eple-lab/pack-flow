@@ -26,7 +26,27 @@
 |---|---|---|---|---|
 | D-1 | 마이그레이션 뒤 새로 만든 함수를 anon이 부를 수 있음 (D-03 실패) | Postgres의 함수 PUBLIC EXECUTE 기본값은 스키마 단위 `alter default privileges`로 지워지지 않는다 | `_rls.sql`에 스키마 없이 전역으로 `revoke execute on functions from public` | D-03 권한 오류, D-04는 그대로 통과 |
 
-## 3. 아직 (eple과 함께)
+## 3. 실제 dev 프로젝트 시험 (2026-11-23, 마이그레이션 6개 적용 뒤)
+
+- 적용: `npx supabase@3.2.0 db push --remote` — dry-run으로 목록 확인 → eple 승인 → 6개 적용. 연결 대상이 `.env.local`의 dev ref · 주소와 같은지 값을 출력하지 않고 비교
+- 방법: 실제 REST(`supabase-js`, publishable 키 + 테스트 계정 A · B 로그인). 출력의 메일 · 키 모양은 가려서 확인
+
+| ID | 내용 | 실제 | 판정 |
+|---|---|---|---|
+| R-0 | A로 `pf_reset_and_seed`(품목 1개) | 성공 | 통과 |
+| T-AUTH-4 | B로 `items` 조회 | A 행 0개, 모두 B | 통과 |
+| T-AUTH-5 | `stock_qty` UPDATE | 42501 권한 오류 | 통과 |
+| P-01 | 대조: `item_name` UPDATE | 1행 성공 | 통과 |
+| T-AUTH-6 | `stock_logs` DELETE | 42501 권한 오류 | 통과 |
+| F-01 | 재고 함수 stub 호출 | `PF_NOT_IMPLEMENTED` | 통과 |
+| P-07 · F-03 | anon으로 조회 · 재고 함수 | 42501 권한 오류 | 통과 |
+| P-08 | `llm_usage` 직접 조회 | 42501 권한 오류 | 통과 |
+| DB-1 | `npm run test:db` (샘플 + helpers, 계정 A · B) | 2파일 13건 통과 | 통과 |
+| UI-1 | 로컬 `npm run dev` → 테스트 계정 로그인 → "준비 중" 화면 (eple 확인) | 확인 | 통과 |
+
+- D-35(Data API '새 테이블 자동 공개' 끄기)에서도 기존 권한 설계대로 동작함을 확인했다.
+
+## 4. 아직 (eple과 함께)
 
 - 실제 Supabase dev · demo에 적용, 두 프로젝트 비교(`db diff`), 실제 REST로 T-AUTH-4~6 다시 확인
 - demo 주소로 계정 스크립트 실행 시 거부 확인, 테스트 계정 8개 · 시연 계정 A · B 생성
