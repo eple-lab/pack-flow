@@ -11,6 +11,7 @@
  *
  * 이력
  * 2026-11-23  skygaul  처음 작성 — 발주서 초안 패널 렌더 시험 (WU-33)
+ * 2026-11-23  skygaul  chat 모드가 챗봇 화면이 돼 P-2 기대를 바꿈 (WU-34)
  */
 import { renderToString } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
@@ -130,9 +131,10 @@ describe('P: AgentPanel', () => {
     expect(html).toContain('data-testid="loading"');
   });
 
-  it('P-2 chat 모드는 아직 준비 중(WU-34)', () => {
+  it('P-2 chat 모드는 챗봇 화면(WU-34): 입력 칸이 있고 준비 중이 아니다', () => {
     const html = plain(renderToString(<AgentPanel request={{ mode: 'chat' }} />));
     expect(html).toContain('data-mode="chat"');
-    expect(html).toContain('준비 중');
+    expect(html).toContain('data-testid="chat-input"');
+    expect(html).not.toContain('준비 중');
   });
 });

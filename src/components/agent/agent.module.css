@@ -10,6 +10,7 @@
  *
  * 이력
  * 2026-11-23  skygaul  처음 작성 — 발주서 초안 패널 스타일 (WU-33)
+ * 2026-11-23  skygaul  챗봇(대화 · 제안 카드 · 입력) 스타일 추가 (WU-34)
  */
 .panel {
   display: flex;
@@ -193,4 +194,76 @@
 .doneText {
   margin: 0;
   font-weight: 600;
+}
+
+/* ── 챗봇 ── */
+.chatLog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.bubbleUser,
+.bubbleReply,
+.bubbleRefused {
+  max-width: 92%;
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  font-size: var(--font-sm);
+  overflow-wrap: anywhere;
+}
+
+.bubbleUser {
+  align-self: flex-end;
+  color: var(--color-primary-contrast);
+  background: var(--color-primary);
+}
+
+.bubbleReply {
+  align-self: flex-start;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.bubbleRefused {
+  align-self: flex-start;
+  border: 1px solid var(--color-warning);
+  background: var(--color-warning-bg);
+}
+
+.chatText {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.facts {
+  margin: var(--space-1) 0 0;
+  color: var(--color-muted);
+  font-size: var(--font-xs);
+}
+
+.actionCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+  padding-top: var(--space-2);
+  border-top: 1px dashed var(--color-border);
+}
+
+.chatNote {
+  align-self: center;
+  margin: 0;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-success);
+  border-radius: var(--radius-md);
+  background: var(--color-success-bg);
+  font-size: var(--font-sm);
+}
+
+.chatForm {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
 }
