@@ -7,12 +7,15 @@
  * - C-62 small · large → 요청한 시드로 rpc 한 번, 200 + 건수 그대로
  * - C-63 (실패해야 함) 미로그인 401 · X-PF 없음 403, rpc 0회
  * - C-64 DB가 PF_VALIDATION을 돌려주면 400 그대로, 모르는 오류는 500 PF_INTERNAL(원문 없음)
+ * - C-65 (실패해야 함) 시드를 못 읽거나 형식이 깨져 SeedError가 나면(loadSeed를 가짜로 바꿔 일으킨다)
+ *        demo · small · large 모두 400 PF_VALIDATION field "dataset", 응답에 파일 경로 없음, rpc 0회
  *
  * 근거: docs/04-api-contract.md 3.7, WU-43
  * 구역: eple (docs/06-work-plan.md 1절)
  *
  * 이력
  * 2026-11-23  eple  처음 작성 — /api/seed 단위 시험 (WU-43)
+ * 2026-11-23  eple  C-65 SeedError → 400 실패 시험 복원 — #40에서 small · large가 생기며 옛 C-62와 함께 빠졌음 (WU-43)
  */
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { describe, expect, it, vi } from 'vitest';
@@ -24,6 +27,17 @@ import large from '@/lib/seed/large.json';
 vi.mock('server-only', () => ({}));
 const holder = vi.hoisted(() => ({ client: null as unknown }));
 vi.mock('@/lib/supabase/server', () => ({ createServerSupabase: async () => holder.client as SupabaseClient }));
+
+// C-65용: failLoad가 켜져 있으면 loadSeed가 파일 경로가 든 SeedError를 던진다. 꺼져 있으면 진짜 로더.
+const loader = vi.hoisted(() => ({ failLoad: false }));
+vi.mock('@/lib/seed', async (importActual) => {
+  const actual = await importActual<typeof import('@/lib/seed')>();
+  return {
+    ...actual,
+    loadSeed: (name: string) =>
+      loader.failLoad ? Promise.reject(new actual.SeedError(`${name} 형식 오류 — src/lib/seed/${name}.json items`)) : actual.loadSeed(name),
+  };
+});
 
 import { POST as postSeed } from './route';
 
@@ -97,5 +111,23 @@ describe('POST /api/seed', () => {
     expect(res.status).toBe(500);
     expect(JSON.parse(text).error.code).toBe('PF_INTERNAL');
     expect(text).not.toContain('secret_table');
+  });
+
+  it('C-65 (실패해야 함) SeedError → 400 field dataset, 경로 미노출, rpc 0회', async () => {
+    loader.failLoad = true;
+    try {
+      for (const dataset of ['demo', 'small', 'large']) {
+        const db = fakeRpcDb();
+        holder.client = db.client;
+        const res = await call({ dataset });
+        const text = await res.text();
+        expect(res.status).toBe(400);
+        expect(JSON.parse(text).error).toMatchObject({ code: 'PF_VALIDATION', detail: { field: 'dataset' } });
+        expect(text).not.toContain('src/lib/seed');
+        expect(db.rpcCalls).toHaveLength(0);
+      }
+    } finally {
+      loader.failLoad = false;
+    }
   });
 });
