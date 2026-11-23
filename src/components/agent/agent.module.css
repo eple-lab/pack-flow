@@ -1,0 +1,196 @@
+/*
+ * 에이전트 패널 스타일 — 발주서 초안(안내 · 문안 · 표 · 버튼). 색 · 간격은 src/styles/tokens.css 변수만 쓴다.
+ *
+ * 하는 일
+ * 1. 패널은 옆 칸(--agent-width)이라 좁다. 표는 .tableWrap 안에서 가로 스크롤한다.
+ * 2. LLM 문안은 글자 그대로 보인다(줄바꿈만 살림). LLM 오류 안내는 경고색 상자.
+ *
+ * 근거: docs/work-units/WU-33-draft-po.md, AGENTS.md 3절(CSS 모듈 + 토큰, D-31)
+ * 구역: skygaul (docs/06-work-plan.md 1절)
+ *
+ * 이력
+ * 2026-11-23  skygaul  처음 작성 — 발주서 초안 패널 스타일 (WU-33)
+ */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-lg);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.muted {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: var(--font-sm);
+}
+
+/* ── LLM 오류 안내 · 문안 ── */
+.llmError {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  border: 1px solid var(--color-warning);
+  border-radius: var(--radius-md);
+  background: var(--color-warning-bg);
+  font-size: var(--font-sm);
+}
+
+.llmErrorTitle {
+  margin: 0;
+  font-weight: 600;
+}
+
+.llmErrorReason {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.messageBox {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.messageLabel {
+  color: var(--color-muted);
+  font-size: var(--font-sm);
+}
+
+.message {
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  font-family: inherit;
+  font-size: var(--font-sm);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* ── 표 ── */
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  font-size: var(--font-sm);
+}
+
+/* 옆 패널이 좁아 칸이 한 글자 폭으로 쪼그라드는 것을 막는다: 품목 · 추천 수량 · 거래처 칸에 최소 폭 */
+.table th:nth-child(1),
+.table td:nth-child(1) {
+  min-width: 112px;
+  word-break: keep-all;
+}
+
+.table th:nth-child(3),
+.table td:nth-child(3) {
+  min-width: 132px;
+}
+
+.table th:nth-child(6),
+.table td:nth-child(6) {
+  min-width: 120px;
+}
+
+.table th,
+.table td {
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  vertical-align: top;
+}
+
+.table th {
+  color: var(--color-muted);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.num {
+  text-align: right !important;
+  white-space: nowrap;
+}
+
+.sku {
+  font-weight: 600;
+}
+
+.basis {
+  color: var(--color-muted);
+  min-width: 140px;
+}
+
+.input {
+  width: 100%;
+  min-width: 72px;
+  padding: var(--space-1) var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  background: var(--color-bg);
+  font-size: var(--font-sm);
+}
+
+.inputNum {
+  text-align: right;
+}
+
+/* ── 버튼 · 알림 ── */
+.actions {
+  display: flex;
+  gap: var(--space-2);
+  justify-content: flex-end;
+}
+
+.secondary {
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  background: var(--color-surface);
+  font-size: var(--font-md);
+  cursor: pointer;
+}
+
+.notice {
+  margin: 0;
+  padding: var(--space-3);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-muted);
+  font-size: var(--font-sm);
+}
+
+.done {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-success);
+  border-radius: var(--radius-md);
+  background: var(--color-success-bg);
+}
+
+.doneText {
+  margin: 0;
+  font-weight: 600;
+}
