@@ -73,7 +73,7 @@ D-06 "LLM 호출은 `lib/llm.ts` 한곳, 설정값으로 Ollama ↔ Gemini 전�
   - Gemini 무료 한도(AI Studio 표): Flash Lite 계열(3.1 · 3.5) 분당 15 · 토큰 250K · 하루 500 / 다른 Flash 계열과 4 Hydrogen은 하루 20 → Flash Lite를 쓴다 ([기록](../records/skygaul-llm-poc.md) 3절)
   - 다 됐다의 기준: ① `llm.test.ts`(정상 / 시간 초과 / 상한 1 → 두 번째 `PF_QUOTA_EXCEEDED`) 통과 ② 로컬 Ollama 한 번 · Gemini 한 번 성공 ④ diff에 키 없음(커밋 훅 통과)
 - 확인 못 한 것:
-  - **③ 팀 공통 Ollama 모델 결정 · 공지**: 이 PC에는 0.8B 하나뿐이고 후보 모델 비교(같은 문장 3개)를 못 했다. 배포는 Gemini, 개발 기본 모델은 팀과 정해야 한다. `skygaul-llm-poc.md` 2절 표가 비어 있다
+  - **③ 팀 공통 Ollama 모델**: 1일차에 `qwen3.5:4b`(사양이 낮으면 3B급)로 정했다(skygaul 보고). 다만 그 모델로 같은 문장 3개를 돌려 본 시험은 못 했다 — 이 PC에는 0.8B만 설치돼 있다(`skygaul-llm-poc.md` 2절 표가 비어 있다). `qwen3.5` 계열이라 `think:false` 없이는 빈 응답이 날 수 있어 `llm.ts`가 항상 보내게 했고, 4b에서의 동작은 확인하지 못했다
   - `pf_llm_take`를 실제 dev DB로 부른 호출(시험은 가짜 클라이언트 · 임시 Gemini 시험은 상한 함수를 막았다) — WU-33 API 시험에서 확인
   - `think:false`를 생각 기능이 없는 Ollama 모델에 보냈을 때 동작
   - `gemini-3.5-flash-lite`와 3.1 Flash Lite의 비교, 긴 요청에서의 빈 응답 여부(짧은 세 요청만 해 봄)
