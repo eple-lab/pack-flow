@@ -3,7 +3,7 @@
  *
  * 하는 일
  * 1. unit: DB 없이 도는 테스트. 각 구역 파일 옆 *.test.ts. Actions에서도 돈다(P-11).
- * 2. db: tests/db/** — .env.local의 dev 프로젝트와 본인 테스트 계정이 필요하다(P-17). 로컬에서만.
+ * 2. db: tests/db/** · tests/api/** —.env.local의 dev 프로젝트와 본인 테스트 계정이 필요하다(P-17). 로컬에서만.
  * 3. 경로 별칭 @/ → src/ 를 tsconfig와 같게 맞춘다.
  *
  * 근거: docs/07-test-strategy.md 1절 · WU-01 · WU-08
@@ -11,6 +11,7 @@
  *
  * 이력
  * 2026-11-20  eple  처음 작성 — unit · db 두 프로젝트 (WU-01)
+ * 2026-11-23  eple  db 묶음에 tests/api/** 추가 — 07의 API 시험 파일이 어느 묶음에도 안 잡혔음 (WU-41)
  */
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
@@ -35,7 +36,8 @@ export default defineConfig({
         extends: true,
         test: {
           name: 'db',
-          include: ['tests/db/**/*.test.ts'],
+          // [WU-41] tests/api/**도 dev DB · 본인 계정이 필요한 API 시험이라 db 묶음에 넣는다 (eple)
+          include: ['tests/db/**/*.test.ts', 'tests/api/**/*.test.ts'],
           environment: 'node',
           // DB 테스트는 계정 데이터를 초기화하므로 파일끼리 동시에 돌리지 않는다.
           fileParallelism: false,

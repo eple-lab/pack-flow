@@ -17,12 +17,16 @@
  * 이력
  * 2026-11-20  eple     자리 생성 (WU-01) — 구현은 skygaul WU-32
  * 2026-11-23  skygaul  처음 구현 — 발주서 문안 프롬프트 (WU-32)
+ * 2026-11-23  skygaul  근거 칸 길이 상한을 따로 늘리고 날짜 오류를 PF_VALIDATION으로 — 리뷰 의견 반영 (WU-33)
  */
+import { PfError } from '@/lib/api/errors';
 import type { PoDraftLine } from '@/types/agent';
 import { LEAD_DAYS } from '../reorder';
 
 /** 자료 한 칸에 들어갈 글자 수 상한. 길게 넣어 프롬프트를 부풀리는 것을 막는다. */
 const MAX_CELL_LENGTH = 60;
+/** 근거 문장 칸의 상한. 코드가 만든 문장이라 길어도 안전하고, 큰 숫자에서도 끝이 잘리지 않아야 한다. */
+const MAX_BASIS_LENGTH = 160;
 
 export type DraftPoPromptOptions = {
   /** 오늘 날짜 YYYY-MM-DD. 요청 납기 = 오늘 + 리드타임. 시각을 직접 읽지 않으려고 인자로 받는다. */
@@ -30,19 +34,19 @@ export type DraftPoPromptOptions = {
 };
 
 /** 자료 칸에 넣을 글자: 줄바꿈 · 탭 · 꺾쇠를 공백/제거로 바꾸고 길이를 자른다. */
-function cell(value: string): string {
+function cell(value: string, max = MAX_CELL_LENGTH): string {
   return value
     .replace(/[\r\n\t]+/g, ' ')
     .replace(/[<>]/g, '')
     .replace(/\s{2,}/g, ' ')
     .trim()
-    .slice(0, MAX_CELL_LENGTH);
+    .slice(0, max);
 }
 
 /** YYYY-MM-DD에 일수를 더한다(UTC 기준 — 시간대에 따라 하루 어긋나지 않게). */
 function addDays(date: string, days: number): string {
   const base = Date.parse(`${date}T00:00:00Z`);
-  if (Number.isNaN(base)) throw new Error(`today는 YYYY-MM-DD 형식이어야 해요: ${date}`);
+  if (Number.isNaN(base)) throw new PfError('PF_VALIDATION', { field: 'today', reason: 'bad_format' });
   return new Date(base + days * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 }
 
@@ -80,7 +84,7 @@ export function buildDraftPoPrompt(
         `추천 수량 ${line.recommended_qty}`,
         `단가 ${line.unit_cost}`,
         `거래처 ${cell(line.supplier)}`,
-        `근거 ${cell(line.basis)}`,
+        `근거 ${cell(line.basis, MAX_BASIS_LENGTH)}`,
       ].join(' | '),
   );
 
