@@ -1,6 +1,6 @@
 # eple 이어받기 노트
 
-마지막 갱신: 2026-11-23 오후 · 쓴 세션: eple의 Wave 0 마무리 세션(Claude, 11/23) · **다음 세션(eple의 WU-41 업무 API 연결)이 이 파일의 0절부터 읽는다.**
+마지막 갱신: 2026-11-23 저녁 · 쓴 세션: eple의 Wave 0 마무리 세션 → WU-41 세션(Claude, 11/23) · **다음 세션은 0절의 '최신' 블록부터 읽는다.**
 
 팀원이 여러 명이라 파일 이름 앞에 `eple-`을 붙였다. 이 노트는 **eple의 작업 흐름**을 이어받기 위한 것이다(팀원 각자의 진행은 work-units와 이슈로 본다).
 
@@ -15,6 +15,22 @@
 | 남은 기간 | 11/22(일)까지 골격 → 11/23(월) 팀원 합류 → 11/24 14시 기능 동결 → 11/26 10:00 제출 |
 
 ## 0. 최신 상태 (2026-11-23 오후 — 다음 세션은 여기부터)
+
+### 최신 (11/23 18시 30분 무렵, WU-41 세션) — 아래 16시 스냅샷보다 이것이 우선
+
+- **병합 끝:** #28(WU-16) · #29(WU-21) · #31 · #32 · #34(WU-33) · #36 · #37 · **#38(WU-41 업무 API)** → main `5eb0dc8`, CI 통과. Render 두 서비스 `/api/health` 200
+- **WU-21 마이그레이션 `20261123120000_inventory.sql`: dev · demo 둘 다 적용 끝**(eple 승인, 둘 다 `migration list` 7개, 함수 권한 확인). 다시 적용하지 않는다. CLI link는 dev로 되돌려 둠
+- **WU-41 끝:** 목 없이 화면 입고 → 출고 → 대시보드 확인(로컬 → dev), T-S1-3(API) · T-S4-2 · T-VAL-2~4 통과. `vitest.config.mts` db 묶음에 `tests/api/**` 추가 — `test:db`가 `tests/api`도 돈다(계정 A · B 데이터를 demo 시드로 초기화)
+- **WU-42:** #39 T-AUTH-1~8 · Step 2 증거 — sorek-charlie가 새 계정으로 10건 독립 실행 후 승인, 병합(11/23 저녁)
+- **열린 PR:** #35 이 노트 / #40 WU-22 시드 3벌 · E2E(demo 8품목으로 바뀌어 eple 구역 시험 갱신 필요 — 고침 브랜치 `feat/WU-43-seed-loader` 작업 중)
+- **로컬에만 있는 것:** 브랜치 `feat/WU-43-bulk-seed-api`(WU-42 위에 쌓음) — `POST /api/seed` 연결 · T-AUTH-7을 라우트로 확인(커밋 `9206d38`, push 전). #39 병합 뒤 main 기준으로 PR
+- **다음 단계 (순서):**
+  1. #40 + 고침 PR 병합(로더 small · large 등록, S4-1 · 2 · 4, T-S1-3을 demo expected 기준으로) → WU-43 브랜치를 main에 맞춰 C-60 · T-AUTH-7 갱신
+  2. 배포 URL(`pack-flow`)에서 2일차 판정 1 · 4번(입고 → 출고 → 대시보드), sorek-charlie 배포 E2E Step 1 · 2
+  3. WU-43(11/24 오전): `pf_bulk_apply`(새 마이그레이션 → eple 확인 뒤 dev · demo 적용) · `/api/bulk/preview` · `/commit`, small · large 로더 등록과 S4-4 · C-62 시험 갱신(WU-22 json이 main에 들어온 뒤), 중간 점검 기록
+  4. `docs/daily/day-02.md` 저녁 판정 · 계획서 변경 이력
+- **WU-33 리뷰 후속(skygaul):** 여러 줄 확정 중 일부 저장 안내, `tests/api/agent.test.ts` 커밋, HTTP 경로 확인
+- **주의 추가:** 대시보드 주소는 `/`(`/dashboard` 아님). PowerShell 실행 정책으로 `npm.ps1`이 막히면 `npm.cmd`. 병합된 WU 이슈(#7 · #8 · #9 · #13 · #17 · #18 · #19 · #22)는 열린 채(Refs 규칙) — 닫을지 eple 결정
 
 ### 끝난 것 (Wave 0)
 
