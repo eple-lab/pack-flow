@@ -15,8 +15,13 @@
  * 이력
  * 2026-11-20  eple     자리 생성 (WU-01) — 구현은 skygaul WU-34
  * 2026-11-23  skygaul  처음 구현 — 허용 액션 JSON 프롬프트 (WU-34)
+ * 2026-11-23  skygaul  상태 목록을 erp.ts 상수에서 만들게 정리 (WU-34)
  */
 import { AGENT_ACTION_TYPES } from '@/types/agent';
+import { PURCHASE_STATUS_CHANGE_TARGETS, SALE_STATUS_CHANGE_TARGETS } from '@/types/erp';
+
+/** 프롬프트에 보여 줄 상태 목록(erp.ts 상수에서 만든다): "A" 또는 "B" */
+const orList = (values: readonly string[]) => values.map((value) => `"${value}"`).join(' 또는 ');
 
 /** 프롬프트에 넣는 품목 한 줄(코드 · 이름만). */
 export type ChatPromptItem = { sku_id: string; item_name: string };
@@ -52,8 +57,8 @@ export function buildChatPrompt(message: string, items: readonly ChatPromptItem[
     '- {"type":"list_low_stock"}  안전재고 미만 품목 목록',
     '- {"type":"ship_quantity","sku_id":"<품목코드 또는 이름>","qty":<정수>}  품목을 수량만큼 출고',
     '- {"type":"ship_sale","sale_id":"S-숫자"}  기존 주문 출고(주문번호가 있을 때만)',
-    '- {"type":"set_sale_status","sale_id":"S-숫자","to":"출고대기" 또는 "주문취소"}',
-    '- {"type":"set_purchase_status","purchase_id":"P-숫자","to":"이동·통관중" 또는 "품절" 또는 "취소"}',
+    `- {"type":"set_sale_status","sale_id":"S-숫자","to":${orList(SALE_STATUS_CHANGE_TARGETS)}}`,
+    `- {"type":"set_purchase_status","purchase_id":"P-숫자","to":${orList(PURCHASE_STATUS_CHANGE_TARGETS)}}`,
     '규칙:',
     '1. JSON 객체 하나만 출력하세요. 설명 · 마크다운 · 코드 울타리를 쓰지 마세요.',
     '2. 허용 액션으로 표현할 수 없는 요청(삭제, 재고 직접 수정, 초기화 등)이면 {"type":"unsupported"}만 출력하세요.',

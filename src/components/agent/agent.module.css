@@ -11,6 +11,7 @@
  * 이력
  * 2026-11-23  skygaul  처음 작성 — 발주서 초안 패널 스타일 (WU-33)
  * 2026-11-23  skygaul  챗봇(대화 · 제안 카드 · 입력) 스타일 추가 (WU-34)
+ * 2026-11-23  skygaul  패널 탭(발주 초안 · 대화) 스타일 추가 (WU-34)
  */
 .panel {
   display: flex;
@@ -266,4 +267,27 @@
   display: flex;
   gap: var(--space-2);
   align-items: center;
+}
+
+/* ── 탭 ── */
+.tabs {
+  display: flex;
+  gap: var(--space-1);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tab {
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: var(--color-muted);
+  background: transparent;
+  font-size: var(--font-md);
+  cursor: pointer;
+}
+
+.tabActive {
+  border-bottom-color: var(--color-primary);
+  color: var(--color-text);
+  font-weight: 600;
 }

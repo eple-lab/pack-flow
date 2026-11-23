@@ -22,6 +22,7 @@
  *
  * 이력
  * 2026-11-23  skygaul  처음 작성 — T-AI-2~5 챗봇 실제 DB 시험 (WU-34)
+ * 2026-11-23  skygaul  시험 이름 앞에 ID(C-01~05)를 붙임 — 시험 이름은 ID로 시작하는 규칙 (WU-34)
  */
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
@@ -136,7 +137,7 @@ describe('T-AI-2~5 챗봇 (실제 DB, 가짜 LLM)', () => {
     expect(await stockOf(a, 'PRD-001')).toBe(stockBefore);
   });
 
-  it('[실행] 전에는 DB가 바뀌지 않는다: 출고 제안 뒤에도 판매 · 이력 건수 그대로', async () => {
+  it('C-01 [실행] 전에는 DB가 바뀌지 않는다: 출고 제안 뒤에도 판매 · 이력 건수 그대로', async () => {
     holder.client = a;
     const logsBefore = await count(a, 'stock_logs');
     const salesBefore = await count(a, 'sales');
@@ -147,7 +148,7 @@ describe('T-AI-2~5 챗봇 (실제 DB, 가짜 LLM)', () => {
     expect(await count(a, 'sales')).toBe(salesBefore);
   });
 
-  it('[실행] ship_quantity → 200, 재고 −qty, 직접출고 판매 1건(agent · 출고완료), 이력 +1, 불변식 통과', async () => {
+  it('C-02 [실행] ship_quantity → 200, 재고 −qty, 직접출고 판매 1건(agent · 출고완료), 이력 +1, 불변식 통과', async () => {
     holder.client = a;
     const stockBefore = await stockOf(a, 'PRD-001');
     const salesBefore = await count(a, 'sales');
@@ -166,7 +167,7 @@ describe('T-AI-2~5 챗봇 (실제 DB, 가짜 LLM)', () => {
     await assertInvariants(a);
   });
 
-  it('[실행] (실패해야 함) 재고 초과 execute → 409 PF_INSUFFICIENT_STOCK, 판매가 만들어지지 않는다', async () => {
+  it('C-03 [실행] (실패해야 함) 재고 초과 execute → 409 PF_INSUFFICIENT_STOCK, 판매가 만들어지지 않는다', async () => {
     holder.client = a;
     const stock = await stockOf(a, 'PRD-003');
     const salesBefore = await count(a, 'sales');
@@ -177,7 +178,7 @@ describe('T-AI-2~5 챗봇 (실제 DB, 가짜 LLM)', () => {
     expect(await stockOf(a, 'PRD-003')).toBe(stock);
   });
 
-  it('[실행] 기존 주문 상태 변경: 출고대기 주문을 주문취소로 바꾼다(재고 그대로)', async () => {
+  it('C-04 [실행] 기존 주문 상태 변경: 출고대기 주문을 주문취소로 바꾼다(재고 그대로)', async () => {
     holder.client = a;
     const { data: pending } = await a.from('sales').select('sale_id,sku_id').eq('fulfillment_status', '출고대기').limit(1);
     const sale = pending?.[0];
@@ -194,7 +195,7 @@ describe('T-AI-2~5 챗봇 (실제 DB, 가짜 LLM)', () => {
     expect(await stockOf(a, sale!.sku_id as string)).toBe(stock);
   });
 
-  it('(실패해야 함) 공백만 있는 메시지 → 400 PF_VALIDATION, LLM을 부르지 않는다 / X-PF 없음 → 403', async () => {
+  it('C-05 (실패해야 함) 공백만 있는 메시지 → 400 PF_VALIDATION, LLM을 부르지 않는다 / X-PF 없음 → 403', async () => {
     holder.client = a;
     const calls = holder.llmCalls;
     const blank = await call(postChat, '/api/agent/chat', { message: '   ' });

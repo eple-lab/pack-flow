@@ -17,6 +17,7 @@
  * 2026-11-20  eple     자리 생성 (WU-01) — 구현은 skygaul WU-34
  * 2026-11-23  skygaul  처음 구현 — 허용 액션 검증 · 대화 · 실행 (WU-34)
  * 2026-11-23  skygaul  주문 · 구매 번호는 사용자 메시지에 있을 때만 제안 — 실제 Ollama가 인젝션 문장에서 번호를 지어냄 (WU-34)
+ * 2026-11-23  skygaul  판매 상태 글자를 erp.ts 상수에서 가져오게 정리 (WU-34)
  */
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { fromSupabaseError, messageFor, PfError } from '@/lib/api/errors';
@@ -26,15 +27,17 @@ import { log } from '@/lib/log';
 import { LIMITS } from '@/lib/validation';
 import { agentAction } from '@/lib/validation/schemas';
 import { AGENT_ACTION_TYPES, type AgentAction, type ChatReply } from '@/types/agent';
-import type { ServerErrorCode } from '@/types/erp';
+import { SALE_STATUS_CHANGE_TARGETS, type ServerErrorCode } from '@/types/erp';
 import { buildChatPrompt } from './prompts/chat';
 
 /** 챗봇이 읽는 품목 수 상한(프롬프트 · 조회 크기). */
 const ITEM_LIMIT = 200;
 /** 목록 답에 나열하는 품목 수 상한. */
 const LIST_LIMIT = 10;
-/** 직접출고 판매의 채널(P-14). */
+/** 직접출고 판매의 채널(P-14). 채널은 erp.ts에 상수가 없어(Sale.channel은 string) 결정 P-14의 이름을 여기 둔다. */
 const DIRECT_CHANNEL = '직접출고';
+/** 되돌릴 때 쓰는 판매 상태 = `주문취소`(erp.ts의 변경 가능 상태 목록의 둘째 값). */
+const [, CANCEL_ORDER] = SALE_STATUS_CHANGE_TARGETS;
 
 type Row = Record<string, unknown>;
 type QueryResult = { data: Row[] | null; error: { message?: unknown; details?: unknown; code?: unknown } | null };
@@ -372,7 +375,7 @@ export async function executeAction(supabase: SupabaseClient, value: unknown): P
       } catch (error) {
         // 출고가 거부되면 방금 만든 판매를 주문취소로 닫는다(남은 '주문접수' 건이 없게). 실패해도 원래 오류를 던진다.
         try {
-          await setSaleStatus(supabase, { id: sale.id, to_status: '주문취소' });
+          await setSaleStatus(supabase, { id: sale.id, to_status: CANCEL_ORDER });
         } catch (rollbackError) {
           log.error('agent.ship_rollback_failed', { code: rollbackError instanceof PfError ? rollbackError.code : 'unknown' });
         }

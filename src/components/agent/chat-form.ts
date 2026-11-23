@@ -2,7 +2,7 @@
  * 챗봇 패널의 순수 함수 — 보내기 가능 여부와 실행 결과 알림 문구.
  *
  * 하는 일
- * 1. `canSend`: 앞뒤 공백을 뺀 메시지가 1~500자일 때만 보낼 수 있다(04 4.2 · chatMessage와 같은 기준). 빈 · 공백만 → 보내기 버튼 잠김.
+ * 1. `canSend`: 서버 라우트와 같은 `chatMessage` 스키마(src/lib/validation)로 검사해 통과할 때만 보낼 수 있다(04 4절). 빈 · 공백만 → 보내기 버튼 잠김.
  * 2. `resultMessage`: `/execute` 결과(`unknown`)를 알림 한 줄로 바꾼다. 모양이 맞지 않으면 숫자를 지어내지 않고 일반 문구.
  *    결과의 값은 서버가 DB에서 읽은 값이다(LLM 글이 아니다).
  *
@@ -11,15 +11,14 @@
  *
  * 이력
  * 2026-11-23  skygaul  처음 작성 — 보내기 가능 여부 · 실행 알림 문구 (WU-34)
+ * 2026-11-23  skygaul  보내기 검사를 직접 구현하지 않고 chatMessage 스키마로 바꿈 — 화면 · 서버 같은 규칙 (WU-34)
  */
 
-/** 메시지 글자 수 상한(04 3.8 chat 요청). */
-export const MAX_CHAT_LENGTH = 500;
+import { chatMessage, parseWith } from '@/lib/validation';
 
-/** 보낼 수 있는 메시지인가: 앞뒤 공백을 뺀 글자 수가 1~500. */
+/** 보낼 수 있는 메시지인가: 서버 라우트와 같은 `chatMessage` 스키마로 검사한다(앞뒤 공백 정리 후 1~500자, 04 4절). */
 export function canSend(text: string): boolean {
-  const length = text.trim().length;
-  return length >= 1 && length <= MAX_CHAT_LENGTH;
+  return parseWith(chatMessage, { message: text }).ok;
 }
 
 type Rec = Record<string, unknown>;
