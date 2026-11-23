@@ -56,7 +56,33 @@ D-06 "LLM 호출은 `lib/llm.ts` 한곳, 설정값으로 Ollama ↔ Gemini 전�
 ## 결과 (담당자가 채움)
 
 - 한 것:
+  - `src/lib/llm.ts`: `generate({ system, user, json?, maxTokens? })` → `{ text, provider, latencyMs }`. 제공자 `fake` · `ollama` · `gemini`(REST `fetch`, 새 패키지 없음)
+    - 호출 전 사용자 JWT 클라이언트로 `pf_llm_take(30, 300)` → 넘으면 `PF_QUOTA_EXCEEDED`(detail `scope`)
+    - 20초 시간 초과 · 네트워크 · HTTP 오류 · 빈 응답 → `PF_LLM_UNAVAILABLE`(원문 오류는 밖으로 안 나감, 로그에는 제공자 · 이유 · 상태 · 길이 · 지연만)
+    - 설정(모델 · 키)이 비면 상한을 쓰기 전에 멈춤. Gemini 키는 요청 헤더에만 싣고 주소 · 로그에 없음. Ollama 요청에는 `think:false`를 보냄
+    - eple이 만든 자리(`askLlm`, `prompt`, `ms`)는 이 문서의 인터페이스(`generate`, `user`, `latencyMs`)로 바꿨다. 쓰는 코드가 아직 없었다
+  - `src/lib/llm.test.ts`: 19건 (fake · 시간 초과 · 상한 T-AI-7 · ollama · gemini · 설정 누락 · 로그)
+  - `docs/records/skygaul-llm-poc.md`: Ollama thinking 모델 발견, Gemini 무료 한도 표, 실제 호출 결과
+  - Ollama `qwen3.5`로 시험하다 응답 토큰 한도 200을 생각(thinking)에 다 써서 답이 비어 진행이 어려웠고, 팀장에게 보고한 뒤 개발용 Gemini 키를 발급받아 Gemini로 진행했다(skygaul 보고)
 - 직접 확인한 것:
+  - `npm run test:unit -- src/lib/llm` → 19개 통과, `npm run lint` · `npm run typecheck` 오류 없음, `npm run test:unit` 전체 461개 통과
+  - 시험이 잡는지: 시간 초과 때 요청을 취소(abort)하는 줄을 지우자 O-4 실패, 되돌림
+  - **실제 Ollama**(`qwen3.5:0.8b`): `generate()` 성공(JSON 답, 281ms). `think:false` 없이는 `content`가 빈 채 끝남(아래 AI 사례)
+  - **실제 Gemini**(`gemini-3.5-flash-lite`, 임시 시험 · 커밋 안 함 · 상한 함수는 막음): 세 번 성공 — 재고 질문 → 액션 JSON 1.7초, 발주서 문안 1.0초(표의 수량 · 단가 · 거래처 · 납기 그대로), 허용 밖 요청 → `{"type":"refused"}` 0.9초. 빈 응답 없음
+  - 잘못된 Ollama 주소(연결 거부) → `PF_LLM_UNAVAILABLE`, 서버는 죽지 않음(1ms)
+  - Gemini 무료 한도(AI Studio 표): Flash Lite 계열(3.1 · 3.5) 분당 15 · 토큰 250K · 하루 500 / 다른 Flash 계열과 4 Hydrogen은 하루 20 → Flash Lite를 쓴다 ([기록](../records/skygaul-llm-poc.md) 3절)
+  - 다 됐다의 기준: ① `llm.test.ts`(정상 / 시간 초과 / 상한 1 → 두 번째 `PF_QUOTA_EXCEEDED`) 통과 ② 로컬 Ollama 한 번 · Gemini 한 번 성공 ④ diff에 키 없음(커밋 훅 통과)
 - 확인 못 한 것:
+  - **③ 팀 공통 Ollama 모델**: 1일차에 `qwen3.5:4b`(사양이 낮으면 3B급)로 정했다(skygaul 보고). 다만 그 모델로 같은 문장 3개를 돌려 본 시험은 못 했다 — 이 PC에는 0.8B만 설치돼 있다(`skygaul-llm-poc.md` 2절 표가 비어 있다). `qwen3.5` 계열이라 `think:false` 없이는 빈 응답이 날 수 있어 `llm.ts`가 항상 보내게 했고, 4b에서의 동작은 확인하지 못했다
+  - `pf_llm_take`를 실제 dev DB로 부른 호출(시험은 가짜 클라이언트 · 임시 Gemini 시험은 상한 함수를 막았다) — WU-33 API 시험에서 확인
+  - `think:false`를 생각 기능이 없는 Ollama 모델에 보냈을 때 동작
+  - `gemini-3.5-flash-lite`와 3.1 Flash Lite의 비교, 긴 요청에서의 빈 응답 여부(짧은 세 요청만 해 봄)
+  - 응답이 없는 주소에서의 20초 시간 초과(단위 시험 L-3 · O-4로만 확인, 연결 거부 주소는 1ms에 끝남)
+  - 배포(Render)에서 Gemini 호출(eple이 배포 키를 직접 넣음 — WU-35)
 - AI가 틀린 것과 고친 과정:
-- PR:
+  - **빈 응답(Ollama thinking 모델).** 처음 구현은 Ollama 요청에 `think:false`가 없었다. 가짜 fetch 단위 시험은 모두 통과했지만 실제 `qwen3.5:0.8b` 호출은 `PF_LLM_UNAVAILABLE`이었다(이유 `empty`)
+  - 원인: thinking 모델이 기본값에서 응답 토큰(`num_predict` 200)을 모두 생각에 쓰고 `content`가 빈 채 `done_reason: length`로 끝남(생각 788자, `content` 0자)
+  - 수정: `think:false`를 항상 보내고 테스트 O-1에 `body.think === false`를 추가
+  - 재확인: 같은 요청이 35토큰 · 0.4초에 JSON으로 답함, `generate()`로 281ms 성공
+  - 교훈: 가짜 fetch 시험만으로는 이 문제를 못 잡는다 — 실제 호출을 한 번은 해 봐야 한다. `docs/records/ai-cases-skygaul.md`에 한 건 남길 것
+- PR: https://github.com/eple-lab/pack-flow/pull/6
