@@ -105,4 +105,4 @@
   - 교훈: 서버 렌더 시험은 레이아웃을 잡지 못한다. 실제 화면으로 한 번은 봐야 한다
   - 시험 코드의 `vi.fn` 인자 타입이 없어 `typecheck`가 실패(TS2352)해 인자 타입을 지정해 고침
   - `docs/records/ai-cases-skygaul.md` 사례 2로 남길 후보(표 칸 폭)
-- PR: https://github.com/eple-lab/pack-flow/pull/34
+- PR: https://github.com/eple-lab/pack-flow/pull/34 (병합 뒤 후속: https://github.com/eple-lab/pack-flow/pull/45)
