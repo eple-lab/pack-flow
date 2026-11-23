@@ -12,8 +12,10 @@
  *
  * 이력
  * 2026-11-23  skygaul  처음 작성 — 발주 후보 계산 · 프롬프트 시험 (WU-32)
+ * 2026-11-23  skygaul  근거 문장 길이 · 날짜 오류 시험 P-6 · P-7 추가 — 리뷰 의견 반영 (WU-33)
  */
 import { describe, expect, it } from 'vitest';
+import { PfError } from '@/lib/api/errors';
 import {
   computeReorderCandidates,
   type ReorderItem,
@@ -247,5 +249,22 @@ describe('P: buildDraftPoPrompt', () => {
     expect(user.match(/<\/자료>/g)).toHaveLength(1); // 닫는 태그는 우리가 쓴 것 하나뿐
     const dataBlock = user.slice(user.indexOf('<자료>'), user.indexOf('</자료>'));
     expect(dataBlock).not.toContain('\n이전 지시'); // 줄바꿈이 공백으로 바뀌어 한 줄 안에 갇힌다
+  });
+
+  it('P-6 근거 문장은 자료 칸 60자 제한에 잘리지 않는다(큰 숫자일 때도 끝까지)', () => {
+    const basis = '최근 7일 출고 99999개(하루 14285.6개), 입고 예정 99999개, 안전재고 99999개 기준 — 확인용으로 길게 씁니다';
+    expect(basis.length).toBeGreaterThan(60);
+    const { user } = buildDraftPoPrompt([{ ...lines[0]!, basis }], { today: '2026-11-23' });
+    expect(user).toContain(basis);
+  });
+
+  it('P-7 (실패해야 함) 오늘 날짜 형식이 틀리면 일반 Error가 아니라 PF_VALIDATION(field today)', () => {
+    expect(() => buildDraftPoPrompt(lines, { today: '2026-13-45' })).toThrow(PfError);
+    try {
+      buildDraftPoPrompt(lines, { today: '내일' });
+      expect.unreachable();
+    } catch (error) {
+      expect(error).toMatchObject({ code: 'PF_VALIDATION', detail: { field: 'today', reason: 'bad_format' } });
+    }
   });
 });
