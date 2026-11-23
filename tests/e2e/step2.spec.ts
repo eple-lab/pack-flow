@@ -33,6 +33,7 @@ test('T-AUTH 재로그인 뒤 A 재고가 유지되고 B에는 표시되지 않�
   try {
     const other = await accountB.newPage();
     await loginViaUi(other, 'B');
+    await resetViaApi(other, 'small');
     const response = await other.request.get(new URL('/api/dashboard', other.url()).toString());
     expect(response.ok()).toBe(true);
     const body = (await response.json()) as { data: Dashboard };

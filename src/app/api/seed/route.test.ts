@@ -2,10 +2,9 @@
  * POST /api/seed 단위 시험 — 가짜 rpc로 라우트 → 시드 로더 → pf_reset_and_seed 흐름을 본다.
  *
  * 기대(먼저 적음)
- * - C-60 dataset "demo" → rpc pf_reset_and_seed 한 번, p_data = 검사를 통과한 demo 시드(items 3개), 200 + 건수 그대로
+ * - C-60 dataset "demo" → rpc pf_reset_and_seed 한 번, p_data = 검사를 통과한 demo 시드, 200 + 건수 그대로
  * - C-61 (실패해야 함) dataset "xyz" · 빈 본문 · user_id 같이 보냄 → 400 PF_VALIDATION, rpc 0회
- * - C-62 (실패해야 함) 아직 파일이 없는 시드(small · large) → 400 PF_VALIDATION field "dataset", 응답에 파일 경로 없음, rpc 0회
- *         (파일이 생기면 이 시험은 실패한다 — 그때 C-62를 지우지 말고 '파일이 있으면 200'으로 바꾼다)
+ * - C-62 small · large → 요청한 시드로 rpc 한 번, 200 + 건수 그대로
  * - C-63 (실패해야 함) 미로그인 401 · X-PF 없음 403, rpc 0회
  * - C-64 DB가 PF_VALIDATION을 돌려주면 400 그대로, 모르는 오류는 500 PF_INTERNAL(원문 없음)
  *
@@ -18,6 +17,9 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { describe, expect, it, vi } from 'vitest';
 import { fakeRpcDb } from '@/lib/queries/fakeRpc.testutil';
+import demo from '@/lib/seed/demo.json';
+import small from '@/lib/seed/small.json';
+import large from '@/lib/seed/large.json';
 
 vi.mock('server-only', () => ({}));
 const holder = vi.hoisted(() => ({ client: null as unknown }));
@@ -26,7 +28,7 @@ vi.mock('@/lib/supabase/server', () => ({ createServerSupabase: async () => hold
 import { POST as postSeed } from './route';
 
 const ORIGIN = 'https://app.packflow.test';
-const COUNTS = { items: 3, purchases: 1, sales: 2, logs: 3 };
+const COUNTS = { items: 8, purchases: 4, sales: 6, logs: 8 };
 
 function call(body: unknown, opts: { csrf?: boolean } = {}) {
   const headers: Record<string, string> = { 'content-type': 'application/json', origin: ORIGIN };
@@ -43,8 +45,7 @@ describe('POST /api/seed', () => {
     expect(await res.json()).toEqual({ data: COUNTS });
     expect(db.rpcCalls).toHaveLength(1);
     expect(db.rpcCalls[0].fn).toBe('pf_reset_and_seed');
-    const sent = db.rpcCalls[0].args.p_data as { items: { sku_id: string }[] };
-    expect(sent.items.map((i) => i.sku_id)).toEqual(['PRD-001', 'PRD-002', 'PRD-003']);
+    expect(db.rpcCalls[0].args.p_data).toEqual(demo);
   });
 
   it('C-61 (실패해야 함) 모르는 dataset · 빈 본문 · user_id → 400, rpc 0회', async () => {
@@ -58,17 +59,17 @@ describe('POST /api/seed', () => {
     }
   });
 
-  it('C-62 (실패해야 함) 아직 없는 small · large → 400 field dataset, 경로 미노출, rpc 0회', async () => {
-    for (const dataset of ['small', 'large']) {
-      const db = fakeRpcDb();
-      holder.client = db.client;
-      const res = await call({ dataset });
-      const text = await res.text();
-      expect(res.status).toBe(400);
-      expect(JSON.parse(text).error.detail).toMatchObject({ field: 'dataset' });
-      expect(text).not.toContain('src/lib/seed');
-      expect(db.rpcCalls).toHaveLength(0);
-    }
+  it.each([
+    ['small', small, { items: 5, purchases: 10, sales: 5, logs: 20 }],
+    ['large', large, { items: 10, purchases: 20, sales: 20, logs: 50 }],
+  ] as const)('C-62 %s → 해당 시드 적재 및 건수 반환', async (dataset, seed, counts) => {
+    const db = fakeRpcDb({ rpc: () => ({ data: counts }) });
+    holder.client = db.client;
+    const res = await call({ dataset });
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ data: counts });
+    expect(db.rpcCalls).toHaveLength(1);
+    expect(db.rpcCalls[0]).toMatchObject({ fn: 'pf_reset_and_seed', args: { p_data: seed } });
   });
 
   it('C-63 (실패해야 함) 미로그인 401 · X-PF 없음 403, rpc 0회', async () => {

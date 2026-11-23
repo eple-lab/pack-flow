@@ -19,6 +19,7 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { beforeAll, describe, expect, it } from 'vitest';
 import { assertInvariants, resetAndSeed, signIn } from './helpers';
+import demo from '@/lib/seed/demo.json';
 
 describe('T-DB-SAMPLE 로그인 · 초기화 · 검산 예시', () => {
   let clientA: SupabaseClient;
@@ -30,18 +31,18 @@ describe('T-DB-SAMPLE 로그인 · 초기화 · 검산 예시', () => {
     clientB = await signIn('B');
   });
 
-  it('T-DB-SAMPLE-1 A로 demo 초기화 후 A 품목 3개, B 품목 수 불변, 두 계정 불변식 통과', async () => {
+  it('T-DB-SAMPLE-1 A로 demo 초기화 후 A 품목은 시드와 같고 B 품목 수는 그대로다', async () => {
     // 초기화 전 B의 품목 수를 기억한다(T-AUTH-7).
     const before = await clientB.from('items').select('sku_id', { count: 'exact', head: true });
     expect(before.error).toBeNull();
     const countBBefore = before.count ?? 0;
 
     const counts = await resetAndSeed(clientA, 'demo');
-    expect(counts).toEqual({ items: 3, purchases: 1, sales: 2, logs: 3 });
+    expect(counts).toEqual({ items: 8, purchases: 4, sales: 6, logs: 8 });
 
     const itemsA = await clientA.from('items').select('sku_id');
     expect(itemsA.error).toBeNull();
-    expect((itemsA.data ?? []).map((row) => row.sku_id).sort()).toEqual(['PRD-001', 'PRD-002', 'PRD-003']);
+    expect((itemsA.data ?? []).map((row) => row.sku_id).sort()).toEqual(demo.items.map((item) => item.sku_id).sort());
 
     // 계정 B의 데이터는 A의 초기화로 바뀌지 않아야 한다.
     const after = await clientB.from('items').select('sku_id', { count: 'exact', head: true });

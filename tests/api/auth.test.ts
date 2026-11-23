@@ -25,6 +25,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
 import { loadLocalEnv, resetAndSeed, signIn } from '../db/helpers';
+import demo from '@/lib/seed/demo.json';
 
 vi.mock('server-only', () => ({}));
 const holder = vi.hoisted(() => ({ client: null as unknown }));
@@ -144,10 +145,10 @@ describe('T-AUTH API 권한 (실제 dev DB, 계정 A · B)', () => {
     holder.client = clientB;
     const res = await call(postSeed, '/api/seed', { method: 'POST', body: { dataset: 'demo' } });
     expect(res.status).toBe(200);
-    expect(res.body.data).toMatchObject({ items: 3, purchases: 1, sales: 2 });
+    expect(res.body.data).toMatchObject({ items: demo.items.length, purchases: demo.purchases.length, sales: demo.sales.length });
     const { data: bItems, error } = await clientB.from('items').select('sku_id').order('sku_id');
     expect(error).toBeNull();
-    expect((bItems ?? []).map((r) => r.sku_id)).toEqual(['PRD-001', 'PRD-002', 'PRD-003']);
+    expect((bItems ?? []).map((r) => r.sku_id)).toEqual(demo.items.map((item) => item.sku_id).sort());
     expect(await snapshotA()).toEqual(before);
   });
 

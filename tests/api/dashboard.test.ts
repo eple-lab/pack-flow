@@ -96,7 +96,9 @@ describe('T-S1-3 대시보드 = DB 집계 (API 쪽, 실제 DB)', () => {
     expect(Object.fromEntries(d.items.map((i) => [i.sku_id, i.stock_qty]))).toEqual(demo.expected.stock);
     expect(d.kpi.today_in).toBe(0);
     expect(d.kpi.today_out).toBe(0);
-    expect(d.alerts.map((a) => a.sku_id)).toEqual(['PRD-003']);
+    expect(d.alerts.map((a) => a.sku_id).sort()).toEqual(
+      demo.items.filter((item) => item.initial_qty < item.safety_stock).map((item) => item.sku_id).sort(),
+    );
   });
 
   it('T-S1-3b P-101 8개 입고 → S-201 출고 → 대시보드가 같이 바뀌고 DB 집계와 같다', async () => {
@@ -110,13 +112,13 @@ describe('T-S1-3 대시보드 = DB 집계 (API 쪽, 실제 DB)', () => {
 
     const d = await dashboard();
     const direct = await directKpi();
-    expect(d.kpi).toEqual({ item_count: 3, stock_total: 55, below_safety: 1, today_in: 1, today_out: 1 });
+    expect(d.kpi).toEqual({ ...demo.expected.kpi, stock_total: demo.expected.kpi.stock_total + 2, today_in: 1, today_out: 1 });
     expect(d.kpi).toMatchObject({ item_count: direct.item_count, stock_total: direct.stock_total, below_safety: direct.below_safety });
     expect(Object.fromEntries(d.items.map((i) => [i.sku_id, i.stock_qty]))).toEqual(direct.stock);
     expect(d.pipeline.purchase['입고완료']).toBe(1);
     expect(d.pipeline.purchase['이동·통관중']).toBe(0);
     expect(d.pipeline.sale['출고완료']).toBe(1);
-    expect(d.pipeline.sale['출고대기']).toBe(0);
+    expect(d.pipeline.sale['출고대기']).toBe(demo.sales.filter((sale) => sale.fulfillment_status === '출고대기').length - 1);
     expect(d.recent_changes.slice(0, 2).map((l) => [l.sku_id, l.change_qty, l.reason])).toEqual([
       ['PRD-001', -6, '실판매출고'],
       ['PRD-001', 8, '구매입고'],
