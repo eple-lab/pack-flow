@@ -85,4 +85,4 @@ D-06 "LLM 호출은 `lib/llm.ts` 한곳, 설정값으로 Ollama ↔ Gemini 전�
   - 수정: `think:false`를 항상 보내고 테스트 O-1에 `body.think === false`를 추가
   - 재확인: 같은 요청이 35토큰 · 0.4초에 JSON으로 답함, `generate()`로 281ms 성공
   - 교훈: 가짜 fetch 시험만으로는 이 문제를 못 잡는다 — 실제 호출을 한 번은 해 봐야 한다. `docs/records/ai-cases-skygaul.md`에 한 건 남길 것
-- PR: (push 후 PR 링크를 적는다)
+- PR: https://github.com/eple-lab/pack-flow/pull/6
