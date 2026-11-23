@@ -7,8 +7,8 @@
  * 2. LLM은 fake 제공자(LLM_PROVIDER=fake)로 고정한다 — 외부 호출 없음. 문안 내용은 저장에 쓰이지 않는다.
  * 3. 끝에 demo 시드로 되돌린다(계정 A 데이터만). 계정 B는 읽기·거부 확인에만 쓴다.
  *
- * 기대(먼저 적음) — demo 시드의 품절 임박 PRD-003(재고 < 안전재고):
- * - 초안: 200, lines에 PRD-003, 표의 재고 · 안전재고 · 단가는 DB 값. 초안만 만들면 purchases 건수 그대로([취소]에 해당)
+ * 기대(먼저 적음) — demo 시드의 품절 임박 품목(재고 < 안전재고, PRD-003 포함):
+ * - 초안: 200, lines에 PRD-003, 모든 줄의 재고 · 안전재고 · 단가는 DB 값. 초안만 만들면 purchases 건수 그대로([취소]에 해당)
  * - [확인]: 201, purchases에 `발주완료` 1건(source agent · 수량 · 금액은 보낸 값), 건수 +1, 재고 그대로, 불변식 통과
  * - 실패해야 함: X-PF 없음 → 403 · 수량 0 → 400 · 없는 품목 포함 → 404 PF_NOT_FOUND이고 다른 줄도 저장 안 됨
  *               · 계정 B가 A의 품목으로 확정 → 404 PF_NOT_FOUND, A · B 건수 그대로
@@ -18,6 +18,7 @@
  *
  * 이력
  * 2026-11-23  skygaul  처음 작성 — T-AI-1 실제 DB 시험을 정식 파일로 (WU-33)
+ * 2026-11-23  skygaul  demo 시드가 8개 품목이 돼 초안 후보가 늘어남 — 후보에 PRD-003 포함 · 모든 줄이 DB 값과 같은지로 검사 (WU-22 반영)
  */
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
@@ -80,17 +81,24 @@ describe('T-AI-1 발주서 초안 → 확인 시에만 저장 (실제 DB)', () =
     const res = await draft();
     expect(res.status).toBe(200);
     const d = res.body.data as PoDraft;
-    expect(d.lines.map((l) => l.sku_id)).toEqual(['PRD-003']);
+    // demo 시드가 품목 8개로 늘어(WU-22) 후보가 PRD-003 하나가 아닐 수 있다. 안전재고 미만 PRD-003은 반드시 들어 있어야 하고,
+    // 모든 줄의 표 값은 DB 값과 같아야 한다.
+    expect(d.lines.map((l) => l.sku_id)).toContain('PRD-003');
 
-    const { data: item, error } = await a.from('items').select('item_name,unit_cost,stock_qty,safety_stock').eq('sku_id', 'PRD-003').single();
+    const { data: items, error } = await a.from('items').select('sku_id,item_name,unit_cost,stock_qty,safety_stock');
     expect(error).toBeNull();
-    expect(d.lines[0]).toMatchObject({
-      item_name: item!.item_name,
-      unit_cost: item!.unit_cost,
-      stock_qty: item!.stock_qty,
-      safety_stock: item!.safety_stock,
-    });
-    expect(d.lines[0]!.recommended_qty).toBeGreaterThanOrEqual(1);
+    const bySku = new Map((items ?? []).map((row) => [row.sku_id as string, row]));
+    for (const line of d.lines) {
+      const item = bySku.get(line.sku_id)!;
+      expect(line).toMatchObject({
+        item_name: item.item_name,
+        unit_cost: item.unit_cost,
+        stock_qty: item.stock_qty,
+        safety_stock: item.safety_stock,
+      });
+      expect(line.stock_qty).toBeLessThan(line.safety_stock);
+      expect(line.recommended_qty).toBeGreaterThanOrEqual(1);
+    }
     expect(await purchaseCount(a)).toBe(before);
   });
 
