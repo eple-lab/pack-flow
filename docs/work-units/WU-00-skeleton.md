@@ -132,6 +132,12 @@ sorek-charlie가 월요일에 **테스트 케이스만** 쓰면 되도록 구조
 
 ---
 
+## 테스트 방법
+
+- 자동: `npm run lint && npm run typecheck && npm run test:unit` (골격 검사. 통과 기록은 [eple-wu01-checks.md](../records/eple-wu01-checks.md)), `npm run check:secrets` (스테이징된 내용을 `scripts/check-secrets.sh`로 검사)
+- 직접: 새 폴더에 clone → `npm ci` → 가짜 키를 넣은 `.env.local`이 `git status`에 안 보이는지, `git config core.hooksPath`가 `.githooks`인지 확인. 배포 URL의 `/api/health`가 200이고 비로그인 `/items`가 `/login`으로 가는지 확인 (WU-06 기록: [eple-wu06-checks.md](../records/eple-wu06-checks.md))
+- 준비: 실제 키 없이 가짜 값만 쓴다. 값은 문서나 대화에 적지 않는다
+
 ## Wave 0 끝 점검 (11/22 밤)
 
 - [ ] WU-01~08 기준 모두 체크

@@ -30,6 +30,12 @@
 - [x] 배포 URL에서 Step 1 · 2 E2E 통과
 - [x] 증거 문서에 키 · 비밀번호 · 이메일 없음
 
+## 테스트 방법
+
+- 자동: `npm run test:db -- tests/api/auth.test.ts` (T-AUTH: 테스트 계정 A · B 두 개로 로그인 → 서로의 id로 호출)
+- 직접: 배포 URL에서 `E2E_BASE_URL=<배포 URL> npm run test:e2e -- step1 step2` (검증자 sorek-charlie). 결과를 계획서 2절 변경 이력에 "Step 1 · 2 완료/일부"로 기록
+- 준비: `.env.local`의 테스트 계정 A · B (값은 적지 않는다). E2E 대상 주소는 환경변수 `E2E_BASE_URL`로만 지정하고 파일에 적지 않는다
+
 ## 결과
 
 (작성: eple 세션의 Claude, 2026-11-23)

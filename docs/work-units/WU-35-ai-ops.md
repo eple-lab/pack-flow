@@ -36,6 +36,12 @@ Step 5 "요청량 상한과 비용을 기록하고, AI가 하지 못하는 것�
 - [ ] `ai-limits.md` · `llm-usage.md` · 사례 3개 완성
 - [ ] 문서에 키 · 이메일 없음
 
+## 테스트 방법
+
+- 자동: `npm run test:unit -- src/lib/llm.test.ts src/lib/agent` (LLM 호출 · 초안 로직). 에이전트 API는 `npm run test:db -- tests/api/agent.test.ts` (dev DB와 본인 계정 필요)
+- 직접: 배포 URL(Gemini)에서 시연 순서의 에이전트 부분을 3회 (발주서 초안 → 확인, 챗봇 5문장). 결과 · 지연 · 실패를 기록하고, Ollama 결과(WU-34)와 같은 문장으로 비교: 액션 JSON 일치 여부, 문안 품질 한 줄 평. `ai-limits.md` · `llm-usage.md`가 실제 동작과 맞는지 읽어 보고, `docs/records/ai-cases-*.md`의 사례 3개가 원인 · 수정 · 재검증을 갖췄는지 확인
+- 준비: Gemini 키는 배포 환경변수에만 두고 문서 · 대화에 적지 않는다. 로컬 Ollama 설정은 `.env.local`의 `LLM_PROVIDER` · `OLLAMA_BASE_URL` 이름만 확인한다
+
 ## 실제 동작 확인 항목 (리뷰어 eple)
 
 - [ ] 사례 3개가 "원인 · 수정 · 재검증"을 모두 갖춤
