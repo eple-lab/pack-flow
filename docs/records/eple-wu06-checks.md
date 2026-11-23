@@ -25,7 +25,7 @@
 | C-05 | Render 빌드 로그에 Node 24 · 빌드 성공 | `Using Node.js version 24.22.3 via environment variable NODE_VERSION`, `Build successful` (eple, 3절 로그 · [캡처](img/wu06/c05-node-version.png)) | 통과 |
 | C-06 | 배포 URL `/api/health` → 200 `ok/ok` | 200 `{"data":{"status":"ok","db":"ok","llm":"gemini"}}` (Claude, curl) | 통과 |
 | C-07 | 배포 URL 비로그인 `/items` → `/login` | 307 → `/login?next=%2Fitems`, `/`도 307 → `/login` (Claude, curl) | 통과 |
-| C-08 | 배포 URL 로그인 → 빈 대시보드 | dev 테스트 계정으로 로그인 성공(eple). **시연 계정 A(demo)는 demo 교체 뒤** | 일부 |
+| C-08 | 배포 URL 로그인 → 빈 대시보드 | dev 테스트 계정으로 로그인 성공(eple). 시연 계정 A는 demo 서비스에서 확인 — 4절 C-08 | 통과 |
 | C-09 | 틀린 비밀번호 로그인 → 오류 문구, 대시보드로 가지 않음(실패해야 정상) | "이메일 또는 비밀번호를 확인해 주세요", 로그인 화면에 머묾 (eple, [캡처](img/wu06/c09-wrong-password.png)) | 통과 |
 | C-10 | Render 환경변수 목록에 서비스 키 없음 | 9개(`GEMINI_API_KEY` · `LLM_*` 4개 · `NEXT_PUBLIC_*` 3개 · `NODE_VERSION`) 중 서비스 키 없음 (eple, [환경변수 캡처](img/wu06/c10-render-env.png)). 첫 배포 때 입력 칸은 `sync: false` 4개뿐 ([Blueprint 캡처](img/wu06/c10-blueprint-first-deploy.png)) | 통과 |
 | C-11 | 배포 URL 비로그인 `/api/me` → 401 `PF_UNAUTHENTICATED`(실패해야 정상) | 401 `PF_UNAUTHENTICATED` (Claude, curl) | 통과 |
@@ -92,3 +92,26 @@ found 0 vulnerabilities
 ![C-10 Render 환경변수 9개, 서비스 키 없음](img/wu06/c10-render-env.png)
 
 ![C-10 Blueprint 첫 배포 입력 칸 4개](img/wu06/c10-blueprint-first-deploy.png)
+
+## 4. 시연(demo) 서비스 (11/23 — D-37, `render.demo.yaml`)
+
+배포 URL: https://pack-flow-demo.onrender.com · eple이 Blueprint(`render.demo.yaml`)로 생성, Supabase **demo** 값 · Gemini 키 입력. Supabase demo 적용 · 비교는 [설정 기록](eple-supabase-setup.md) 5절 8~10번.
+
+| ID | 기대 | 실제 | 판정 |
+|---|---|---|---|
+| D-01 | 빌드 로그: 최신 main · Node 24 · 빌드 성공 | 커밋 `4fb5626`, `Using Node.js version 24.22.3 via environment variable NODE_VERSION`, `Build successful`, `Your service is live` (eple) | 통과 |
+| D-02 | `/api/health` → 200 ok/ok | 200 `{"data":{"status":"ok","db":"ok","llm":"gemini"}}` (Claude, curl) | 통과 |
+| D-03 | 비로그인 `/items` → `/login` | 307 → `/login?next=%2Fitems` (Claude, curl) | 통과 |
+| D-04 | 비로그인 `/api/me` → 401(실패해야 정상) | 401 `PF_UNAUTHENTICATED` (Claude, curl) | 통과 |
+| D-05 | dev · demo 서비스가 각각 맞는 DB를 봄 | 배포 화면 코드에 실린 Supabase 주소를 프로젝트 목록과 셸 안에서만 비교(값 출력 없음): `pack-flow` → dev, `pack-flow-demo` → demo, 서로 다름 (Claude) | 통과 |
+| D-06 | dev 테스트 계정으로 demo 로그인 → 거부(실패해야 정상) | "이메일 또는 비밀번호를 확인해 주세요" (eple, [캡처](img/wu06/d06-dev-account-on-demo.png)) | 통과 |
+| D-07 | demo 회원가입 꺼짐 · 이메일 확인 켜짐, 사용자는 시연 계정 A · B뿐 | [설정 캡처](img/wu06/d07-demo-signup-off.png), 사용자 목록 2개 확인 — 시연 계정 주소는 공개하지 않아 캡처 생략 (eple) | 통과 |
+| C-08 | 시연 계정 A로 demo 로그인 → 빈 대시보드 | 로그인 성공 → 대시보드 화면 · 네 메뉴 표시. 본문은 "아직 준비 중인 기능이에요" — 대시보드 API가 stub(`PF_NOT_IMPLEMENTED`)이라 정상, WU-41 병합 뒤 실제 값 (eple, [캡처](img/wu06/c08-demo-dashboard.png)) | 통과 |
+
+- 계정 스크립트를 demo 주소로 돌리면 거부(설정 기록 10번, `exit=1`). 이때 Node가 `MODULE_TYPELESS_PACKAGE_JSON` 경고를 내지만 동작에는 영향 없음(`package.json`에 `"type"`이 없어서 — eple 소유, 필요하면 따로)
+
+![D-06 dev 계정은 demo에서 거부](img/wu06/d06-dev-account-on-demo.png)
+
+![D-07 demo 회원가입 꺼짐](img/wu06/d07-demo-signup-off.png)
+
+![C-08 시연 계정 A 로그인 → 대시보드](img/wu06/c08-demo-dashboard.png)

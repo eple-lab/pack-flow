@@ -10,7 +10,8 @@
 |---|---|---|
 | 쓰임 | 개발 · 테스트(팀원 개인 테스트 계정, P-17), Render `pack-flow` 서비스(D-37) | Render `pack-flow-demo` 서비스 · 시연(D-37) |
 | 계정 주인 | eple (D-28) | eple (D-28) |
-| 지역 | Northeast Asia (Seoul) | 같음 |
+| 지역 | `ap-south-1`(뭄바이) — CLI 프로젝트 목록 기준, 처음 기록(Seoul)과 다름 | `ap-southeast-1`(싱가포르) — Render 서비스와 같은 지역 |
+| 대시보드 이름 | `pack-flow` | `pack-flow-demo` |
 | 플랜 | 무료 (활성 프로젝트 2개 한도, 1주 미사용 시 일시정지) | 같음 |
 | DB 비밀번호 | 자동 생성 → eple 비밀번호 관리자에만 | 같음 |
 | 팀원 초대 | 하지 않음 — 초대가 조직 단위라면 demo까지 열린다(추측). 팀원은 dev 공개 키 + 개인 테스트 계정으로 개발(D-28 대안) | 하지 않음 |
@@ -57,6 +58,6 @@
 | 5 | 테스트 계정 8개(`npm run users:create`) | Claude | 비밀번호는 `.env.testusers.local`에만, 화면 출력 없음 | 끝 (11/23, eple 실행 · 전달 뒤 파일 삭제) |
 | 6 | 실제 REST 시험: T-AUTH-4~6, 재고 함수 → `PF_NOT_IMPLEMENTED`, anon 조회 거부, `npm run test:db` | Claude | [eple-wu02-checks.md](eple-wu02-checks.md)에 결과 추가 | 끝 (11/23, 10건 통과) |
 | 7 | 로그인 → 네 페이지 이동 (로컬 `npm run dev`) | eple · Claude | 화면 | 끝 (11/23, eple 확인: 네 페이지 이동 · 로그아웃 → `/login` · 로그아웃 뒤 `/items` 직접 입력 → `/login`) |
-| 8 | demo 적용 → dev와 목록 비교(`db diff`) | Claude (eple 확인 후) | 차이 없음 | |
-| 9 | demo 시연 계정 A · B (대시보드에서) | eple | — | |
-| 10 | demo 주소로 계정 스크립트 실행 → 거부 | Claude | 거부 메시지, 계정 안 생김 | |
+| 8 | demo 적용 → dev와 목록 비교 | Claude (eple 확인 후) | 차이 없음 | 끝 (11/23) — dry-run 6개 → eple 확인 → `db push --remote` 6개 적용. 적용 이력 6개 local = remote, 읽기 전용 조회로 테이블 5 · RLS 5 · 정책 5(조건 지문) · `pf_*` 함수 16(인자 · 실행 권한 지문)이 dev와 **같음**. `db diff`는 로컬 Docker가 필요해 대신 씀. link는 dev로 되돌림 |
+| 9 | demo 시연 계정 A · B (대시보드에서) | eple | — | 끝 (11/23) — A · B 두 개(`@packflow.demo` 시연용 주소 — 메일이 가지 않음, 주소 · 비밀번호는 eple 비밀번호 관리자에만, Auto confirm). 회원가입 끄기 확인(캡처) |
+| 10 | demo 주소로 계정 스크립트 실행 → 거부 | eple 실행 | 거부 메시지, 계정 안 생김 | 끝 (11/23) — "멈춤 — 주소가 dev 프로젝트가 아닙니다 … (D-20 ③)", `exit=1`. demo 사용자 목록은 A · B 두 개뿐 |
