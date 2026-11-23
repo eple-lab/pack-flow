@@ -45,6 +45,7 @@
 | D-34 | **다 됐다의 기준은 항목마다 중간에 시험한다.** 기대 결과(실패해야 하는 경우 포함)를 먼저 적고 → 시험 → 통과 뒤 다음 항목. 결과는 PR 본문 '확인한 것' 표(ID · 기대 · 실제 · 판정), 실패 → 고침 → 재확인은 `ai-cases-<계정>.md`. 근거: WU-01에서 결함 4건이 모두 중간 시험에서 잡힘 | eple, 11/20 |
 | D-35 | **Supabase Data API 설정**: Data API 켜기, '새 테이블 API 자동 공개' 끄기, '새 테이블 RLS 자동 켜기' 켜기(두 프로젝트 같게). 권한은 마이그레이션에 직접 적는다. 팀원 초대는 하지 않는다(D-28 대안). 설정 전체는 [records/eple-supabase-setup.md](records/eple-supabase-setup.md) | eple, 11/23 |
 | D-36 | **D-13 예외: 11/23 Wave 0 마무리(render.yaml · 기록 문서)는 eple이 main에 직접 push한다.** eple 수업 중(11시 무렵까지)이라 리뷰 대기 없이 진행. PR 흐름은 WU-01 시험 PR #1에서 이미 확인했다. 팀원 WU와 그 밖의 eple 작업은 D-13대로 브랜치 + PR | eple, 11/23 |
+| D-37 | **Render 서비스를 dev · demo 둘로 나눈다.** `render.yaml` → `pack-flow`(Supabase dev 값, 팀원 테스트 · 검증자의 배포 URL E2E를 dev 테스트 계정으로), `render.demo.yaml` → `pack-flow-demo`(Supabase demo 값, 발표 · 시연 — 시연 계정 A · B만). 이유: 한 서비스를 demo로 바꾸면 dev 테스트 계정으로 배포 URL을 시험할 수 없고(2일차 "다른 팀원이 배포 URL에서 테스트", WU-42), dev로 두면 시연 데이터가 섞인다. 두 서비스 모두 main 병합 때마다 다시 배포된다. 서비스 키는 둘 다 없음(D-20) | eple, 11/23 |
 
 ## 2. 제안에서 확정된 결정 (P-01~P-19, 2026-11-20 eple 승인)
 
@@ -97,3 +98,4 @@ P-01 · P-08 · P-12 · P-19는 D-16~19와 같은 내용이다(계획서 반영 
 | 2026-11-20 | D-34 중간 시험 규칙 (AGENTS.md 4절 · 06 PR 양식 · 07 5절) |
 | 2026-11-23 | D-35 Supabase Data API · 초대 설정 |
 | 2026-11-23 | D-36 Wave 0 마무리 main 직접 push (D-13 예외) |
+| 2026-11-23 | D-37 Render dev · demo 두 서비스 |

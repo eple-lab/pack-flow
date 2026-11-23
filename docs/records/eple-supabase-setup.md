@@ -8,7 +8,7 @@
 
 | 항목 | packflow-dev | packflow-demo |
 |---|---|---|
-| 쓰임 | 개발 · 테스트(팀원 개인 테스트 계정, P-17) | 배포(Render) · 시연 |
+| 쓰임 | 개발 · 테스트(팀원 개인 테스트 계정, P-17), Render `pack-flow` 서비스(D-37) | Render `pack-flow-demo` 서비스 · 시연(D-37) |
 | 계정 주인 | eple (D-28) | eple (D-28) |
 | 지역 | Northeast Asia (Seoul) | 같음 |
 | 플랜 | 무료 (활성 프로젝트 2개 한도, 1주 미사용 시 일시정지) | 같음 |
@@ -38,8 +38,8 @@
 
 | 키 | dev | demo |
 |---|---|---|
-| 주소 (`NEXT_PUBLIC_SUPABASE_URL`) | eple · 팀원 `.env.local` | Render 환경변수 |
-| publishable(공개) 키 (`NEXT_PUBLIC_SUPABASE_ANON_KEY`) | eple · 팀원 `.env.local` (개별 전달) | Render 환경변수 |
+| 주소 (`NEXT_PUBLIC_SUPABASE_URL`) | eple · 팀원 `.env.local`, Render `pack-flow` | Render `pack-flow-demo` |
+| publishable(공개) 키 (`NEXT_PUBLIC_SUPABASE_ANON_KEY`) | eple · 팀원 `.env.local` (개별 전달), Render `pack-flow` | Render `pack-flow-demo` |
 | 프로젝트 ref (`SUPABASE_DEV_PROJECT_REF`) | eple `.env.local` (계정 스크립트 안전장치) | — |
 | secret(서비스) 키 (`SUPABASE_SERVICE_ROLE_KEY`) | **eple PC `.env.local`에만** | **아무 데도 저장하지 않음** |
 
