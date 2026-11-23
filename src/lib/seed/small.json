@@ -1,0 +1,55 @@
+{
+  "items": [
+    {"sku_id": "SML-001", "item_name": "가상 검증 품목 1", "unit_cost": 1100, "sale_price": 2200, "initial_qty": 8, "safety_stock": 9},
+    {"sku_id": "SML-002", "item_name": "가상 검증 품목 2", "unit_cost": 1200, "sale_price": 2400, "initial_qty": 9, "safety_stock": 4},
+    {"sku_id": "SML-003", "item_name": "가상 검증 품목 3", "unit_cost": 1300, "sale_price": 2600, "initial_qty": 10, "safety_stock": 11},
+    {"sku_id": "SML-004", "item_name": "가상 검증 품목 4", "unit_cost": 1400, "sale_price": 2800, "initial_qty": 11, "safety_stock": 4},
+    {"sku_id": "SML-005", "item_name": "가상 검증 품목 5", "unit_cost": 1500, "sale_price": 3000, "initial_qty": 12, "safety_stock": 13}
+  ],
+  "purchases": [
+    {"purchase_id": "P-101", "sku_id": "SML-001", "supplier": "가상 검증 공급처", "order_qty": 6, "purchase_cost": 7000},
+    {"purchase_id": "P-102", "sku_id": "SML-001", "supplier": "가상 검증 공급처", "order_qty": 7, "purchase_cost": 8000},
+    {"purchase_id": "P-103", "sku_id": "SML-002", "supplier": "가상 검증 공급처", "order_qty": 6, "purchase_cost": 7000},
+    {"purchase_id": "P-104", "sku_id": "SML-002", "supplier": "가상 검증 공급처", "order_qty": 7, "purchase_cost": 8000},
+    {"purchase_id": "P-105", "sku_id": "SML-003", "supplier": "가상 검증 공급처", "order_qty": 6, "purchase_cost": 7000},
+    {"purchase_id": "P-106", "sku_id": "SML-003", "supplier": "가상 검증 공급처", "order_qty": 7, "purchase_cost": 8000},
+    {"purchase_id": "P-107", "sku_id": "SML-004", "supplier": "가상 검증 공급처", "order_qty": 6, "purchase_cost": 7000},
+    {"purchase_id": "P-108", "sku_id": "SML-004", "supplier": "가상 검증 공급처", "order_qty": 7, "purchase_cost": 8000},
+    {"purchase_id": "P-109", "sku_id": "SML-005", "supplier": "가상 검증 공급처", "order_qty": 6, "purchase_cost": 7000},
+    {"purchase_id": "P-110", "sku_id": "SML-005", "supplier": "가상 검증 공급처", "order_qty": 7, "purchase_cost": 8000}
+  ],
+  "sales": [
+    {"sale_id": "S-201", "sku_id": "SML-001", "channel": "가상 검증 판매처", "sold_qty": 3, "sale_amount": 5000},
+    {"sale_id": "S-203", "sku_id": "SML-002", "channel": "가상 검증 판매처", "sold_qty": 4, "sale_amount": 5000},
+    {"sale_id": "S-205", "sku_id": "SML-003", "channel": "가상 검증 판매처", "sold_qty": 2, "sale_amount": 5000},
+    {"sale_id": "S-207", "sku_id": "SML-004", "channel": "가상 검증 판매처", "sold_qty": 3, "sale_amount": 5000},
+    {"sale_id": "S-209", "sku_id": "SML-005", "channel": "가상 검증 판매처", "sold_qty": 4, "sale_amount": 5000}
+  ],
+  "events": [
+    {"op": "receive", "purchase_id": "P-101", "received_qty": 4},
+    {"op": "receive", "purchase_id": "P-102", "received_qty": 5},
+    {"op": "ship", "sale_id": "S-201"},
+    {"op": "receive", "purchase_id": "P-103", "received_qty": 5},
+    {"op": "receive", "purchase_id": "P-104", "received_qty": 6},
+    {"op": "ship", "sale_id": "S-203"},
+    {"op": "receive", "purchase_id": "P-105", "received_qty": 6},
+    {"op": "receive", "purchase_id": "P-106", "received_qty": 3},
+    {"op": "ship", "sale_id": "S-205"},
+    {"op": "receive", "purchase_id": "P-107", "received_qty": 3},
+    {"op": "receive", "purchase_id": "P-108", "received_qty": 4},
+    {"op": "ship", "sale_id": "S-207"},
+    {"op": "receive", "purchase_id": "P-109", "received_qty": 4},
+    {"op": "receive", "purchase_id": "P-110", "received_qty": 5},
+    {"op": "ship", "sale_id": "S-209"}
+  ],
+  "expected": {
+    "kpi": { "item_count": 5, "stock_total": 79, "below_safety": 0 },
+    "stock": {
+      "SML-001": 14,
+      "SML-002": 16,
+      "SML-003": 17,
+      "SML-004": 15,
+      "SML-005": 17
+    }
+  }
+}

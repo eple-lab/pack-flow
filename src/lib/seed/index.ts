@@ -6,8 +6,8 @@
  * 2. 검사 내용: 03 7절 형식(items · purchases · sales · events · expected) + 교차 확인(구매 · 판매 · 이벤트가 있는 품목 · 번호를 가리키는지,
  *    번호 중복 없음, 재고에 영향 주는 상태는 시드 행에 넣지 않고 events로 만든다 — DB 함수 pf_reset_and_seed와 같은 규칙).
  * 3. JSON에는 주석을 달 수 없어 데이터 설명은 여기에 적는다:
- *    - demo.json = 계획서 7절 예시(PRD-001~003 · P-101 · S-201 · S-202). 완료 테스트 1 · 2가 바로 이어진다. 데이터 주인은 sorek-charlie(이후 8~12개로 늘림).
- *    - small.json · large.json = Step 4 정답표 · 응답 시간용. sorek-charlie가 만든다(지금은 없다 — 부르면 "아직 없어요" 오류).
+ *    - demo.json = 계획서 7절 예시(PRD-001~003 · P-101 · S-201 · S-202)를 포함한 시연 데이터.
+ *    - small.json · large.json = Step 4 정답표 · 응답 시간용 데이터.
  *    - `initial_qty`는 `재고조정` 이력으로 들어간다. `events`는 재고 함수로 실행된다. `expected`는 손으로 구한 정답이다(검산 기준).
  * 4. 서버(`POST /api/seed`)와 테스트 도우미(tests/db/helpers.ts)가 같은 로더를 쓴다. 실제 거래처명 · 매출을 넣지 않는다(가상 데이터만).
  *
@@ -16,6 +16,7 @@
  *
  * 이력
  * 2026-11-23  eple  처음 작성 — 시드 로더 · 형식 검사 · demo (WU-08)
+ * 2026-11-23  sorek-charlie  small·large 등록 (WU-22)
  */
 import { z } from 'zod';
 import { SEED_DATASETS, type SeedDataset } from '@/types/erp';
@@ -149,28 +150,22 @@ export function isSeedName(value: unknown): value is SeedDataset {
 
 /**
  * 이름 → JSON 불러오기. 파일마다 글자 그대로 import해야 Next 번들러가 파일을 포함한다(변수로 만든 경로는 번들에 안 들어간다).
- * small.json · large.json을 만들면 아래에 한 줄씩 더한다:
- *   small: () => import('./small.json'),
- *   large: () => import('./large.json'),
- * (그리고 seed.test.ts의 'S4-4' 시험에서 해당 이름을 뺀다.)
  */
-const LOADERS: Partial<Record<SeedDataset, () => Promise<{ default: unknown }>>> = {
+const LOADERS: Record<SeedDataset, () => Promise<{ default: unknown }>> = {
   demo: () => import('./demo.json'),
+  small: () => import('./small.json'),
+  large: () => import('./large.json'),
 };
 
 /**
  * 이름으로 시드를 읽어 검사한다.
  * @param name 'demo' | 'small' | 'large'
- * @throws SeedError 모르는 이름 · 파일이 아직 없음(small · large는 sorek-charlie가 만든다) · 형식 오류
+ * @throws SeedError 모르는 이름 · 형식 오류
  */
 export async function loadSeed(name: string): Promise<SeedData> {
   if (!isSeedName(name)) {
     throw new SeedError(`모르는 시드 이름이에요: ${String(name).slice(0, 20)} (demo · small · large 중 하나)`);
   }
-  const loader = LOADERS[name];
-  if (!loader) {
-    throw new SeedError(`시드 ${name}.json이 아직 없어요 (src/lib/seed/${name}.json — 데이터 주인 sorek-charlie)`);
-  }
-  const raw = (await loader()).default;
+  const raw = (await LOADERS[name]()).default;
   return parseSeed(raw, name);
 }

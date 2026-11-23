@@ -1,19 +1,40 @@
 {
   "items": [
-    { "sku_id": "PRD-001", "item_name": "무선 마우스", "unit_cost": 8000, "sale_price": 15000, "initial_qty": 10, "safety_stock": 5 },
-    { "sku_id": "PRD-002", "item_name": "USB-C 케이블", "unit_cost": 2000, "sale_price": 5000, "initial_qty": 40, "safety_stock": 15 },
-    { "sku_id": "PRD-003", "item_name": "노트북 거치대", "unit_cost": 12000, "sale_price": 25000, "initial_qty": 3, "safety_stock": 4 }
+    {"sku_id": "PRD-001", "item_name": "무선 마우스", "unit_cost": 8000, "sale_price": 15000, "initial_qty": 10, "safety_stock": 5},
+    {"sku_id": "PRD-002", "item_name": "USB-C 케이블", "unit_cost": 2000, "sale_price": 5000, "initial_qty": 40, "safety_stock": 15},
+    {"sku_id": "PRD-003", "item_name": "노트북 거치대", "unit_cost": 12000, "sale_price": 25000, "initial_qty": 3, "safety_stock": 4},
+    {"sku_id": "PRD-004", "item_name": "가상 시연 품목 4", "unit_cost": 1400, "sale_price": 2800, "initial_qty": 11, "safety_stock": 4},
+    {"sku_id": "PRD-005", "item_name": "가상 시연 품목 5", "unit_cost": 1500, "sale_price": 3000, "initial_qty": 12, "safety_stock": 13},
+    {"sku_id": "PRD-006", "item_name": "가상 시연 품목 6", "unit_cost": 1600, "sale_price": 3200, "initial_qty": 13, "safety_stock": 4},
+    {"sku_id": "PRD-007", "item_name": "가상 시연 품목 7", "unit_cost": 1700, "sale_price": 3400, "initial_qty": 14, "safety_stock": 15},
+    {"sku_id": "PRD-008", "item_name": "가상 시연 품목 8", "unit_cost": 1800, "sale_price": 3600, "initial_qty": 15, "safety_stock": 4}
   ],
   "purchases": [
-    { "purchase_id": "P-101", "sku_id": "PRD-001", "supplier": "가나물산", "order_qty": 10, "purchase_cost": 80000, "status": "이동·통관중" }
+    {"purchase_id": "P-101", "sku_id": "PRD-001", "supplier": "가나물산", "order_qty": 10, "purchase_cost": 80000, "status": "이동·통관중"},
+    {"purchase_id": "P-102", "sku_id": "PRD-004", "supplier": "가상 시연 공급처 1", "order_qty": 8, "purchase_cost": 12000, "status": "발주완료"},
+    {"purchase_id": "P-103", "sku_id": "PRD-005", "supplier": "가상 시연 공급처 2", "order_qty": 9, "purchase_cost": 13000, "status": "발주완료"},
+    {"purchase_id": "P-104", "sku_id": "PRD-006", "supplier": "가상 시연 공급처 3", "order_qty": 10, "purchase_cost": 14000, "status": "발주완료"}
   ],
   "sales": [
-    { "sale_id": "S-201", "sku_id": "PRD-001", "channel": "스마트스토어", "sold_qty": 6, "sale_amount": 90000, "fulfillment_status": "출고대기" },
-    { "sale_id": "S-202", "sku_id": "PRD-002", "channel": "쿠팡", "sold_qty": 5, "sale_amount": 25000, "fulfillment_status": "주문접수" }
+    {"sale_id": "S-201", "sku_id": "PRD-001", "channel": "스마트스토어", "sold_qty": 6, "sale_amount": 90000, "fulfillment_status": "출고대기"},
+    {"sale_id": "S-202", "sku_id": "PRD-002", "channel": "쿠팡", "sold_qty": 5, "sale_amount": 25000, "fulfillment_status": "주문접수"},
+    {"sale_id": "S-203", "sku_id": "PRD-004", "channel": "가상 시연 판매처 1", "sold_qty": 2, "sale_amount": 5500, "fulfillment_status": "출고대기"},
+    {"sale_id": "S-204", "sku_id": "PRD-005", "channel": "가상 시연 판매처 2", "sold_qty": 3, "sale_amount": 6500, "fulfillment_status": "출고대기"},
+    {"sale_id": "S-205", "sku_id": "PRD-006", "channel": "가상 시연 판매처 3", "sold_qty": 4, "sale_amount": 7500, "fulfillment_status": "주문접수"},
+    {"sale_id": "S-206", "sku_id": "PRD-007", "channel": "가상 시연 판매처 4", "sold_qty": 5, "sale_amount": 8500, "fulfillment_status": "주문접수"}
   ],
   "events": [],
   "expected": {
-    "kpi": { "item_count": 3, "stock_total": 53, "below_safety": 1 },
-    "stock": { "PRD-001": 10, "PRD-002": 40, "PRD-003": 3 }
+    "kpi": { "item_count": 8, "stock_total": 118, "below_safety": 3 },
+    "stock": {
+      "PRD-001": 10,
+      "PRD-002": 40,
+      "PRD-003": 3,
+      "PRD-004": 11,
+      "PRD-005": 12,
+      "PRD-006": 13,
+      "PRD-007": 14,
+      "PRD-008": 15
+    }
   }
 }
