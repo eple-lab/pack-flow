@@ -103,4 +103,4 @@ Step 5 ② "요청을 정해진 액션으로만 해석, 변경은 실행 전 확
   - 실제 Ollama 시험은 가짜 DB 데이터로 돌렸다(Gemini 시험은 실제 DB 데이터)
   - 참고: 작은 모델(0.8B)이라 허용 액션 밖 요청에 `unsupported`를 내라는 지시를 안 따르는 일이 있어, 서버 검사(스키마 · 재탐색 · 번호 확인 · 재고 확인 · 사람 확인)가 막는다는 점이 이 구조의 전제다
 - AI가 틀린 것과 고친 과정: 가짜 LLM 시험이 모두 통과했지만 실제 Ollama가 인젝션 문장에서 없는 구매 번호를 지어냄 → 사용자 메시지에 번호가 있을 때만 제안(`docs/records/ai-cases-skygaul.md` 사례 3)
-- PR:
+- PR: https://github.com/eple-lab/pack-flow/pull/51
