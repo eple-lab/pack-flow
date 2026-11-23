@@ -57,7 +57,7 @@
 - 한 것:
   - `src/lib/agent/reorder.ts`: `computeReorderCandidates()` — 최근 7일 출고 · 입고 예정 · 안전재고로 후보와 추천 수량 · 근거 문장 계산(순수 함수, 시간은 `now` 인자)
   - `src/lib/agent/prompts/draft-po.ts`: `buildDraftPoPrompt()` — 계산 표를 `<자료>` 구역에 넣고 LLM이 문안만 쓰게 하는 시스템 · 사용자 프롬프트
-  - `src/lib/agent/reorder.test.ts`: 계산 12건(R-1~12) + 프롬프트 5건(P-1~5)
+  - `src/lib/agent/reorder.test.ts`: 계산 12건(R-1부터 R-12) + 프롬프트 5건(P-1부터 P-5)
   - 올림 · 품절 예상 비교는 정수 연산으로 했다(부동소수 오차 방지). 올림 시험(R-6)을 위해 `leadDays` 옵션을 열어 뒀다(기본 7, 실제 동작 같음)
 - 직접 확인한 것:
   - `npm run test:unit -- src/lib/agent/reorder` → 17개 통과
