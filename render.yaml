@@ -1,0 +1,53 @@
+# render.yaml — Render 배포 설정(Blueprint). 대시보드에서 이 파일로 서비스를 만든다.
+#
+# 하는 일
+# 1. Next.js 앱 하나를 Render 무료 Web Service로 띄운다. 빌드 `npm ci && npm run build`, 시작 `npm start`.
+#    `next start`는 Render가 주는 PORT 환경변수와 0.0.0.0을 기본으로 쓴다(Next 16 CLI 문서).
+# 2. 상태 확인은 `/api/health` — DB에 닿지 않으면 503이라 배포가 실패로 보인다(일부러).
+# 3. 환경변수는 이름만 적는다. 값이 있는 칸(`sync: false`)은 eple이 대시보드에서 직접 넣는다.
+#    NEXT_PUBLIC_* 값은 빌드 때 번들에 들어가므로, 값을 바꾸면 다시 배포해야 반영된다.
+# 4. 서비스 키(SUPABASE_SERVICE_ROLE_KEY)는 넣지 않는다(D-20 ①). NODE_ENV도 넣지 않는다
+#    (production이면 `npm ci`가 devDependencies의 typescript를 빼서 빌드가 실패한다).
+#
+# 근거: D-05(Render 무료) · D-20(서비스 키) · D-27(Gemini 키는 eple이 직접) · WU-06
+# 구역: eple (docs/06-work-plan.md 1절)
+#
+# 이력
+# 2026-11-23  eple  처음 작성 — Render Web Service 설정 (WU-06)
+
+services:
+  - type: web
+    name: pack-flow
+    runtime: node
+    plan: free
+    # Supabase가 서울이라 가까운 싱가포르
+    region: singapore
+    branch: main
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      # .nvmrc · package.json engines와 같은 메이저
+      - key: NODE_VERSION
+        value: "24"
+      # ── Supabase: 배포는 demo 프로젝트 값(D-11). eple이 입력 ──
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
+      # ── LLM (D-06): 배포는 gemini ──
+      - key: LLM_PROVIDER
+        value: gemini
+      # AI Studio의 Flash-Lite 모델 ID. eple이 입력
+      - key: LLM_MODEL
+        sync: false
+      # 서버 전용 키. eple이 직접 입력(D-27)
+      - key: GEMINI_API_KEY
+        sync: false
+      # P-09: 사용자당 하루 30, 앱 전체 하루 300
+      - key: LLM_LIMIT_USER
+        value: "30"
+      - key: LLM_LIMIT_GLOBAL
+        value: "300"
+      - key: NEXT_PUBLIC_USE_MOCK
+        value: "0"
