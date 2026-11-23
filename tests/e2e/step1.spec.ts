@@ -5,7 +5,9 @@
  */
 import { expect, test } from '@playwright/test';
 import type { Dashboard } from '@/types/erp';
-import { loadSeed } from '@/lib/seed';
+import demo from '@/lib/seed/demo.json';
+import small from '@/lib/seed/small.json';
+import large from '@/lib/seed/large.json';
 import { loginViaUi, resetViaApi } from './helpers';
 
 test('T-S1-1 · T-S1-2 출고 후 4개, 부분 입고 후 12개', async ({ page }) => {
@@ -41,10 +43,8 @@ test('T-S1-1 · T-S1-2 출고 후 4개, 부분 입고 후 12개', async ({ page 
   await expect(total).toHaveText((initialTotal + 2).toLocaleString('ko-KR'));
 });
 
-for (const name of ['demo', 'small', 'large'] as const) {
+for (const [name, { expected }] of [['demo', demo], ['small', small], ['large', large]] as const) {
   test(`T-S4-1 ${name} 초기화 뒤 대시보드 API가 정답과 일치한다`, async ({ page }) => {
-    const { expected } = await loadSeed(name);
-    if (!expected?.stock || !expected.kpi) throw new Error(`${name}: 손으로 계산한 expected가 필요합니다`);
     await loginViaUi(page, 'A');
     await resetViaApi(page, name);
 
