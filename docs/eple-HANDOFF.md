@@ -19,14 +19,13 @@
 - 골격 코드: WU-01 · 02 · 03 · 04 · 05 · 08 커밋 · push 끝(`8dd8fe0`까지). 검토 기록 [records/eple-skeleton-review.md](records/eple-skeleton-review.md)
 - Supabase dev: 설정 · 마이그레이션 6개 적용 · 테스트 계정 8개 · 실제 권한 시험 10건 통과 · 로그인 확인. 기록 [records/eple-supabase-setup.md](records/eple-supabase-setup.md), [records/eple-wu02-checks.md](records/eple-wu02-checks.md). 결정 D-35
 - 로컬 확인 끝(11/23, eple): 네 페이지 이동 · 로그아웃 → `/login` · 비로그인 직접 접근 → `/login`
-- WU-06: `render.yaml` push(`fb6fe0b`), 로컬 빌드 · health 확인 — [records/eple-wu06-checks.md](records/eple-wu06-checks.md). Render 서비스는 아직 안 만듦
-- 올리는 방식: 11/23 Wave 0 마무리는 main 직접 push(D-36, D-13 예외)
-- 팀원: 계정 정보 받음, "아직 개발하지 말고 문서만" 상태 — dev 적용이 끝났으니 시작 공지 가능
-- 남은 순서 (11/23 eple 결정: Render 먼저, demo는 뒤로)
-  1. WU-06 Render: Blueprint로 서비스 만들기 → 환경변수 입력(eple) → 배포 → `/api/health` · 배포 URL 확인. 첫 배포의 Supabase 값(dev 임시 / demo)과 Gemini 준비 여부(아니면 `LLM_PROVIDER=fake`)는 eple 선택 대기
-  2. demo 프로젝트 만들기(설정 기록 1~3절과 같게) → `supabase link`를 demo로 바꿔 dry-run → **eple 확인 후** 적용 → dev와 비교 → 다시 dev로 link
-  3. demo 시연 계정 A · B(대시보드), demo 주소로 계정 스크립트 거부 확인 → Render 값을 demo로 바꿔 다시 배포 → 배포 URL에서 계정 A 로그인
-  4. WU-07 이슈 올리기 · 팀 시작 공지 → WU-00 'Wave 0 끝 점검'
+- WU-06: `render.yaml`(`fb6fe0b`) → **배포 완료 https://pack-flow.onrender.com (dev 값으로 임시)**, eple 로그인 확인, health ok — [records/eple-wu06-checks.md](records/eple-wu06-checks.md)
+- 올리는 방식: render.yaml과 기록 2건까지 main 직접(D-36, `fb6fe0b` · `d0f7695`). **그 뒤로는 eple도 브랜치 + PR(리뷰어 sorek-charlie, D-13)**
+- 팀원: 시작 공지문을 workspace 저장소 `guide/01-start-notice.md`에 작성(11/23). 화면 담당 AI가 workspace 저장소를 코드 저장소로 착각해 "뼈대 만들기"를 제안한 일이 있어 공지 0절에 적음
+- 남은 순서 (Render 먼저 끝냄, 이제 demo)
+  1. demo 프로젝트 만들기(설정 기록 1~3절과 같게) → `supabase link`를 demo로 바꿔 dry-run → **eple 확인 후** 적용 → dev와 비교 → 다시 dev로 link
+  2. demo 시연 계정 A · B(대시보드), demo 주소로 계정 스크립트 거부 확인 → Render 값을 demo로 바꿔 다시 배포 → 배포 URL에서 계정 A 로그인
+  3. WU-06 남은 확인(C-05 · 08 · 09 · 10) → WU-07 이슈 올리기 · 공지 게시 → WU-00 'Wave 0 끝 점검'
 - 주의: CLI는 `npx supabase@3.2.0 … --remote`(빼면 로컬 Docker를 찾음). `.env.local`은 열거나 출력하지 않는다(값은 셸 안 비교만)
 
 ### 골격 세션에서 배운 것 (11/20~23)
