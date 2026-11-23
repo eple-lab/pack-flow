@@ -21,16 +21,16 @@ import { FieldError } from '@/components/common/FieldError';
 import { SubmitButton } from '@/components/common/SubmitButton';
 import { api, ApiError } from '@/lib/api-client';
 import { formatNumber } from '@/lib/format';
-import { makeReceive, parseWith, toNumberInput, type ParseResult } from '@/lib/validation';
+import { makeReceive, parseWith, type ParseResult } from '@/lib/validation';
 import type { Purchase, PurchaseWithStock } from '@/types/erp';
-import { fieldErrorFromApi, fieldErrorFromDetail, type FieldErrorState } from './form-utils';
+import { fieldErrorFromApi, fieldErrorFromDetail, toIntegerInput, type FieldErrorState } from './form-utils';
 import styles from './trades.module.css';
 
 const RECEIVE_FIELDS = ['received_qty'] as const;
 
 /** 도착 수량 입력 글자를 검사한다(1 ~ 그 구매의 order_qty, 쉼표 · 공백 제거). */
 export function buildReceiveInput(orderQty: number, text: string): ParseResult<{ received_qty: number }> {
-  return parseWith(makeReceive(orderQty), { received_qty: toNumberInput(text) });
+  return parseWith(makeReceive(orderQty), { received_qty: toIntegerInput(text) });
 }
 
 /**

@@ -20,10 +20,10 @@ import { useId, useRef, useState } from 'react';
 import { FieldError } from '@/components/common/FieldError';
 import { SubmitButton } from '@/components/common/SubmitButton';
 import { api, ApiError } from '@/lib/api-client';
-import { parseWith, saleCreate, toNumberInput, toUpperSku, type ParseResult } from '@/lib/validation';
+import { parseWith, saleCreate, toUpperSku, type ParseResult } from '@/lib/validation';
 import type { SaleCreateInput } from '@/lib/validation/schemas';
 import type { Item, Sale } from '@/types/erp';
-import { fieldErrorFromApi, fieldErrorFromDetail, type FieldErrorState } from './form-utils';
+import { fieldErrorFromApi, fieldErrorFromDetail, toIntegerInput, type FieldErrorState } from './form-utils';
 import styles from './trades.module.css';
 
 /** 폼 칸 값(입력 그대로의 글자). */
@@ -47,8 +47,8 @@ export function buildSaleInput(values: SaleFormValues): ParseResult<SaleCreateIn
   return parseWith(saleCreate, {
     sku_id: toUpperSku(values.sku_id),
     channel: values.channel,
-    sold_qty: toNumberInput(values.sold_qty),
-    sale_amount: toNumberInput(values.sale_amount),
+    sold_qty: toIntegerInput(values.sold_qty),
+    sale_amount: toIntegerInput(values.sale_amount),
     invoice_no: values.invoice_no,
   });
 }

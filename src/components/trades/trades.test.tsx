@@ -109,6 +109,16 @@ describe('F: 폼 검사 — 요청 전에 막는다 (04 4.2 · 4.3)', () => {
     if (!noChannel.ok) expect(noChannel.detail).toEqual({ field: 'channel', reason: 'required' });
     else throw new Error('빈 채널이 통과했다');
   });
+  it('F-09 (실패해야 함) 금액 · 수량 `8,5`(소수 뜻 쉼표) → not_integer, 천 단위 쉼표 `1,000`은 통과', () => {
+    const cost = buildPurchaseInput({ ...purchaseValues, purchase_cost: '8,5' });
+    expect(!cost.ok && cost.detail).toEqual({ field: 'purchase_cost', reason: 'not_integer' });
+    const qty = buildSaleInput({ ...saleValues, sold_qty: '1,5' });
+    expect(!qty.ok && qty.detail).toEqual({ field: 'sold_qty', reason: 'not_integer' });
+    const received = buildReceiveInput(10, '8,5');
+    expect(!received.ok && received.detail).toEqual({ field: 'received_qty', reason: 'not_integer' });
+    const thousands = buildSaleInput({ ...saleValues, sale_amount: '1,000' });
+    expect(thousands.ok && thousands.data.sale_amount).toBe(1000);
+  });
   it('F-08 도착 수량은 1 ~ 주문 수량: 8은 통과, 0 · 11은 범위 밖(실패해야 함)', () => {
     expect(buildReceiveInput(10, '8')).toEqual({ ok: true, data: { received_qty: 8 } });
     for (const text of ['0', '11']) {

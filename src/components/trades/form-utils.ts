@@ -4,18 +4,34 @@
  * 하는 일
  * 1. 화면 검사(parseWith) 실패나 서버 PF_VALIDATION · PF_DUPLICATE_INVOICE를 "어느 칸 아래에 무슨 문구"로 바꾼다(04 4.4).
  *    폼에 없는 칸이면 null을 돌려 배너로 보내게 한다.
- * 2. 성공 알림 "PRD-001 재고 10 → 4" 문구를 만든다. 숫자는 목록 값(전)과 서버 응답 stock_qty(후)를 그대로 쓴다.
- * 3. 'use client'가 없다 — 단위 시험에서 바로 부른다.
+ * 2. 숫자 칸은 천 단위 쉼표만 지운다(toIntegerInput) — `8,5`는 not_integer로 막는다.
+ * 3. 성공 알림 "PRD-001 재고 10 → 4" 문구를 만든다. 숫자는 목록 값(전)과 서버 응답 stock_qty(후)를 그대로 쓴다.
+ * 4. 'use client'가 없다 — 단위 시험에서 바로 부른다.
  *
  * 근거: docs/04-api-contract.md 4.3 · 4.4 · 4.6, docs/work-units/WU-12-trades.md 6 · 7번
  * 구역: jkspawn (docs/06-work-plan.md 1절)
  *
  * 이력
- * 2026-11-23  jkspawn  처음 작성 — 칸 오류 · 재고 변화 문구 (WU-12)
+ * 2026-11-23  jkspawn  처음 작성 — 칸 오류 · 재고 변화 문구 · 숫자 칸 천 단위 쉼표 처리 (WU-12)
  */
 import type { ApiError } from '@/lib/api-client';
 import { formatNumber } from '@/lib/format';
+import { toNumberInput } from '@/lib/validation';
 import type { ValidationDetail } from '@/types/erp';
+
+/** 천 단위 쉼표가 바르게 찍힌 정수(예: 1,000 · 12,000). */
+const THOUSANDS = /^-?\d{1,3}(,\d{3})+$/;
+
+/**
+ * 숫자 칸 입력을 보낼 값으로 바꾼다. 쉼표는 천 단위 자리에 있을 때만 지운다.
+ * `8,5`처럼 천 단위가 아닌 쉼표(소수 뜻)는 글자 그대로 넘겨 스키마가 not_integer로 막게 한다
+ * — toNumberInput은 쉼표를 모두 지워 85로 통과시키기 때문이다(04 4.1 "소수는 not_integer", WU-12 다 됐다 5번).
+ */
+export function toIntegerInput(text: string): number | string {
+  const compact = text.replace(/\s/g, '');
+  if (compact.includes(',') && !THOUSANDS.test(compact)) return text;
+  return toNumberInput(text);
+}
 
 /** 칸 아래 오류 하나. detail이면 FieldError가 4.3 문구를 만들고, message면 그대로 보인다. */
 export type FieldErrorState =

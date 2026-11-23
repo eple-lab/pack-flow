@@ -20,10 +20,10 @@ import { useId, useRef, useState } from 'react';
 import { FieldError } from '@/components/common/FieldError';
 import { SubmitButton } from '@/components/common/SubmitButton';
 import { api, ApiError } from '@/lib/api-client';
-import { parseWith, purchaseCreate, toNumberInput, toUpperSku, type ParseResult } from '@/lib/validation';
+import { parseWith, purchaseCreate, toUpperSku, type ParseResult } from '@/lib/validation';
 import type { PurchaseCreateInput } from '@/lib/validation/schemas';
 import type { Item, Purchase } from '@/types/erp';
-import { fieldErrorFromApi, fieldErrorFromDetail, type FieldErrorState } from './form-utils';
+import { fieldErrorFromApi, fieldErrorFromDetail, toIntegerInput, type FieldErrorState } from './form-utils';
 import styles from './trades.module.css';
 
 /** 폼 칸 값(입력 그대로의 글자). */
@@ -48,8 +48,8 @@ export function buildPurchaseInput(values: PurchaseFormValues): ParseResult<Purc
   return parseWith(purchaseCreate, {
     sku_id: toUpperSku(values.sku_id),
     supplier: values.supplier,
-    order_qty: toNumberInput(values.order_qty),
-    purchase_cost: toNumberInput(values.purchase_cost),
+    order_qty: toIntegerInput(values.order_qty),
+    purchase_cost: toIntegerInput(values.purchase_cost),
     invoice_no: values.invoice_no,
   });
 }
