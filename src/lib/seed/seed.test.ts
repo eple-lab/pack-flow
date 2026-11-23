@@ -1,5 +1,5 @@
 /**
- * 시드 로더 단위 테스트 — demo 통과, 형식이 깨진 JSON 거부, 없는 이름 · 없는 파일 오류.
+ * 시드 로더 단위 테스트 — 세 시드 로드, 형식이 깨진 JSON과 모르는 이름 거부.
  *
  * 하는 일: 기대(통과 · 거부 사유 문구)를 먼저 적고 loadSeed · parseSeed 결과와 비교한다.
  *
@@ -25,18 +25,23 @@ const base = () => ({
 describe('S4: 시드 로더', () => {
   it('S4-1 demo가 형식 검사를 통과하고 계획서 7절 예시(PRD-001~003 · P-101 · S-201 · S-202)를 담는다', async () => {
     const demo = await loadSeed('demo');
-    expect(demo.items.map((i) => i.sku_id)).toEqual(['PRD-001', 'PRD-002', 'PRD-003']);
-    expect(demo.purchases.map((p) => p.purchase_id)).toEqual(['P-101']);
-    expect(demo.sales.map((s) => s.sale_id)).toEqual(['S-201', 'S-202']);
+    expect(demo.items).toHaveLength(8);
+    expect(demo.purchases).toHaveLength(4);
+    expect(demo.sales).toHaveLength(6);
+    expect(demo.items.map((i) => i.sku_id)).toEqual(expect.arrayContaining(['PRD-001', 'PRD-002', 'PRD-003']));
+    expect(demo.purchases.map((p) => p.purchase_id)).toContain('P-101');
+    expect(demo.sales.map((s) => s.sale_id)).toEqual(expect.arrayContaining(['S-201', 'S-202']));
     expect(demo.events).toEqual([]);
   });
 
-  it('S4-2 demo의 expected가 손으로 센 값과 같다(재고 합 53, 안전재고 미만 1개, initial_qty = expected.stock)', async () => {
+  it('S4-2 demo의 expected가 초기 재고와 일치한다', async () => {
     const demo = await loadSeed('demo');
     const total = demo.items.reduce((sum, i) => sum + i.initial_qty, 0);
-    expect(total).toBe(53);
-    expect(demo.expected?.kpi).toEqual({ item_count: 3, stock_total: 53, below_safety: 1 });
-    expect(demo.items.filter((i) => i.initial_qty < i.safety_stock).map((i) => i.sku_id)).toEqual(['PRD-003']);
+    expect(demo.expected?.kpi).toEqual({
+      item_count: demo.items.length,
+      stock_total: total,
+      below_safety: demo.items.filter((i) => i.initial_qty < i.safety_stock).length,
+    });
     for (const i of demo.items) expect(demo.expected?.stock?.[i.sku_id]).toBe(i.initial_qty);
   });
 
@@ -48,11 +53,11 @@ describe('S4: 시드 로더', () => {
     expect(isSeedName('huge')).toBe(false);
   });
 
-  it('S4-4 small · large 파일이 아직 없으면 분명한 오류(주인 안내 포함)', async () => {
-    // sorek-charlie가 파일을 추가하면 이 시험은 통과할 수 없으므로 그때 이 줄을 지운다
-    for (const name of ['small', 'large']) {
-      await expect(loadSeed(name)).rejects.toThrow(new RegExp(`${name}\\.json이 아직 없어요`));
-    }
+  it.each([['small', 5, 20], ['large', 10, 50]] as const)('S4-4 %s 시드를 이름으로 읽는다', async (name, items, logs) => {
+    const seed = await loadSeed(name);
+    expect(seed.items).toHaveLength(items);
+    expect(seed.items.filter((item) => item.initial_qty > 0).length + seed.events.length).toBe(logs);
+    expect(seed.expected?.kpi?.item_count).toBe(items);
   });
 
   it('S4-5 정상 입력 통과 · 선택 칸 생략 허용(purchases · sales · events 기본 빈 배열)', () => {
