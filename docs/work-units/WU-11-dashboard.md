@@ -125,7 +125,7 @@
 | C-22 | `npm run lint` | 오류 0 | 처음엔 `react-hooks/set-state-in-effect` 1건 → 응답 콜백에서만 setState하도록 고침 | 통과(수정 후) |
 
 - 확인 못 한 것:
-- 실제 API 비교(`NEXT_PUBLIC_USE_MOCK=0`, `demo` 시드, S-201 출고 뒤 PRD-001 재고 4 · 품절 임박 카드 · 오늘 출고 +1) — WU-41 병합 뒤 확인하고 이 PR에 결과를 덧붙인다
+- 실제 API 비교(`NEXT_PUBLIC_USE_MOCK=0`, `demo` 시드, S-201 출고 뒤 PRD-001 재고 4 · 품절 임박 카드 · 오늘 출고 +1) — WU-41 병합 뒤 확인하고 이 PR에 덧붙일 예정
 - E2E(`tests/e2e/step1.spec.ts`)는 sorek-charlie 몫이라 돌리지 않음
 
 - AI가 틀린 것과 고친 과정:
