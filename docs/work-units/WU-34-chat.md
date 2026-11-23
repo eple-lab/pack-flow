@@ -57,7 +57,7 @@ Step 5 ② "요청을 정해진 액션으로만 해석, 변경은 실행 전 확
 
 ## 테스트 방법
 
-- 자동: `npm run test:unit -- src/lib/agent`, `tests/api/agent.test.ts`
+- 자동: `npm run test:unit -- src/lib/agent`, `tests/api/agent.test.ts` · `agent-chat.test.ts`
 - 직접: dev에서 패널에 문장 5개
 
 ## 실제 동작 확인 항목 (리뷰어 eple)
@@ -74,7 +74,7 @@ Step 5 ② "요청을 정해진 액션으로만 해석, 변경은 실행 전 확
   - `src/lib/agent/prompts/chat.ts`: 허용 액션 6개 모양 · "JSON 하나만" 지시는 시스템에, 사용자 메시지 · 품목 목록은 각각 구역에(꺾쇠 · 줄바꿈 제거, 지시가 아니라 자료라고 명시). 재고 · 단가 수치는 프롬프트에 넣지 않는다
   - `src/app/api/agent/chat/route.ts` · `execute/route.ts`: stub을 위 함수로 교체
   - `src/components/agent/ChatView.tsx` · `chat-form.ts` · `AgentPanel.tsx` · `agent.module.css`: 대화 목록(내 말 · 답 · 근거 · 실행 알림), 제안 카드 [실행] · [취소], 공백만 있는 메시지는 보내기 버튼 잠김. 새 메시지를 보내면 열려 있던 이전 카드는 닫는다(오래된 제안이 나중에 실행되지 않게)
-  - `tests/api/agent-chat.test.ts`: T-AI-2~5 실제 DB 시험(새 파일). WU 문서가 정한 `tests/api/agent.test.ts`는 아직 병합되지 않은 PR #45(T-AI-1)에 있어서 충돌을 피해 파일을 나눴다
+  - `tests/api/agent-chat.test.ts`: T-AI-2~5 실제 DB 시험(새 파일). WU 문서는 `tests/api/agent.test.ts`에 챗봇 부분을 이어 쓰라고 했지만, 그 파일은 T-AI-1(WU-33 후속, PR #45)이 쓰는 같은 시험 묶음이라 두 PR이 서로 충돌하지 않게 챗봇은 파일을 나눴다(`main`에는 둘 다 있다)
   - `docs/records/ai-cases-skygaul.md` 사례 3
 - 직접 확인한 것:
   - `npm run lint` · `npm run typecheck` 오류 없음, `npm run test:unit` 전체 통과(`actions.test.ts` 35 · `chat-form` 6 · `ChatView` 9)
@@ -97,7 +97,6 @@ Step 5 ② "요청을 정해진 액션으로만 해석, 변경은 실행 전 확
   - **화면에서 챗봇으로 들어가는 입구가 아직 없다.** `openAgentPanel({ mode: 'chat' })`을 부르는 곳이 코드에 없다. 대시보드 [AI 에이전트에게 맡기기]는 발주서 초안(`draft-po`)을 연다. 입구(대시보드 `AlertCards` · 상단 바)는 jkspawn · eple 구역이라 이번 PR에서 만들지 않았고 요청이 필요하다
   - 실제 Gemini로 같은 문장(WU-35 리허설), 실제 모델로 `ship_sale` · 상태 변경 문장
   - 실제 Ollama 시험은 가짜 DB 데이터로 돌렸다(실제 DB의 품목 · 주문 번호로는 돌리지 않음)
-  - `tests/api/agent.test.ts`(WU 문서의 파일 이름)는 PR #45가 병합돼야 생긴다. 지금은 `tests/api/agent-chat.test.ts`로 대신했다
   - 참고: 작은 모델(0.8B)이라 허용 액션 밖 요청에 `unsupported`를 내라는 지시를 안 따르는 일이 있어, 서버 검사(스키마 · 재탐색 · 번호 확인 · 재고 확인 · 사람 확인)가 막는다는 점이 이 구조의 전제다
 - AI가 틀린 것과 고친 과정: 가짜 LLM 시험이 모두 통과했지만 실제 Ollama가 인젝션 문장에서 없는 구매 번호를 지어냄 → 사용자 메시지에 번호가 있을 때만 제안(`docs/records/ai-cases-skygaul.md` 사례 3)
 - PR:
