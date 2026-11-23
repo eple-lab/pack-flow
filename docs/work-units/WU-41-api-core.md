@@ -39,11 +39,11 @@
 
 ## 다 됐다의 기준
 
-- [ ] 목 없이(`NEXT_PUBLIC_USE_MOCK=0`) 화면에서 입고 → 출고 → 대시보드 갱신
-- [ ] `/api/dashboard` 값 = DB 직접 집계 (T-S1-3의 API 쪽, `demo` 시드 `expected`와 비교)
-- [ ] `large` 시드에서 `stock-logs` 20 · 20 · 10건으로 나뉨, 마지막 `next_cursor: null` (T-S4-2)
-- [ ] lint · typecheck · test:unit 통과
-- [ ] T-VAL-2 · T-VAL-3 · T-VAL-4 통과 (`tests/api/validation.test.ts`)
+- [x] 목 없이(`NEXT_PUBLIC_USE_MOCK=0`) 화면에서 입고 → 출고 → 대시보드 갱신
+- [x] `/api/dashboard` 값 = DB 직접 집계 (T-S1-3의 API 쪽, `demo` 시드 `expected`와 비교)
+- [x] `large` 시드에서 `stock-logs` 20 · 20 · 10건으로 나뉨, 마지막 `next_cursor: null` (T-S4-2)
+- [x] lint · typecheck · test:unit 통과
+- [x] T-VAL-2 · T-VAL-3 · T-VAL-4 통과 (`tests/api/validation.test.ts`)
 
 ## 실제 동작 확인 항목 (리뷰어 sorek-charlie)
 
@@ -51,4 +51,18 @@
 
 ## 결과
 
-- 한 것 / 직접 확인한 것 / 확인 못 한 것 / PR:
+(작성: eple 세션의 Claude, 2026-11-23. 구현은 하위 에이전트(Sonnet) 3개에 단계별로 맡기고, 관리 세션이 기준 명령을 다시 돌리고 핵심 파일을 읽은 뒤 커밋했다)
+
+- 한 것:
+  - 조회 라우트 items(`below_safety`) · purchases · sales(status 필터) · dashboard(KST 오늘, 상태별 head count) · stock-logs(`(created_at, log_id)` 키셋, base64url 커서 — 시각을 `Date`로 바꾸지 않아 마이크로초 보존)
+  - 변경 라우트 9개가 `inventory.ts` 래퍼만 부름. receive는 구매를 먼저 읽어 `makeReceive(order_qty)`로 칸 오류. `PATCH items`는 JWT 클라이언트로 허용 5칸만 update
+  - `src/lib/queries/`(dashboard · stockLogs · lists · items · pathParam · throwIfDbError, 시험 도우미 2개), `vitest.config.mts` db 묶음에 `tests/api/**` 추가(eple 결정)
+  - 시험: 단위 C-01~C-55, `tests/api/` validation(T-VAL-2~4) · stock-logs(T-S4-2) · dashboard(T-S1-3)
+- 직접 확인한 것:
+  - `NEXT_PUBLIC_USE_MOCK=0` 로컬 + dev DB 화면: P-101 8개 입고(부분 입고 배지) → S-201 출고 → 대시보드 합계 53 → 55, 오늘 입고 1 · 출고 1, 최근 변경 −6 · +8
+  - T-S1-3 API 쪽: 대시보드 kpi · 재고 = demo `expected` = DB 직접 집계, 입고 → 출고 뒤 갱신, 같은 판매 재출고 409
+  - T-S4-2: 이력 50건(한 트랜잭션, 같은 시각) → 20 · 20 · 10, 마지막 `next_cursor: null`, 이어 붙이면 DB 순서와 같음
+  - lint · typecheck 통과, test:unit 627개, test:db 38개(당시)
+- 확인 못 한 것: 남의 품목 PATCH → 404는 단위(가짜 DB)로만 — 실제 계정 B 시험은 WU-42 T-AUTH-2b로 보완. T-S4-2는 `large.json` 전 같은 규모 시드로 만들었다(#40 뒤 `large`도 이력 50)
+- AI가 틀린 것과 고친 과정: 하위 에이전트가 시험을 복제하다 판매 시험의 오류 field 기대값을 `fulfillment_status`로 잘못 바꿈 → 시험 실패로 잡아 기대값만 고침(코드는 맞았음). [ai-cases-eple](../records/ai-cases-eple.md) 사례 1
+- PR: #38 (리뷰 sorek-charlie, 병합 11/23 18:16)
