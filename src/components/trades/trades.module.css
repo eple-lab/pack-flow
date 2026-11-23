@@ -1,0 +1,209 @@
+/*
+ * 입출고 화면 스타일 — 탭 · 등록 폼 · 구매 · 판매 표 · 입고 확정 창. 색 · 간격은 src/styles/tokens.css 변수만 쓴다.
+ *
+ * 하는 일
+ * 1. 표는 .tableWrap 안에서 가로 스크롤한다(휴대폰 폭).
+ * 2. 폼 칸은 grid로 폭에 맞춰 줄바꿈한다.
+ * 3. 입고 확정 창은 화면 가운데 상자 + 뒤 덮개.
+ *
+ * 근거: docs/work-units/WU-12-trades.md, AGENTS.md 3절(CSS 모듈 + 토큰, D-31)
+ * 구역: jkspawn (docs/06-work-plan.md 1절)
+ *
+ * 이력
+ * 2026-11-23  jkspawn  처음 작성 — 입출고 화면 스타일 (WU-12)
+ */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  padding: var(--space-4);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-xl);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: var(--font-lg);
+}
+
+/* ── 탭 ── */
+.tabs {
+  display: flex;
+  gap: var(--space-1);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.tab {
+  padding: var(--space-2) var(--space-4);
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--color-muted);
+  background: transparent;
+  font-size: var(--font-md);
+  cursor: pointer;
+}
+
+.tabActive {
+  border-bottom-color: var(--color-primary);
+  color: var(--color-text);
+  font-weight: 600;
+}
+
+/* ── 필터 칩 ── */
+.filter {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  align-self: flex-start;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  font-size: var(--font-sm);
+}
+
+.filterClear {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+/* ── 폼 ── */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-3);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.label {
+  color: var(--color-muted);
+  font-size: var(--font-sm);
+}
+
+.input {
+  padding: var(--space-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  background: var(--color-bg);
+  font-size: var(--font-md);
+}
+
+.formActions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+/* ── 표 ── */
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  font-size: var(--font-sm);
+}
+
+.table th,
+.table td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table th {
+  color: var(--color-muted);
+  background: var(--color-surface);
+  font-weight: 600;
+}
+
+.num {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.muted {
+  color: var(--color-muted);
+}
+
+.badge {
+  display: inline-block;
+  margin-left: var(--space-1);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  color: var(--color-warning);
+  background: var(--color-warning-bg);
+  font-size: var(--font-xs);
+  font-weight: 600;
+}
+
+/* ── 입고 확정 창 ── */
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background: var(--color-overlay);
+}
+
+.dialog {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: 360px;
+  padding: var(--space-5);
+  border-radius: var(--radius-md);
+  background: var(--color-bg);
+  box-shadow: var(--shadow-md);
+}
+
+.dialogText {
+  margin: 0;
+}
+
+.dialogActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.secondary {
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text);
+  background: transparent;
+  cursor: pointer;
+}
