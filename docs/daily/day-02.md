@@ -31,7 +31,7 @@
 
 - [x] 목 없이 화면에서 입고 → 출고 → 대시보드 갱신 (Step 1, 완료 판정 1 · 2) — 아래 '저녁 판정' 참고
 - [x] 다른 사용자의 데이터 조회 · 수정 거부 (Step 2, 완료 판정 6 · T-AUTH)
-- [ ] 검증 담당(sorek-charlie)이 **배포 URL에서** Step 1 · 2 E2E 실행 — 일부(아래)
+- [x] 검증 담당(sorek-charlie)이 **배포 URL에서** Step 1 · 2 E2E 실행 — 6건 통과(아래)
 - [x] 합친 버전(main)을 한 번 실행 (공통 안내 "매일 한 번은 합친 버전 실행")
 
 **중간 점검 결과와 변경 이력:**
@@ -72,7 +72,7 @@
 
 ### 저녁 갱신 (11/23 19시 무렵, 2차 병합 뒤)
 
-**2차 병합 (모두 merge commit, 리뷰 승인 뒤 · 승인 뒤 새 커밋 없음 확인)**
+**2차 병합 12건 (모두 merge commit, 리뷰 승인 뒤 · 승인 뒤 새 커밋 없음 확인)**
 
 | PR | WU | 작성 | 리뷰 | 병합 |
 |---|---|---|---|---|
@@ -85,9 +85,10 @@
 | #39 | WU-42 권한 테스트 T-AUTH-1~8 · Step 2 증거 | eple | sorek-charlie | 18:49 |
 | #41 | WU-43 (1/2) `POST /api/seed` | eple | sorek-charlie | 18:55 |
 | #35 | 이어받기 노트 | eple | sorek-charlie(변경 요청 → 수정 → 승인) | 18:55 |
+| #40 | WU-22 시드 3벌 · 정답표 · E2E Step 1 · 2 (eple 구역 시험 · 로더 갱신 포함) | sorek-charlie | eple(브랜치 독립 실행 unit 688 · db 61) | 19:24 |
 
 - DB: WU-21 마이그레이션 `20261123120000_inventory.sql`을 eple 승인 뒤 **dev(17시 무렵, 병합 전 — 리뷰어 `test:db`가 dev 함수를 써야 해서) · demo(병합 뒤)** 에 적용, 둘 다 7개 · 함수 실행 권한 확인
-- 리뷰 중: #40 WU-22 시드 3벌(demo 8품목 · small · large) · E2E — demo가 3 → 8품목으로 바뀌어 eple 구역 시험 갱신이 함께 필요(고침 브랜치 `feat/WU-43-seed-loader`)
+- #40: demo가 3 → 8품목으로 바뀌며 깨진 eple 구역 시험(로더 · seed · dashboard · auth · _sample)을 작성자가 같은 PR에서 갱신 → eple 리뷰 · 병합. 리뷰에서 빠진 실패 시험(SeedError → 400)은 #43으로 복원
 
 **저녁 판정**
 
@@ -95,7 +96,7 @@
 |---|---|---|
 | 1. 목 없이 입고 → 출고 → 대시보드 | 충족 | WU-41 코드로 화면 확인 두 번: eple 로컬(`USE_MOCK=0` + dev DB, P-101 8개 입고 → S-201 출고 → 대시보드 합계 55 · 오늘 입고 1 · 출고 1), sorek-charlie의 #38 서버(Chrome, PRD-001 10 → 4 → 12). API 시험 T-S1-3(대시보드 = DB 직접 집계) 통과. 이 코드는 18:16 main 병합 |
 | 2. 다른 사용자 데이터 거부 | 충족 | T-AUTH-1~8 10건(API 라우트 + Supabase REST 직접) dev 통과 — 작성자 · 리뷰어(새 계정) 각각 실행. 증거 [records/eple-step2-evidence.md](../records/eple-step2-evidence.md) |
-| 3. 배포 URL에서 Step 1 · 2 E2E | 일부 | sorek-charlie가 배포 서비스 로그인 · 입출고 · 권한 흐름을 Chrome으로 확인 중. 시드는 `/api/seed`가 18:55 병합 전이라 DB 함수로 넣음 → 정식 E2E 6건은 #40 병합 · 재배포 뒤 다시 |
+| 3. 배포 URL에서 Step 1 · 2 E2E | 충족 | #40 병합 · 재배포 뒤 sorek-charlie가 Render `pack-flow` 배포 URL에서 Playwright E2E(Step 1 · 2) **6건 통과**(약 1분, 19시 30분 무렵). 실제 `POST /api/seed`로 demo(8품목) · small · large를 각각 넣고 입출고 · 대시보드 정답 · 권한 격리 · 세션 복귀 확인. 그 전에 Chrome 수동 확인(입고 → 출고, 계정 격리)도 함 |
 | 4. 합친 버전(main) 실행 | 충족 | main `d00c36e`(2차 병합 뒤): `lint` · `typecheck` 오류 없음, `test:unit` **686개 통과**(35파일), `test:db` **58개 통과**(11파일, dev — T-S1-3 · T-AUTH · T-VAL · WU-21 시험 포함), `build` 성공, `next start`(`USE_MOCK=0`)로 띄워 `/api/health` 200(db ok) · `/login` 200 · 미로그인 `/` → `/login` · `/api/items` 401 · X-PF 없는 `POST /api/seed` 403 확인 뒤 종료. 로그인한 화면 조작은 판정 1의 확인으로 갈음 |
 
 **AI가 틀렸다가 고친 일 (저녁)**
@@ -109,7 +110,7 @@
 
 - dev 테스트 계정 하나의 비밀번호가 팀원 로컬 실행 기록에 노출됐다는 보고 → eple이 계정을 다시 만들고 새 값을 개인 전달(dev 테스트 계정 · 가짜 주소라 영향은 그 계정의 시험 데이터뿐)
 - WU-43을 두 PR로 나눔: `/api/seed` 먼저(배포 E2E가 기다림, eple 결정), `pf_bulk_apply` · bulk 라우트는 11/24 오전
-- 남은 핵심 경로(11/24 14시 기능 동결 전): #40 + 시드 고침 병합 → 배포 E2E 6건 → WU-43 bulk · WU-23 취소 · 상태 전이 · WU-14 이력 화면 · WU-34 챗봇
+- 남은 핵심 경로(11/24 14시 기능 동결 전): WU-43 bulk(`pf_bulk_apply` · 일괄 등록 라우트) · WU-23 취소 · 상태 전이(구현 · 로컬 검증 끝, PR · dev 적용 조율) · WU-14 이력 화면 · WU-34 챗봇
 
 ## AI 활용 (2일차)
 
