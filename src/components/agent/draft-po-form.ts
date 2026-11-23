@@ -96,3 +96,45 @@ export function buildConfirmLines(
 export function confirmMessage(purchases: readonly Purchase[]): string {
   return `${purchases.map((p) => p.purchase_id).join(' · ')} 발주완료 ${purchases.length}건`;
 }
+
+// ── 확정 중간 실패(일부 저장) ────────────────────────────────────────────
+// 줄마다 따로 저장해서 중간 줄이 거부되면 앞 줄은 이미 저장돼 있다. 같은 줄을 다시 보내면 중복 발주가 되므로,
+// 서버가 오류 detail에 싣는 saved_count · saved(draft-po.ts confirmPoLines)를 읽어 저장된 줄을 표에서 뺀다.
+
+/** 이미 저장된 앞 줄: 건수와 구매 번호(번호는 비어 있을 수 있다). */
+export type PartialSave = { count: number; ids: string[] };
+
+/**
+ * 확정 오류의 detail에서 저장된 앞 줄을 읽는다. 저장된 것이 없거나 모양이 틀리면 null(그때는 표를 그대로 둔다).
+ * 건수(saved_count)가 기준이고, 번호(saved)는 글자인 것만 쓴다.
+ */
+export function partialSaveOf(detail: Record<string, unknown> | null | undefined): PartialSave | null {
+  const count = detail?.saved_count;
+  if (typeof count !== 'number' || !Number.isInteger(count) || count < 1) return null;
+  const saved = detail?.saved;
+  const ids = Array.isArray(saved) ? saved.filter((id): id is string => typeof id === 'string') : [];
+  return { count, ids };
+}
+
+/** 이미 저장된 앞 줄(count건)을 뺀 남은 줄. 수정한 값은 그대로 둔다. 건수가 줄 수보다 많아도 안전하다. */
+export function remainingRows(rows: readonly DraftRow[], count: number): DraftRow[] {
+  return rows.slice(Math.max(0, count));
+}
+
+/** 연달아 일부 저장되면 이미 저장된 전체(건수 · 번호)를 합친다. */
+export function mergePartial(previous: PartialSave | null, next: PartialSave): PartialSave {
+  return { count: (previous?.count ?? 0) + next.count, ids: [...(previous?.ids ?? []), ...next.ids] };
+}
+
+/** 일부 저장 안내 문구. 번호를 모르면 건수만 적는다. */
+export function partialSaveMessage(partial: PartialSave, remaining: number): string {
+  const ids = partial.ids.length > 0 ? `(${partial.ids.join(' · ')})` : '';
+  return `앞 ${partial.count}건${ids}은 이미 저장됐어요. 남은 ${remaining}건은 저장되지 않았어요. 표를 확인하고 다시 [발주 등록]을 누르면 남은 줄만 등록돼요.`;
+}
+
+/** 확정 성공 알림. 앞서 일부가 저장돼 있었다면 그 건수도 함께 적는다. */
+export function doneMessage(purchases: readonly Purchase[], earlier: PartialSave | null): string {
+  const base = confirmMessage(purchases);
+  if (!earlier) return base;
+  return `${base} (앞서 저장된 ${earlier.count}건 포함 모두 ${earlier.count + purchases.length}건)`;
+}

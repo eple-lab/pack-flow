@@ -252,13 +252,41 @@ describe('C: 발주서 확정 (confirmPoLines)', () => {
     expect(rpcCalls).toEqual([]);
   });
 
-  it('C-3 중간 줄이 DB에서 거부되면 그 오류를 던진다(앞 줄은 이미 저장됨 — 호출 수로 확인)', async () => {
+  it('C-3 중간 줄이 DB에서 거부되면 그 오류 코드를 그대로 던지고, 앞 줄이 이미 저장됐다는 사실(saved_count · saved)을 detail에 싣는다', async () => {
     const { client, rpcCalls } = fakeSupabase(
       { items: ITEMS },
       { rpc: [{ data: purchaseRow(5, LINES[0]!) }, { error: { message: 'PF_NOT_FOUND' } }] },
     );
-    await expect(confirmPoLines(client, LINES)).rejects.toMatchObject({ code: 'PF_NOT_FOUND' });
-    expect(rpcCalls).toHaveLength(2);
+    await expect(confirmPoLines(client, LINES)).rejects.toMatchObject({
+      code: 'PF_NOT_FOUND',
+      detail: { saved_count: 1, saved: ['P-105'] },
+    });
+    expect(rpcCalls).toHaveLength(2); // 앞 줄은 저장됐고, 거부된 줄 뒤로는 부르지 않는다
+  });
+
+  it('C-6 (실패해야 함) 첫 줄이 거부되면 저장된 것이 없으므로 detail에 saved를 싣지 않는다(원래 오류 그대로)', async () => {
+    const { client, rpcCalls } = fakeSupabase({ items: ITEMS }, { rpc: [{ error: { message: 'PF_NOT_FOUND' } }] });
+    const error = await confirmPoLines(client, LINES).catch((thrown: unknown) => thrown);
+    expect(error).toBeInstanceOf(PfError);
+    expect((error as PfError).code).toBe('PF_NOT_FOUND');
+    expect((error as PfError).detail).toBeNull();
+    expect(rpcCalls).toHaveLength(1);
+  });
+
+  it('C-7 원래 오류의 detail(PF_DUPLICATE_INVOICE의 invoice_no)은 보존하고 saved를 덧붙인다', async () => {
+    const { client } = fakeSupabase(
+      { items: ITEMS },
+      {
+        rpc: [
+          { data: purchaseRow(5, LINES[0]!) },
+          { error: { message: 'PF_DUPLICATE_INVOICE', details: '{"invoice_no":"X-1"}' } },
+        ],
+      },
+    );
+    await expect(confirmPoLines(client, LINES)).rejects.toMatchObject({
+      code: 'PF_DUPLICATE_INVOICE',
+      detail: { invoice_no: 'X-1', saved_count: 1, saved: ['P-105'] },
+    });
   });
 
   it('C-5 (실패해야 함) 수량 0 · 금액 음수는 DB에 가기 전에 PF_VALIDATION, 아무것도 저장하지 않는다', async () => {

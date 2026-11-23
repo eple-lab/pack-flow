@@ -16,6 +16,7 @@
  * 이력
  * 2026-11-20  eple     자리 생성 (WU-01) — 구현은 skygaul WU-33
  * 2026-11-23  skygaul  발주서 초안 패널 구현 — 불러오기 · 표 수정 · 확정 · 취소 (WU-33)
+ * 2026-11-23  skygaul  확정 중간 실패 시 저장된 줄을 표에서 빼고 안내 — 중복 발주 방지, 리뷰 후속 (WU-33)
  */
 import { useEffect, useState } from 'react';
 import { EmptyState } from '@/components/common/EmptyState';
@@ -28,7 +29,19 @@ import { api, ApiError } from '@/lib/api-client';
 import { formatNumber } from '@/lib/format';
 import type { PoDraft } from '@/types/agent';
 import styles from './agent.module.css';
-import { buildConfirmLines, confirmMessage, estimateCost, rowsFromDraft, type DraftRow, type RowError } from './draft-po-form';
+import {
+  buildConfirmLines,
+  doneMessage,
+  estimateCost,
+  mergePartial,
+  partialSaveMessage,
+  partialSaveOf,
+  remainingRows,
+  rowsFromDraft,
+  type DraftRow,
+  type PartialSave,
+  type RowError,
+} from './draft-po-form';
 
 type View =
   | { status: 'loading' }
@@ -174,6 +187,18 @@ export function DraftPoContent({
 }
 
 /**
+ * 확정이 중간에 거부돼 앞 줄만 저장됐을 때의 안내. 저장된 번호 · 남은 건수 · 다시 누르면 남은 줄만 등록된다는 것을 알린다.
+ * testid: draft-partial
+ */
+export function DraftPoPartialNotice({ partial, remaining }: { partial: PartialSave; remaining: number }) {
+  return (
+    <p className={styles.notice} role="status" data-testid="draft-partial">
+      {partialSaveMessage(partial, remaining)}
+    </p>
+  );
+}
+
+/**
  * 발주서 초안 패널 본문. 서버 호출은 api-client만 쓴다(AGENTS.md 3절).
  * 호출하는 쪽이 요청마다 `key`를 달아 새로 그린다(AgentPanel).
  *
@@ -189,6 +214,7 @@ export function DraftPoView({ skuIds }: { skuIds?: string[] }) {
   const [attempt, setAttempt] = useState(0);
   const [errors, setErrors] = useState<Record<string, RowError>>({});
   const [banner, setBanner] = useState<ApiError | null>(null);
+  const [partial, setPartial] = useState<PartialSave | null>(null);
   const skuKey = skuIds?.join(',') ?? '';
 
   useEffect(() => {
@@ -212,6 +238,7 @@ export function DraftPoView({ skuIds }: { skuIds?: string[] }) {
     setView({ status: 'loading' });
     setErrors({});
     setBanner(null);
+    setPartial(null);
     setAttempt((n) => n + 1);
   };
 
@@ -237,12 +264,19 @@ export function DraftPoView({ skuIds }: { skuIds?: string[] }) {
     setErrors({});
     try {
       const result = await api.confirmPo(built.lines);
-      const message = confirmMessage(result.purchases);
+      const message = doneMessage(result.purchases, partial);
       toast.show(message);
       setBanner(null);
       setView({ status: 'done', message });
     } catch (error) {
-      setBanner(toApiError(error)); // 실패하면 입력값은 그대로 둔다
+      const apiError = toApiError(error);
+      setBanner(apiError);
+      // 중간 줄이 거부돼 앞 줄이 이미 저장됐다면 그 줄을 표에서 뺀다(같은 줄을 다시 보내면 중복 발주). 나머지 입력값은 그대로 둔다.
+      const saved = partialSaveOf(apiError.detail);
+      if (saved) {
+        setPartial((prev) => mergePartial(prev, saved));
+        setView((prev) => (prev.status === 'ready' ? { ...prev, rows: remainingRows(prev.rows, saved.count) } : prev));
+      }
     }
   };
 
@@ -251,6 +285,8 @@ export function DraftPoView({ skuIds }: { skuIds?: string[] }) {
       <ErrorBanner error={view.status === 'error' ? view.error : banner} onRetry={view.status === 'error' ? reload : undefined} />
 
       {view.status === 'loading' && <Loading />}
+
+      {view.status === 'ready' && partial && <DraftPoPartialNotice partial={partial} remaining={view.rows.length} />}
 
       {view.status === 'ready' && (
         <DraftPoContent
@@ -278,7 +314,7 @@ export function DraftPoView({ skuIds }: { skuIds?: string[] }) {
 
       {view.status === 'cancelled' && (
         <div className={styles.notice} data-testid="draft-cancelled">
-          취소했어요. 저장된 것은 없어요.
+          {partial ? `취소했어요. 앞서 저장된 ${partial.count}건은 그대로 남아 있어요.` : '취소했어요. 저장된 것은 없어요.'}
           <div className={styles.actions}>
             <button type="button" className={styles.secondary} onClick={reload}>
               초안 다시 보기
