@@ -12,8 +12,7 @@
  * - T-AUTH-3 B가 A의 판매 id로 ship → 404 PF_NOT_FOUND, A 그대로
  * - (덧붙임) B가 PATCH /api/items/PRD-001 → B 자기 품목만 바뀌고 A의 같은 품목코드 행은 그대로
  *            B의 GET /api/purchases 목록에 A의 구매 id가 없다
- * - T-AUTH-7 B가 시드 초기화 → B 데이터만 바뀌고 A의 건수 그대로.
- *            POST /api/seed 라우트는 WU-43 전까지 stub(501)이라 지금은 같은 DB 함수(pf_reset_and_seed)를 B로 불러 확인한다
+ * - T-AUTH-7 B가 POST /api/seed {dataset: demo} → 200, B 데이터만 demo로 바뀌고 A의 재고 · 이력 · 거래 그대로
  * - T-AUTH-8 X-PF 헤더 없이 POST /api/sales → 403 PF_CSRF, 판매 건수 그대로
  *
  * 근거: docs/05-security.md 3절 T-AUTH, docs/work-units/WU-42-auth-tests.md
@@ -21,6 +20,7 @@
  *
  * 이력
  * 2026-11-23  eple  처음 작성 — T-AUTH-1 · 2 · 3 · 7 · 8 (WU-42)
+ * 2026-11-23  eple  T-AUTH-7을 DB 함수 대신 POST /api/seed 라우트로 (WU-43)
  */
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vitest';
@@ -36,6 +36,7 @@ import { POST as postReceive } from '@/app/api/purchases/[id]/receive/route';
 import { GET as getPurchases } from '@/app/api/purchases/route';
 import { POST as postShip } from '@/app/api/sales/[id]/ship/route';
 import { POST as postSale } from '@/app/api/sales/route';
+import { POST as postSeed } from '@/app/api/seed/route';
 
 const ORIGIN = 'https://app.packflow.test';
 type Handler = (request: Request, ctx?: { params?: Promise<Record<string, string>> }) => Promise<Response>;
@@ -136,13 +137,17 @@ describe('T-AUTH API 권한 (실제 dev DB, 계정 A · B)', () => {
     expect((list.body.data as { id: string }[]).some((p) => p.id === aPurchaseId)).toBe(false);
   });
 
-  it('T-AUTH-7(DB 쪽) B가 시드 초기화 → B만 바뀌고 A의 건수 그대로 (POST /api/seed는 WU-43 전까지 stub)', async () => {
+  it('T-AUTH-7 B가 POST /api/seed(demo) → 200, B만 demo로 바뀌고 A 그대로', async () => {
+    // B를 demo와 다른 상태로 만들어 두어야 초기화가 실제로 일어났는지 보인다
+    await resetAndSeed(clientB, { items: [{ sku_id: 'BBB-001', item_name: 'B 전용', unit_cost: 1, sale_price: 2, initial_qty: 1, safety_stock: 0 }] });
     const before = await snapshotA();
-    const result = await resetAndSeed(clientB, { items: [{ sku_id: 'BBB-001', item_name: 'B 전용', unit_cost: 1, sale_price: 2, initial_qty: 1, safety_stock: 0 }] });
-    expect(result.items).toBe(1);
-    const { data: bItems, error } = await clientB.from('items').select('sku_id');
+    holder.client = clientB;
+    const res = await call(postSeed, '/api/seed', { method: 'POST', body: { dataset: 'demo' } });
+    expect(res.status).toBe(200);
+    expect(res.body.data).toMatchObject({ items: 3, purchases: 1, sales: 2 });
+    const { data: bItems, error } = await clientB.from('items').select('sku_id').order('sku_id');
     expect(error).toBeNull();
-    expect((bItems ?? []).map((r) => r.sku_id)).toEqual(['BBB-001']);
+    expect((bItems ?? []).map((r) => r.sku_id)).toEqual(['PRD-001', 'PRD-002', 'PRD-003']);
     expect(await snapshotA()).toEqual(before);
   });
 
