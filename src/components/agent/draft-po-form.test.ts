@@ -14,7 +14,17 @@
 import { describe, expect, it } from 'vitest';
 import type { PoDraftLine } from '@/types/agent';
 import type { Purchase } from '@/types/erp';
-import { buildConfirmLines, confirmMessage, estimateCost, rowsFromDraft } from './draft-po-form';
+import {
+  buildConfirmLines,
+  confirmMessage,
+  doneMessage,
+  estimateCost,
+  mergePartial,
+  partialSaveMessage,
+  partialSaveOf,
+  remainingRows,
+  rowsFromDraft,
+} from './draft-po-form';
 
 const LINE: PoDraftLine = {
   sku_id: 'PRD-003',
@@ -113,5 +123,75 @@ describe('M: 금액 · 알림 문구', () => {
     const p = (n: number) => ({ purchase_id: `P-${100 + n}` }) as Purchase;
     expect(confirmMessage([p(5)])).toBe('P-105 발주완료 1건');
     expect(confirmMessage([p(5), p(6)])).toBe('P-105 · P-106 발주완료 2건');
+  });
+});
+
+describe('S: 확정 중간 실패(일부 저장) — 중복 발주 방지', () => {
+  const LINE_B: PoDraftLine = { ...LINE, sku_id: 'PRD-002', item_name: 'USB-C 케이블', unit_cost: 2000, recommended_qty: 20 };
+  const LINE_C: PoDraftLine = { ...LINE, sku_id: 'PRD-001', item_name: '무선 마우스', unit_cost: 8000, recommended_qty: 5 };
+
+  it('S-1 서버 오류의 detail에서 저장된 건수와 번호를 읽는다', () => {
+    expect(partialSaveOf({ saved_count: 2, saved: ['P-105', 'P-106'] })).toEqual({ count: 2, ids: ['P-105', 'P-106'] });
+    // 원래 오류의 detail이 같이 있어도 읽는다
+    expect(partialSaveOf({ invoice_no: 'X-1', saved_count: 1, saved: ['P-105'] })).toEqual({ count: 1, ids: ['P-105'] });
+  });
+
+  it('S-2 (실패해야 함) 저장된 것이 없거나 모양이 틀리면 null — 그때는 표를 그대로 둔다', () => {
+    expect(partialSaveOf(null)).toBeNull();
+    expect(partialSaveOf(undefined)).toBeNull();
+    expect(partialSaveOf({})).toBeNull();
+    expect(partialSaveOf({ saved_count: 0, saved: [] })).toBeNull();
+    expect(partialSaveOf({ saved_count: -1, saved: [] })).toBeNull();
+    expect(partialSaveOf({ saved_count: 1.5, saved: ['P-105'] })).toBeNull();
+    expect(partialSaveOf({ saved_count: '2', saved: ['P-105'] })).toBeNull();
+    expect(partialSaveOf({ field: 'order_qty', reason: 'out_of_range' })).toBeNull(); // 일반 PF_VALIDATION
+  });
+
+  it('S-3 번호 목록이 이상해도 건수는 믿고, 글자가 아닌 번호만 버린다', () => {
+    expect(partialSaveOf({ saved_count: 2, saved: ['P-105', 7, null] })).toEqual({ count: 2, ids: ['P-105'] });
+    expect(partialSaveOf({ saved_count: 2 })).toEqual({ count: 2, ids: [] });
+  });
+
+  it('S-4 저장된 앞 줄을 표에서 빼고 남은 줄은 그대로(수정한 값 유지)', () => {
+    const rows = rowsFromDraft([LINE, LINE_B, LINE_C]).map((row, index) => (index === 2 ? { ...row, qty: '7' } : row));
+    const left = remainingRows(rows, 2);
+    expect(left.map((row) => row.sku_id)).toEqual(['PRD-001']);
+    expect(left[0]?.qty).toBe('7');
+  });
+
+  it('S-5 (실패해야 함) 건수가 줄 수보다 많거나 0 이하여도 안전하게 자른다', () => {
+    const rows = rowsFromDraft([LINE, LINE_B]);
+    expect(remainingRows(rows, 0).map((row) => row.sku_id)).toEqual(['PRD-003', 'PRD-002']);
+    expect(remainingRows(rows, 5)).toEqual([]);
+  });
+
+  it('S-6 안내 문구: 저장된 번호 · 남은 건수 · 다시 누르면 남은 줄만 등록됨', () => {
+    const text = partialSaveMessage({ count: 2, ids: ['P-105', 'P-106'] }, 1);
+    expect(text).toContain('P-105 · P-106');
+    expect(text).toContain('2건');
+    expect(text).toContain('남은 1건');
+    expect(text).toContain('남은 줄만');
+  });
+
+  it('S-7 번호를 모를 때도 건수만으로 문구를 만든다', () => {
+    const text = partialSaveMessage({ count: 1, ids: [] }, 2);
+    expect(text).toContain('앞 1건');
+    expect(text).toContain('남은 2건');
+    expect(text).not.toContain('()');
+  });
+
+  it('S-8 다시 눌렀는데 또 일부만 저장되면 건수 · 번호를 합쳐 이미 저장된 전체를 알려 준다', () => {
+    const first = { count: 1, ids: ['P-105'] };
+    expect(mergePartial(null, first)).toEqual(first);
+    expect(mergePartial(first, { count: 2, ids: ['P-106', 'P-107'] })).toEqual({ count: 3, ids: ['P-105', 'P-106', 'P-107'] });
+  });
+
+  it('S-9 일부 저장된 뒤 남은 줄이 성공하면 알림에 앞서 저장된 건수를 함께 적는다', () => {
+    const p = (n: number) => ({ purchase_id: `P-${100 + n}` }) as Purchase;
+    expect(doneMessage([p(7)], null)).toBe('P-107 발주완료 1건');
+    const text = doneMessage([p(7)], { count: 2, ids: ['P-105', 'P-106'] });
+    expect(text).toContain('P-107 발주완료 1건');
+    expect(text).toContain('앞서 저장된 2건');
+    expect(text).toContain('모두 3건');
   });
 });

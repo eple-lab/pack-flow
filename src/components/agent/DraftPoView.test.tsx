@@ -19,7 +19,7 @@ import { messageFor } from '@/lib/api/errors';
 import type { PoDraft } from '@/types/agent';
 import { AgentPanel } from './AgentPanel';
 import { rowsFromDraft } from './draft-po-form';
-import { DraftPoContent } from './DraftPoView';
+import { DraftPoContent, DraftPoPartialNotice } from './DraftPoView';
 
 const noop = () => {};
 
@@ -119,6 +119,16 @@ describe('V: 발주서 초안 화면', () => {
     expect(html).not.toContain('<script>alert(1)</script>');
     expect(html).not.toContain('<b>굵게</b>');
     expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
+  });
+});
+
+describe('N: 일부 저장 안내', () => {
+  it('N-1 저장된 번호 · 남은 건수 · 다시 누르면 남은 줄만 등록된다는 안내가 보인다', () => {
+    const html = plain(renderToString(<DraftPoPartialNotice partial={{ count: 1, ids: ['P-105'] }} remaining={1} />));
+    const text = textOf(html, 'draft-partial') ?? '';
+    expect(text).toContain('P-105');
+    expect(text).toContain('남은 1건');
+    expect(text).toContain('남은 줄만');
   });
 });
 
