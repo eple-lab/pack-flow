@@ -19,7 +19,7 @@
 ### 최신 (11/23 20시 무렵, WU-41 세션 마감) — 아래 16시 스냅샷보다 이것이 우선
 
 - **2일차 완료 판정 1~4 모두 충족**(day-02 · 계획서 변경 이력 반영, #42). 배포 URL Playwright E2E Step 1 · 2 6건 통과(sorek-charlie)
-- **오늘 병합(merge commit):** #28 · #29 · #31 · #32 · #34 · #35 · #36 · #37 · #38(WU-41) · #39(WU-42) · #40(WU-22 시드 3벌, demo 8품목) · #41(WU-43 1/2 `/api/seed`) · #42 · #43(seed C-65) · #44(WU-23 취소 · 상태 전이) · #45(WU-33 후속) → main `82cb987`
+- **오늘 병합(merge commit):** #28 · #29 · #31 · #32 · #34 · #35 · #36 · #37 · #38(WU-41) · #39(WU-42) · #40(WU-22 시드 3벌, demo 8품목) · #41(WU-43 1/2 `/api/seed`) · #42 · #43(seed C-65) · #44(WU-23 취소 · 상태 전이) · #45(WU-33 후속) · #51(WU-34 챗봇, 밤) → main `02b8ce2`
 - **DB 마이그레이션 현황 — 다시 적용하지 않는다:**
 
   | 파일 | dev | demo |
@@ -29,13 +29,16 @@
   | `20261124090000_bulk_apply.sql`(WU-43, #46) | 적용(병합 전, eple 승인) | **미적용** |
 
   → **#46 병합 뒤 demo에 2개를 한 번에 적용**(eple 결정). 그 전까지 demo 서비스의 취소 · 상태 변경 · 일괄 반영은 501. CLI link는 dev
-- **열린 PR:** #46 WU-43 (2/2) `pf_bulk_apply` · bulk 라우트(리뷰 sorek-charlie — dev에서 `test:db` 76건 통과, WU-23 시험 포함) / #47 04 계약 3.8 `saved_count` · `saved`(리뷰 skygaul) / (이 노트 PR)
-- **WU-45 회귀 실행기 · 측정:** PR 올림(`feat/WU-45-regression-runner`, 리뷰 sorek-charlie). `npm run test:regression` · `npm run measure` — E2E(Playwright) 경로는 브라우저 · 로컬 서버가 없어 미확인, 리뷰어 PC에서 첫 확인. import 4곳 `@ts-expect-error TS5097`(tsconfig `allowImportingTsExtensions` 켜면 지움, eple 결정)
+- **열린 PR(밤):** #46 WU-43 (2/2) `pf_bulk_apply` · bulk 라우트(리뷰 sorek-charlie — dev에서 `test:db` 76건 통과, WU-23 시험 포함) / #47 04 계약 3.8 `saved_count` · `saved`(리뷰 skygaul) / #48 이 노트 / #49 WU-45 / #50 WU-41 · 42 · 43 · 45 결과 절 · `ai-cases-eple.md` / #52 WU 문서 8개 테스트 방법 절(**#50 다음 병합**) / #53 DevelopDoc 4개 · README 초안 — #47 말고는 모두 리뷰 sorek-charlie
+- **WU-45 회귀 실행기 · 측정:** PR 올림(`feat/WU-45-regression-runner`, 리뷰 sorek-charlie). `npm run test:regression` · `npm run measure` — E2E(Playwright) 경로는 브라우저 · 로컬 서버가 없어 미확인, 리뷰어 PC에서 첫 확인. tsconfig `allowImportingTsExtensions`를 켜고 우회 주석 4곳 제거(eple 결정, #49에 포함)
 - **다음 단계 (11/24, 14시 기능 동결):**
   1. #46 리뷰 · 병합 → demo 마이그레이션 2개 적용(dry-run으로 2개만 확인) → demo 서비스 취소 · 일괄 반영 확인
   2. WU-45 리뷰 · 병합 → sorek-charlie 첫 회귀(WU-24)
   3. 중간 점검 기록(계획서 2절, 오후) — 완료 · 미완료 · 범위 조정(A/B안)
   4. 팀원: jkspawn WU-13 일괄 등록 화면(`src/lib/bulk/parse.ts` 채우면 `/api/bulk/preview` 501 해소) · WU-14 이력 · 취소 화면, skygaul WU-34 챗봇, sorek-charlie WU-24
+- **위험(11/23 밤):** jkspawn의 WU-13(일괄 등록 화면) · WU-14(이력 · 취소 화면) · WU-15 브랜치가 아직 없다. API는 준비됨. 11/24 아침에 진행 확인 → 늦으면 줄일 순서 A/B안(일괄 등록은 미리보기까지 / 취소만) 팀 결정
+- **eple 결정 대기:** ① 병합된 WU 이슈 닫기 — 팀 규칙(docs/11-issues.md 96~102)은 '리뷰어가 실제 동작 확인 항목을 체크한 뒤 **담당자**가 닫는다' ② LICENSE(README '미정') — 나중에 다시 묻기로
+- **이력 비밀값 점검(11/23 밤, 읽기만):** 147커밋에서 실제 키 · 토큰 · 비밀번호 · 사용자 경로 · 프로젝트 ref 0건. 커밋 작성자 메타데이터에 개인 Gmail 2종(eple 공개 주소 — 레이어 2에서 허용 / 팀원 1명 — 본인에게 noreply 설정 안내 권장). 실명은 목록 없이 자동 판정 못 함 — 11/25 보안 점검 때 실명 목록으로 다시
 - **주의:**
   - 대시보드 주소는 `/`. PowerShell 실행 정책으로 `npm.ps1`이 막히면 `npm.cmd`
   - 마이그레이션 적용은 별도 임시 worktree에서(작업 폴더의 미검토 마이그레이션이 같이 올라가지 않게, 로컬에 원격 버전 파일이 모두 있어야 CLI가 받음) → dry-run → `--yes`
