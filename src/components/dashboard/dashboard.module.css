@@ -1,0 +1,233 @@
+/*
+ * 대시보드 스타일 — KPI 카드 · 품절 임박 카드 · 파이프라인 · 재고 표 · 최근 변경. 색 · 간격은 src/styles/tokens.css 변수만 쓴다.
+ *
+ * 하는 일
+ * 1. 카드 묶음은 grid로 폭에 맞춰 줄바꿈한다(휴대폰 폭에서 한 줄 하나).
+ * 2. 표는 .tableWrap 안에서 가로 스크롤한다(휴대폰 폭에서 표가 깨지지 않게 — WU-11 리뷰 항목).
+ * 3. 경고 · 미만 배지는 warning · danger 토큰을 쓴다.
+ *
+ * 근거: docs/work-units/WU-11-dashboard.md, AGENTS.md 3절(CSS 모듈 + 토큰, D-31)
+ * 구역: jkspawn (docs/06-work-plan.md 1절)
+ *
+ * 이력
+ * 2026-11-23  jkspawn  처음 작성 — 대시보드 스타일 (WU-11)
+ */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-4);
+}
+
+.title {
+  margin: 0;
+  font-size: var(--font-xl);
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.sectionHead {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: var(--font-lg);
+}
+
+/* ── KPI ── */
+.kpiGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-3);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.cardLabel {
+  color: var(--color-muted);
+  font-size: var(--font-sm);
+}
+
+.cardValue {
+  font-size: var(--font-xl);
+  font-weight: 700;
+}
+
+.cardRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+}
+
+.subLabel {
+  margin-right: var(--space-1);
+  color: var(--color-muted);
+  font-size: var(--font-sm);
+}
+
+/* ── 배지 ── */
+.badge {
+  display: inline-block;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-xs);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.badgeWarning {
+  color: var(--color-warning);
+  background: var(--color-warning-bg);
+}
+
+.badgeDanger {
+  color: var(--color-danger);
+  background: var(--color-danger-bg);
+}
+
+.badgeOk {
+  color: var(--color-success);
+  background: var(--color-success-bg);
+}
+
+/* ── 품절 임박 카드 ── */
+.alertGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--space-3);
+}
+
+.alertCard {
+  border-color: var(--color-danger);
+}
+
+.alertText {
+  margin: 0;
+}
+
+/* ── 버튼 ── */
+.button {
+  align-self: flex-start;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-sm);
+  color: var(--color-primary);
+  background: transparent;
+  font-size: var(--font-sm);
+  cursor: pointer;
+}
+
+.buttonPrimary {
+  color: var(--color-primary-contrast);
+  background: var(--color-primary);
+}
+
+/* ── 파이프라인 ── */
+.pipeGroup {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.pipeGroupLabel {
+  min-width: 3em;
+  color: var(--color-muted);
+  font-size: var(--font-sm);
+}
+
+.pipeStep {
+  display: inline-flex;
+  gap: var(--space-2);
+  align-items: baseline;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  background: var(--color-surface);
+  text-decoration: none;
+}
+
+.pipeStep:hover,
+.pipeStep:focus-visible {
+  border-color: var(--color-primary);
+}
+
+.pipeCount {
+  font-weight: 700;
+}
+
+.pipeArrow {
+  color: var(--color-muted);
+}
+
+/* ── 표 ── */
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.table {
+  width: 100%;
+  min-width: 480px;
+  border-collapse: collapse;
+  font-size: var(--font-sm);
+}
+
+.table th,
+.table td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table th {
+  color: var(--color-muted);
+  background: var(--color-surface);
+  font-weight: 600;
+}
+
+.num {
+  text-align: right !important;
+  font-variant-numeric: tabular-nums;
+}
+
+.clickRow {
+  cursor: pointer;
+}
+
+.clickRow:hover {
+  background: var(--color-surface);
+}
+
+.rowLink {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.plus {
+  color: var(--color-success);
+}
+
+.minus {
+  color: var(--color-danger);
+}
