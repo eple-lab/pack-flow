@@ -18,6 +18,7 @@
  *
  * 이력
  * 2026-11-23  eple  처음 작성 — 시드 초기화 · db · 시드 정답표 · e2e → 결과표 (WU-45)
+ * 2026-11-23  eple  tsconfig allowImportingTsExtensions를 켜고 TS5097 우회 주석 제거 (WU-45)
  */
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -35,9 +36,7 @@ import {
   seoulStamp,
   type CaseResult,
   type NotRun,
-// @ts-expect-error TS5097 — node가 직접 읽으려면 .ts 확장자가 필요하다(tsconfig에서 allowImportingTsExtensions를 켜면 이 줄은 지운다)
 } from '../../scripts/regression/report.ts';
-// @ts-expect-error TS5097 — node가 직접 읽으려면 .ts 확장자가 필요하다(tsconfig에서 allowImportingTsExtensions를 켜면 이 줄은 지운다)
 import { baseUrl, loadLocalEnv, loginWithCookies, REPO_ROOT, resetSeed, secretValues } from '../../scripts/regression/session.ts';
 
 const SEED = 'small';

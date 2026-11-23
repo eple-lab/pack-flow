@@ -15,13 +15,12 @@
  *
  * 이력
  * 2026-11-23  eple  처음 작성 — small · large 응답 시간 → performance.md (WU-45)
+ * 2026-11-23  eple  tsconfig allowImportingTsExtensions를 켜고 TS5097 우회 주석 제거 (WU-45)
  */
 import { appendFileSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { cpus, platform } from 'node:os';
 import { join } from 'node:path';
-// @ts-expect-error TS5097 — node가 직접 읽으려면 .ts 확장자가 필요하다(tsconfig에서 allowImportingTsExtensions를 켜면 이 줄은 지운다)
 import { describeTarget, PERFORMANCE_HEADER, redact, renderPerfRow, seoulStamp, toTiming, type Timing } from '../../scripts/regression/report.ts';
-// @ts-expect-error TS5097 — node가 직접 읽으려면 .ts 확장자가 필요하다(tsconfig에서 allowImportingTsExtensions를 켜면 이 줄은 지운다)
 import { baseUrl, loadLocalEnv, loginWithCookies, REPO_ROOT, resetSeed, secretValues, type SeedName } from '../../scripts/regression/session.ts';
 
 /** 첫 호출 뒤에 재는 횟수. */
