@@ -1,24 +1,35 @@
 /**
- * 에이전트 패널 — 빈 패널 자리. 열린 모드만 보여 준다.
+ * 에이전트 패널 — 열린 모드(발주서 초안 · 챗봇)에 맞는 화면을 보여 준다.
  *
- * 하는 일: skygaul가 WU-33(발주서 초안) · WU-34(챗봇)에서 DraftPoView · ChatView를 꽂아 채운다.
- * <AgentSlot />(5단계 레이아웃)이 openAgentPanel 요청을 받아 이 패널을 연다.
+ * 하는 일
+ * 1. <AgentSlot />(5단계 레이아웃)이 openAgentPanel 요청을 받아 이 패널을 연다(닫기 버튼은 슬롯이 가진다).
+ * 2. draft-po 모드는 DraftPoView(WU-33). 요청마다 key를 달아 대상 품목이 바뀌면 새로 그린다.
+ * 3. chat 모드는 아직 준비 중이다 — ChatView는 WU-34에서 꽂는다.
  *
  * 근거: docs/04-api-contract.md 3.8, docs/work-units/WU-33-*.md · WU-34-*.md
  * 구역: skygaul (docs/06-work-plan.md 1절)
  *
  * 이력
- * 2026-11-23  eple  자리 생성 (WU-04) — 구현은 skygaul WU-33/34
+ * 2026-11-23  eple     자리 생성 (WU-04) — 구현은 skygaul WU-33/34
+ * 2026-11-23  skygaul  draft-po 모드에 DraftPoView 연결 (WU-33)
  */
+import { DraftPoView } from './DraftPoView';
 import type { AgentPanelRequest } from './open';
+import styles from './agent.module.css';
 
 /**
- * 빈 패널. props: request(열린 모드와 대상 품목). testid: agent-panel
+ * 에이전트 패널. props: request(열린 모드와 대상 품목). testid: agent-panel
  */
 export function AgentPanel({ request }: { request: AgentPanelRequest }) {
+  const isDraft = request.mode === 'draft-po';
   return (
-    <aside data-testid="agent-panel" data-mode={request.mode}>
-      <p>{request.mode === 'draft-po' ? '발주서 초안' : '챗봇'} — 준비 중</p>
-    </aside>
+    <section className={styles.panel} data-testid="agent-panel" data-mode={request.mode}>
+      <h2 className={styles.title}>{isDraft ? '발주서 초안' : '챗봇'}</h2>
+      {isDraft ? (
+        <DraftPoView key={`draft-po:${request.sku_ids?.join(',') ?? ''}`} skuIds={request.sku_ids} />
+      ) : (
+        <p className={styles.muted}>챗봇 — 준비 중</p>
+      )}
+    </section>
   );
 }
