@@ -19,6 +19,7 @@
  * 이력
  * 2026-11-23  eple  처음 작성 — 시드 초기화 · db · 시드 정답표 · e2e → 결과표 (WU-45)
  * 2026-11-23  eple  tsconfig allowImportingTsExtensions를 켜고 TS5097 우회 주석 제거 (WU-45)
+ * 2026-11-24  eple  chromium을 실제로 띄워 확인 · 하위 출력 가리기 · 비정상 종료 코드 반영 (#49 리뷰)
  */
 import { spawnSync } from 'node:child_process';
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -34,6 +35,7 @@ import {
   renderReport,
   runnerLabel,
   seoulStamp,
+  withExitCode,
   type CaseResult,
   type NotRun,
 } from '../../scripts/regression/report.ts';
@@ -41,13 +43,21 @@ import { baseUrl, loadLocalEnv, loginWithCookies, REPO_ROOT, resetSeed, secretVa
 
 const SEED = 'small';
 
-/** 하위 명령을 node로 실행한다(출력은 그대로 보여 준다). 종료 코드를 돌려준다. */
+/**
+ * 하위 명령을 node로 실행한다. 종료 코드를 돌려준다.
+ * [#49 리뷰] 출력은 붙잡아 redact()로 가린 뒤에만 화면에 쓴다(Playwright 시간 초과 때 요청 헤더의 세션 쿠키가 찍힌 일).
+ */
 function runNode(args: string[], extraEnv: Record<string, string> = {}): number {
   const result = spawnSync(process.execPath, args, {
     cwd: REPO_ROOT,
-    stdio: 'inherit',
+    stdio: ['inherit', 'pipe', 'pipe'],
+    encoding: 'utf8',
+    maxBuffer: 64 * 1024 * 1024,
     env: { ...process.env, ...extraEnv },
   });
+  const secrets = secretValues();
+  if (result.stdout) process.stdout.write(redact(result.stdout, secrets));
+  if (result.stderr) process.stderr.write(redact(result.stderr, secrets));
   return result.status ?? 1;
 }
 
@@ -71,15 +81,20 @@ async function isReachable(url: string): Promise<boolean> {
   }
 }
 
-/** Playwright 브라우저(chromium)가 설치돼 있는지. */
+type Launchable = { launch(options: { headless: boolean }): Promise<{ close(): Promise<void> }> };
+
+/**
+ * Playwright 브라우저(chromium)를 실제로 띄울 수 있는지.
+ * [#49 리뷰] 실행 파일 경로 존재만 보면 headless shell만 설치된 Windows에서 거짓 '없음'이 된다 → 직접 띄워 본다.
+ */
 async function hasChromium(): Promise<boolean> {
   try {
-    const mod = (await import('@playwright/test')) as unknown as {
-      chromium?: { executablePath(): string };
-      default?: { chromium: { executablePath(): string } };
-    };
+    const mod = (await import('@playwright/test')) as unknown as { chromium?: Launchable; default?: { chromium: Launchable } };
     const chromium = mod.chromium ?? mod.default?.chromium;
-    return chromium ? existsSync(chromium.executablePath()) : false;
+    if (!chromium) return false;
+    const browser = await chromium.launch({ headless: true });
+    await browser.close();
+    return true;
   } catch {
     return false;
   }
@@ -112,14 +127,14 @@ async function main(): Promise<number> {
     const dbJson = join(tmp, 'db.json');
     const dbCode = runNode([join(REPO_ROOT, 'node_modules/vitest/vitest.mjs'), 'run', '--project', 'db', '--reporter=default', '--reporter=json', `--outputFile.json=${dbJson}`]);
     const dbRaw = readIfExists(dbJson);
-    cases.push(...(dbRaw ? parseVitestJson(JSON.parse(dbRaw), 'db') : [crashed('db', dbCode)]));
+    cases.push(...(dbRaw ? withExitCode(parseVitestJson(JSON.parse(dbRaw), 'db'), 'db', dbCode) : [crashed('db', dbCode)]));
 
     // 3. 시드 정답표 시험 (node:test)
     console.log('[회귀] 시드 정답표 시험 실행');
     const seedXml = join(tmp, 'seed.xml');
     const seedCode = runNode(['--test', '--test-reporter=spec', '--test-reporter-destination=stdout', '--test-reporter=junit', `--test-reporter-destination=${seedXml}`, 'tests/regression/seed-expected.test.ts']);
     const seedRaw = readIfExists(seedXml);
-    cases.push(...(seedRaw ? parseJunit(seedRaw, 'seed') : [crashed('seed', seedCode)]));
+    cases.push(...(seedRaw ? withExitCode(parseJunit(seedRaw, 'seed'), 'seed', seedCode) : [crashed('seed', seedCode)]));
 
     // 4. test:e2e (Playwright)
     console.log(`[회귀] test:e2e 실행 준비 — 대상 ${describeTarget(base)}`);
@@ -134,7 +149,7 @@ async function main(): Promise<number> {
         E2E_BASE_URL: base,
       });
       const e2eRaw = readIfExists(e2eJson);
-      cases.push(...(e2eRaw ? parsePlaywrightJson(JSON.parse(e2eRaw), 'e2e') : [crashed('e2e', e2eCode)]));
+      cases.push(...(e2eRaw ? withExitCode(parsePlaywrightJson(JSON.parse(e2eRaw), 'e2e'), 'e2e', e2eCode) : [crashed('e2e', e2eCode)]));
     }
   } finally {
     rmSync(tmp, { recursive: true, force: true });

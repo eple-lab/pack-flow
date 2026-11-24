@@ -12,12 +12,18 @@
  * - 결과표 · 측정 행 전체 문자열에 이메일 · 비밀번호 · 키를 일부러 넣어도 출력에 없다
  * - hostOnly: 계정 · 쿼리 · 경로 제거, 주소 아님 → '알 수 없음'
  * - seoulStamp: 2026-11-23T15:30:00Z → 2026-11-24 00:30 (한국 시간으로 날짜가 넘어감)
+ * - (#49 리뷰) C-24 redact: `Cookie: sb-…-auth-token=값; …` · `set-cookie: …` · `"authorization": "Basic …"` · 맨몸 `sb-proj-auth-token.0=값`
+ *   → 원래 값이 하나도 안 남고 헤더 이름은 남는다
+ * - (#49 리뷰) C-25 redact: 평범한 글(`PRD-001 재고 10`)은 그대로
+ * - (#49 리뷰) C-26 withExitCode: (실패 없음, 코드 1) → 실패 한 건 추가 / (코드 0) → 그대로 / (이미 실패 있음, 코드 1) → 그대로 / 원본 불변
  *
+
  * 근거: WU-45 · docs/07-test-strategy.md 5절
  * 구역: eple (docs/06-work-plan.md 1절 '테스트 기반')
  *
  * 이력
  * 2026-11-23  eple  처음 작성 — 결과표 · p50 · 가리기 시험 (WU-45)
+ * 2026-11-24  eple  헤더형 비밀 가리기 · 비정상 종료 코드 반영 시험 추가 (#49 리뷰)
  */
 import { describe, expect, it } from 'vitest';
 import {
@@ -37,6 +43,7 @@ import {
   runnerLabel,
   seoulStamp,
   toTiming,
+  withExitCode,
   type CaseResult,
 } from './report';
 
@@ -251,6 +258,44 @@ describe('가리기 (이메일 · 키 · 비밀번호가 결과 파일에 남지
     }
     expect(doc).toContain('pack-flow.example.com');
     expect(doc).toContain('실행: 미기재');
+  });
+});
+
+describe('헤더형 비밀 가리기 · 종료 코드 (#49 리뷰)', () => {
+  it('C-24 cookie · set-cookie · authorization · sb 세션 쿠키는 값을 모르는 채로도 가린다(이름은 남김)', () => {
+    const cookie = redact('Cookie: sb-abc-auth-token=base64-xyz; other=1');
+    expect(cookie).toContain('Cookie:');
+    for (const leak of ['base64-xyz', 'other=1']) expect(cookie).not.toContain(leak);
+
+    const setCookie = redact('set-cookie: sid=SESSVALUE123; Path=/; HttpOnly');
+    expect(setCookie).toContain('set-cookie:');
+    expect(setCookie).not.toContain('SESSVALUE123');
+
+    const auth = redact('{"authorization": "Basic abc", "x": 1}');
+    expect(auth).toContain('"authorization"');
+    expect(auth).not.toContain('Basic abc');
+    expect(redact('{"cookie": "a=SECRETCOOKIE"}')).not.toContain('SECRETCOOKIE');
+
+    const bare = redact('요청 실패 sb-proj-auth-token.0=AbC123 끝');
+    expect(bare).not.toContain('AbC123');
+    expect(bare).toContain('sb-…-auth-token=[세션]');
+    expect(bare).toContain('끝');
+  });
+  it('C-25 평범한 글은 그대로 둔다', () => {
+    expect(redact('PRD-001 재고 10')).toBe('PRD-001 재고 10');
+  });
+  it('C-26 withExitCode: 실패 없이 비정상 종료면 실패 한 건 추가, 코드 0이거나 이미 실패가 있으면 그대로', () => {
+    const base = [pass('T-S1-1 출고')];
+    const added = withExitCode(base, 'db', 1);
+    expect(added).toHaveLength(2);
+    expect(added[1]).toMatchObject({ source: 'db', name: 'db 묶음 비정상 종료', status: 'failed', durationMs: 0 });
+    expect(added[1].message).toContain('종료 코드 1');
+    expect(hasFailure(added)).toBe(true);
+    expect(base).toHaveLength(1); // 원본 불변
+
+    expect(withExitCode(base, 'db', 0)).toBe(base);
+    const already = [pass('a'), fail('C-01 x')];
+    expect(withExitCode(already, 'db', 1)).toBe(already);
   });
 });
 

@@ -14,6 +14,7 @@
  *
  * 이력
  * 2026-11-23  eple  처음 작성 — 결과 묶기 · 결과표 · p50 · 가리기 (WU-45)
+ * 2026-11-24  eple  헤더형 비밀(cookie · authorization · sb 세션 쿠키) 가리기 + 비정상 종료 코드 반영 withExitCode (#49 리뷰)
  */
 
 /** 한 테스트의 결과. */
@@ -149,6 +150,25 @@ export function renderReport(header: ReportHeader, cases: CaseResult[], notRun: 
 /** 실패가 하나라도 있으면 true(종료 코드 1의 기준). 미실행은 실패가 아니다. */
 export function hasFailure(cases: CaseResult[]): boolean {
   return cases.some((c) => c.status === 'failed');
+}
+
+/**
+ * 결과 파일은 있는데 하위 명령이 0이 아닌 코드로 끝났고, 파일에 실패 건이 없으면
+ * '묶음 비정상 종료' 실패 한 건을 덧붙인 새 목록을 돌려준다(종료 코드를 버려 통과로 보이는 것을 막는다).
+ * 종료 코드 0이거나 이미 실패 건이 있으면 그대로 돌려준다. 원본은 바꾸지 않는다.
+ */
+export function withExitCode(cases: CaseResult[], label: string, code: number): CaseResult[] {
+  if (code === 0 || hasFailure(cases)) return cases;
+  return [
+    ...cases,
+    {
+      source: label,
+      name: `${label} 묶음 비정상 종료`,
+      status: 'failed',
+      durationMs: 0,
+      message: `종료 코드 ${code} — 결과 파일에 실패가 없지만 실행이 비정상 종료됨(미수집 실패)`,
+    },
+  ];
 }
 
 // ── 결과 파일 → CaseResult ────────────────────────────────────────────
@@ -361,6 +381,8 @@ export function runnerLabel(value: string | undefined): string {
  * secrets: 실행 환경의 실제 값들(비밀번호 · 키 등). 4글자 미만은 무시한다(오탐 방지).
  * 가리는 것: 알려 준 값, 이메일, JWT, Bearer 토큰, 접두사 있는 키(sb_ · sk- · AIza · ghp_ …),
  * 사용자 홈 경로, URL 쿼리, 32자 이상 긴 영숫자 덩어리.
+ * (#49 리뷰) 값을 몰라도 가리는 헤더 모양: `cookie:` · `set-cookie:` · `authorization:` 줄(JSON `"cookie": "…"` 포함)은
+ * 이름은 두고 값만 `[가림]`, Supabase 세션 쿠키 `sb-…-auth-token(.N)=값`은 `sb-…-auth-token=[세션]`으로 바꾼다.
  */
 export function redact(text: string, secrets: string[] = []): string {
   let out = text;
@@ -368,6 +390,9 @@ export function redact(text: string, secrets: string[] = []): string {
     if (secret.length >= 4) out = out.split(secret).join('[가림]');
   }
   return out
+    .replace(/("(?:set-cookie|cookie|authorization)"\s*:\s*)"(?:[^"\\]|\\.)*"/gi, '$1"[가림]"')
+    .replace(/\b((?:set-cookie|cookie|authorization)\s*:)[^\r\n]*/gi, '$1 [가림]')
+    .replace(/sb-[A-Za-z0-9_-]+-auth-token(?:\.\d+)?=[^;\s'"]+/g, 'sb-…-auth-token=[세션]')
     .replace(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g, '[이메일]')
     .replace(/eyJ[A-Za-z0-9_-]{5,}\.[A-Za-z0-9_-]{5,}(?:\.[A-Za-z0-9_-]*)?/g, '[토큰]')
     .replace(/Bearer\s+[A-Za-z0-9._~+/=-]+/gi, 'Bearer [토큰]')
