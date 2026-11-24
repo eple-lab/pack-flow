@@ -155,6 +155,8 @@ type BulkRowInput = {
 | `POST /api/agent/chat` | `{ message: string }` (500자까지) | `ChatReply` | 없음 |
 | `POST /api/agent/execute` | `{ action: AgentAction }` | `{ result }` | 허용 액션의 함수 |
 
+`/draft-po/confirm`의 일부 저장: 줄마다 `pf_create_purchase`를 따로 부르므로(줄 사이를 묶는 트랜잭션 없음) 중간 줄이 거부되면 앞 줄은 이미 저장돼 있다. 그때는 그 줄의 오류 코드 · HTTP를 그대로 돌려주되, 원래 `detail`에 **`saved_count`**(이미 저장된 앞 줄 수, 1 이상 정수)와 **`saved`**(그 구매 번호 `purchase_id` 목록)를 덧붙인다. 화면은 이 두 칸으로 저장된 줄을 표에서 빼서 다시 눌러도 중복 발주가 되지 않게 한다. 첫 줄에서 거부되면(저장 0건) 두 칸은 없다. (11/23 추가 — #45)
+
 ```ts
 type PoDraft = {
   lines: Array<{
