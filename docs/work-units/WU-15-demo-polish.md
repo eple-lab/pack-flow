@@ -1,6 +1,7 @@
 # WU-15 시연 동선 · 백업 영상
 
 - 담당: jkspawn / 검증: skygaul / Step 4(시연 준비) / Wave 3 · 11/25(수)
+- 담당 변경(11/24 팀 합의): 초기화 버튼은 jkspawn(#67, 동결 예외), **백업 영상은 sorek-charlie**, 시연 순서표는 eple(workspace `presentation/demo-script.md`), 영상 확인은 skygaul 그대로
 - 브랜치: `feat/WU-15-demo-polish`
 - 의존: Wave 1 · 2 전부 병합
 
