@@ -7,7 +7,7 @@
  *    lines가 있으면 원본 값을 살린 그 행들에서 시작하고(오류 행도 값 유지), errors의 사유(04 3.6 · 4.3 칸 문구)를 줄마다 합친다.
  *    lines가 없으면 rows · errors만으로 합치고, 파싱 오류 줄은 빈 값 + 사유만 담는다(valid=false).
  * 2. 파싱을 통과한 행은 사용자 JWT 클라이언트로 조회해 세 가지를 더 본다(RLS가 남의 행을 거른다):
- *    미등록 품목코드 · 이미 등록된 송장번호(입고=purchases, 출고=sales) · 출고 수량 대 현재 재고(같은 품목의 출고 행은 위에서부터 누적).
+ *    미등록 품목코드 · 이미 등록된 송장번호(입고=purchases, 출고=sales) · 출고 수량 대 현재 재고(오류 없는 행만 위에서부터 입고는 더하고 출고는 빼며 가용 재고에 반영).
  *    여기서 더하는 사유 문구는 src/types/erp.ts의 BULK_ERROR_REASONS(04 3.6)만 쓴다.
  * 3. 행 수는 500을 넘으면 전체 거절(PF_VALIDATION). 본문 100KB는 handler와 bulkPreview 스키마가 이미 막는다.
  * 4. insert · update · rpc를 부르지 않는다(원칙: 미리보기는 저장하지 않는다). 최종 판정은 pf_bulk_apply가 한 번 더 한다.
@@ -18,6 +18,7 @@
  * 이력
  * 2026-11-23  eple  처음 작성 — 일괄 등록 미리보기 조회 (WU-43)
  * 2026-11-24  eple  WU-13 parse 결과(rejected · lines · 칸 문구) 받기 — 501행이 빈 결과로 가던 것 · 오류 행 값이 비던 것 (WU-43)
+ * 2026-11-24  eple  미리보기 재고 계산을 유효 행 순서 반영으로 (#46 리뷰)
  */
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { PfError } from '@/lib/api/errors';
@@ -104,22 +105,24 @@ export async function previewBulk(
       for (const entry of (found.data ?? []) as Array<{ invoice_no: string }>) taken[kind].add(entry.invoice_no);
     }
 
-    const shipped = new Map<string, number>(); // 품목별로 앞선 출고 행이 쓴 수량
+    // [#46 리뷰] 제외될 행이 재고를 선점 · 앞선 입고를 반영 안 함 → 유효한 행만 순서대로 가용 재고에 반영 (eple)
+    const available = new Map(stockBySku); // 품목별 가용 재고(pf_bulk_apply가 행 순서대로 반영하는 것과 같게)
     for (const row of checkable) {
       if (!stockBySku.has(row.sku_id)) {
         row.errors.push('미등록 품목코드');
         continue;
       }
+      const stock = available.get(row.sku_id) ?? 0;
       if ((row.kind === '입고' || row.kind === '출고') && row.invoice_no && taken[row.kind].has(row.invoice_no)) {
         row.errors.push('이미 등록된 송장번호');
       }
-      if (row.kind === '출고' && row.qty !== null) {
-        const used = shipped.get(row.sku_id) ?? 0;
-        if (used + row.qty > (stockBySku.get(row.sku_id) ?? 0)) {
-          row.errors.push('출고 수량이 재고보다 많음(미리보기 시점 기준)');
-        } else {
-          shipped.set(row.sku_id, used + row.qty); // 반영될 행만 누적한다
-        }
+      if (row.kind === '출고' && row.qty !== null && row.qty > stock) {
+        row.errors.push('출고 수량이 재고보다 많음(미리보기 시점 기준)');
+      }
+      // 오류가 하나도 없는 행만 가용 재고에 반영한다(오류 행은 재고를 바꾸지 않는다)
+      if (row.errors.length === 0 && row.qty !== null) {
+        if (row.kind === '입고') available.set(row.sku_id, stock + row.qty);
+        else if (row.kind === '출고') available.set(row.sku_id, stock - row.qty);
       }
     }
   }

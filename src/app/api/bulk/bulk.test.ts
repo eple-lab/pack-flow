@@ -19,6 +19,10 @@
  * - C-84 parse가 lines를 주면 오류 행도 원본 값 유지: 수량 0 행 → kind '입고' · sku_id 'PRD-001' · qty 0(lines 값 그대로), valid=false,
  *        errors ['수량이 0 이하'] / 메모 201자 행(lines의 errors는 빈 배열) → errors에 칸 문구 '200자 이하로 입력해 주세요'
  *        / 정상 행은 DB 비교를 거쳐 valid, 줄 순서 1 · 2 · 3
+ * - C-87 preview 재고 10: [출고 6 송장 OUT-USED(이미 등록), 출고 5 새 송장] → 1행 errors ['이미 등록된 송장번호'], 2행 valid
+ *        (오류 행이 재고를 선점하지 않음) / 1행이 미등록 품목코드여도 2행은 valid
+ * - C-88 preview PRD-002 재고 0: [입고 8, 출고 8] → 둘 다 valid / [입고 8, 출고 9] → 2행 '출고 수량이 재고보다 많음(미리보기 시점 기준)'
+ *        / [입고 8 송장 IN-USED(오류), 출고 1] → 오류 입고는 재고를 늘리지 않아 2행도 오류
  * - C-86 preview 마지막 줄이 빈 칸으로 끝나도(끝 탭 2개: 송장 · 비고 빈 값 / 1개: 비고만 빈 값) 열 개수 오류가 아니고
  *        두 행 모두 valid=true, errors [] (붙여넣은 글자 끝 탭을 trim하지 않아야 통과)
  *
@@ -29,6 +33,7 @@
  * 2026-11-23  eple  처음 작성 — 일괄 등록 라우트 단위 시험 C-71 ~ C-82 (WU-43)
  * 2026-11-24  eple  C-83 · C-84 추가 — WU-13 parse의 rejected · lines 받기 (WU-43)
  * 2026-11-24  eple  C-86 추가 — 끝 탭 보존 시험 (#60)
+ * 2026-11-24  eple  C-87 · C-88 추가 — 미리보기 재고 계산을 유효 행 순서 반영으로 (#46 리뷰)
  */
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -194,6 +199,30 @@ describe('POST /api/bulk/preview', () => {
       await (await call(preview, { format: 'tsv', text: text(tsv('출고', 'PRD-001', 6), tsv('출고', 'PRD-001', 6)) })).json()
     ).data.rows;
     expect(stacked.map((r: PreviewRow) => r.valid)).toEqual([true, false]);
+  });
+
+  it('C-87 오류가 난 출고 행은 재고를 선점하지 않는다', async () => {
+    const run = async (body: string) => (await (await call(preview, { format: 'tsv', text: body })).json()).data.rows as PreviewRow[];
+    holder.client = fake(TABLES()).client;
+    const used = await run(text(tsv('출고', 'PRD-001', 6, 'OUT-USED'), tsv('출고', 'PRD-001', 5, 'OUT-NEW')));
+    expect(used[0]).toMatchObject({ valid: false, errors: ['이미 등록된 송장번호'] });
+    expect(used[1]).toMatchObject({ valid: true, errors: [] });
+    const unknown = await run(text(tsv('출고', 'NOPE-001', 6), tsv('출고', 'PRD-001', 5, 'OUT-NEW')));
+    expect(unknown[0]).toMatchObject({ valid: false, errors: ['미등록 품목코드'] });
+    expect(unknown[1]).toMatchObject({ valid: true, errors: [] });
+  });
+
+  it('C-88 앞선 입고는 가용 재고에 더하고, 오류 입고는 더하지 않는다', async () => {
+    const run = async (body: string) => (await (await call(preview, { format: 'tsv', text: body })).json()).data.rows as PreviewRow[];
+    holder.client = fake(TABLES()).client;
+    const ok = await run(text(tsv('입고', 'PRD-002', 8, 'IN-A'), tsv('출고', 'PRD-002', 8, 'OUT-A')));
+    expect(ok.map((r) => r.valid)).toEqual([true, true]);
+    const over = await run(text(tsv('입고', 'PRD-002', 8, 'IN-A'), tsv('출고', 'PRD-002', 9, 'OUT-A')));
+    expect(over[0].valid).toBe(true);
+    expect(over[1]).toMatchObject({ valid: false, errors: ['출고 수량이 재고보다 많음(미리보기 시점 기준)'] });
+    const bad = await run(text(tsv('입고', 'PRD-002', 8, 'IN-USED'), tsv('출고', 'PRD-002', 1, 'OUT-A')));
+    expect(bad[0]).toMatchObject({ valid: false, errors: ['이미 등록된 송장번호'] });
+    expect(bad[1]).toMatchObject({ valid: false, errors: ['출고 수량이 재고보다 많음(미리보기 시점 기준)'] });
   });
 
   it('C-75 파싱 오류 줄은 valid=false이고 줄 번호 순서를 지킨다', async () => {
