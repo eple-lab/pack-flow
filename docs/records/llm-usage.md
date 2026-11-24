@@ -53,7 +53,7 @@ order by day;
 ## 3. 비용
 
 - **원칙**: 배포 · 발표는 Gemini 무료 티어, 개발은 각자 PC의 Ollama(D-06). 키 발급자는 팀이 정한 한 명이고 키는 서버 환경변수로만 읽는다(`env-server.ts`).
-- **실제로는 개발에도 Gemini를 썼다(skygaul)**: Ollama `qwen3.5`가 응답 토큰 한도(200)를 생각(thinking) 단계에 다 써서 빈 응답이 나와 진행이 어려웠고, 팀장에게 보고한 뒤 개발용 Gemini 키로 진행했다([WU-31](../work-units/WU-31-llm.md) 결과). 그래서 개발 중 호출도 Gemini 무료 한도와 데이터 정책([ai-limits.md](ai-limits.md) 3절)의 대상이다. 2절 dev DB의 호출 수가 그 호출이다. 결정 문서 D-06은 "개발은 Ollama"라서 실제와 달랐고, eple가 "Ollama로 진행이 어려우면 각자 본인 계정의 Gemini 개발용 키(로컬 `.env.local`에만)"로 D-06과 계획서 9절을 고치기로 했다(11/24 회신, eple 구역이라 이 문서에서는 고치지 않는다). 배포 키는 1개(발급자 계정, Render 환경변수에만)로 그대로다.
+- **실제로는 개발에도 Gemini를 썼다(skygaul)**: Ollama `qwen3.5`가 응답 토큰 한도(200)를 생각(thinking) 단계에 다 써서 빈 응답이 나와 진행이 어려웠고, 팀장에게 보고한 뒤 개발용 Gemini 키로 진행했다([WU-31](../work-units/WU-31-llm.md) 결과). 그래서 개발 중 호출도 Gemini 무료 한도와 데이터 정책([ai-limits.md](ai-limits.md) 3절)의 대상이다. 2절 dev DB의 호출 수가 그 호출이다. 결정 문서 D-06은 "개발은 Ollama"라서 실제와 달랐고, eple가 "Ollama로 진행이 어려우면 각자 본인 계정의 Gemini 개발용 키(로컬 `.env.local`에만)"로 D-06과 계획서 9절을 고쳤다(11/24, #62 병합. 결정 문서는 eple 구역이라 이 문서에서는 고치지 않았다). 배포 키는 1개(발급자 계정, Render 환경변수에만)로 그대로다.
 - **비용이 0원인 조건**: Gemini API 프로젝트에 **결제 계정이 연결되지 않은 상태**여야 무료 할당량만 쓴다. 결제를 연결하면 유료 단가가 적용되고 데이터 정책도 달라진다([ai-limits.md](ai-limits.md) 3절).
 - **확인 방법(사람이 한다)**: Google AI Studio의 사용량 · 결제 화면에서 ① 결제 계정이 연결되지 않았는지, ② 사용한 호출 수 · 청구 금액이 0인지 캡처 없이 눈으로 확인하고 결과(날짜 · 확인한 사람)만 이 절에 적는다. 키가 보이는 화면은 캡처하지 않는다.
 - **모델 · 무료 티어 가용성**은 Google 쪽 정책이 바뀔 수 있다. 사용 중인 모델 이름은 환경변수 `LLM_MODEL`이고, 모델별 무료 티어 여부는 [Gemini Developer API pricing](https://ai.google.dev/gemini-api/docs/pricing)에서 확인한다(발표 전 한 번).
