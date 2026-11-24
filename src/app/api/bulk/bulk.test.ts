@@ -15,12 +15,17 @@
  * - C-80 X-PF 헤더 없음 → 403 PF_CSRF · 로그인 안 함 → 401 PF_UNAUTHENTICATED (preview · commit 둘 다), DB · rpc 0회
  * - C-81 commit에서 DB 함수가 모르는 오류(원문 포함)를 던지면 500 PF_INTERNAL, 응답에 원문 없음
  * - C-82 parse가 아직 없으면(WU-13 병합 전) preview → 501 PF_NOT_IMPLEMENTED, DB 0회
+ * - C-83 parse가 rejected(501행)를 돌려주면 → PfError PF_VALIDATION, detail { field: 'text', reason: 'too_long', max: 500 }, DB 0회 (실패해야 함)
+ * - C-84 parse가 lines를 주면 오류 행도 원본 값 유지: 수량 0 행 → kind '입고' · sku_id 'PRD-001' · qty 0(lines 값 그대로), valid=false,
+ *        errors ['수량이 0 이하'] / 메모 201자 행(lines의 errors는 빈 배열) → errors에 칸 문구 '200자 이하로 입력해 주세요'
+ *        / 정상 행은 DB 비교를 거쳐 valid, 줄 순서 1 · 2 · 3
  *
  * 근거: docs/04-api-contract.md 3.6 · 4절, docs/05-security.md 5절, WU-43
  * 구역: eple (docs/06-work-plan.md 1절)
  *
  * 이력
  * 2026-11-23  eple  처음 작성 — 일괄 등록 라우트 단위 시험 C-71 ~ C-82 (WU-43)
+ * 2026-11-24  eple  C-83 · C-84 추가 — WU-13 parse의 rejected · lines 받기 (WU-43)
  */
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -311,5 +316,47 @@ describe('parse가 없을 때', () => {
     expect((await res.json()).error.code).toBe('PF_NOT_IMPLEMENTED');
     expect(f.reads).toEqual([]);
     vi.doUnmock('@/lib/bulk/parse');
+  });
+});
+
+describe('WU-13 parse 결과 모양(rejected · lines)', () => {
+  const input = { format: 'tsv' as const, text: '(가짜 parse가 무시함)' };
+
+  it('C-83 parse가 rejected를 돌려주면 PF_VALIDATION(field text, max 500), DB 0회', async () => {
+    const { previewBulk } = await import('@/lib/queries/bulkPreview');
+    const f = fake(TABLES());
+    const rejected = { field: 'text', reason: 'too_long' as const, max: 500 };
+    const parseRejected = () => ({ rows: [], errors: [], lines: [], rejected });
+    await expect(previewBulk(f.client, input, parseRejected)).rejects.toMatchObject({
+      code: 'PF_VALIDATION',
+      detail: rejected,
+    });
+    expect(f.reads).toEqual([]);
+  });
+
+  it('C-84 lines가 있으면 오류 행도 원본 값을 지키고, 칸 문구를 errors에 싣는다', async () => {
+    const { previewBulk } = await import('@/lib/queries/bulkPreview');
+    const f = fake(TABLES());
+    const base = { partner: '거래처', invoice_no: null, memo: null };
+    const ok = { line: 1, kind: '입고' as const, sku_id: 'PRD-001', qty: 2, ...base };
+    const parseWithLines = () => ({
+      rows: [ok],
+      errors: [
+        { line: 2, reason: '수량이 0 이하' },
+        { line: 3, reason: '200자 이하로 입력해 주세요' },
+      ],
+      lines: [
+        { ...ok, valid: true, errors: [] },
+        { line: 2, kind: '입고', sku_id: 'PRD-001', qty: 0, ...base, valid: false, errors: ['수량이 0 이하'] },
+        { line: 3, kind: '출고', sku_id: 'PRD-001', qty: 1, ...base, memo: 'x'.repeat(201), valid: false, errors: [] },
+      ],
+      rejected: null,
+    });
+    const { rows } = await previewBulk(f.client, input, parseWithLines);
+    expect(rows.map((r) => r.line)).toEqual([1, 2, 3]);
+    expect(rows[0]).toMatchObject({ valid: true, errors: [] });
+    expect(rows[1]).toMatchObject({ kind: '입고', sku_id: 'PRD-001', qty: 0, valid: false, errors: ['수량이 0 이하'] });
+    expect(rows[2]).toMatchObject({ kind: '출고', valid: false, errors: ['200자 이하로 입력해 주세요'] });
+    expect(f.reads).toContain('items'); // 정상 행은 DB와 비교했다
   });
 });
