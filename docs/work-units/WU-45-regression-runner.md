@@ -32,9 +32,15 @@
 
 ## 다 됐다의 기준
 
-- [ ] `npm run test:regression` → 결과표 파일 생성, 일부러 실패시킨 테스트 1개가 '실패'로 표시되고 종료 코드 1 (확인 뒤 되돌림)
-- [ ] `npm run measure` → `performance.md`에 두 시드 행 추가
-- [ ] 생성 파일에 이메일 · 키 없음(비밀값 검사 통과)
+- [x] `npm run test:regression` → 결과표 파일 생성, 일부러 실패시킨 테스트 1개가 '실패'로 표시되고 종료 코드 1 (확인 뒤 되돌림)
+- [x] `npm run measure` → `performance.md`에 두 시드 행 추가
+- [x] 생성 파일에 이메일 · 키 없음(비밀값 검사 통과)
+
+## 테스트 방법
+
+- 자동: `npm run test:regression` → `docs/records/regression-<YYYYMMDD-HHmm>.md` 생성. 일부러 실패시킨 테스트 1개가 '실패'로 나오고 종료 코드가 1인지 확인한 뒤 되돌린다. `npm run measure` → `docs/records/performance.md`에 두 시드 행 추가
+- 직접: 자기 PC에서 `npm run test:regression`을 돌려 같은 형식의 결과표가 나오는지 본다 (리뷰어 sorek-charlie, 아래 확인 항목)
+- 준비: 실행 파일(`tests/regression/run.ts` · `tests/regression/measure.ts`)은 이 브랜치에 없다. PR #49(`feat/WU-45-regression-runner`, 커밋 `faa6897`)에 있으니 그 PR을 받은 뒤 돌린다. `test:db`가 필요하므로 `.env.local`의 dev 프로젝트와 본인 계정을 준비한다
 
 ## 실제 동작 확인 항목 (리뷰어 sorek-charlie)
 
@@ -42,4 +48,10 @@
 
 ## 결과
 
-- 한 것 / 직접 확인한 것 / 확인 못 한 것 / PR:
+(작성: eple 세션의 Claude, 2026-11-23. 구현은 하위 에이전트(Sonnet), 확인은 관리 세션)
+
+- 한 것: `tests/regression/run.ts`(small 시드 → test:db · test:e2e · seed-expected → ID별 결과표 `docs/records/regression-<시각>.md`, 실패 시 종료 1, E2E 대상이 없으면 '미실행'), `tests/regression/measure.ts`(small · large, 대시보드 · 이력 첫 호출 + 10회 p50 · 최대 → `performance.md`), 순수 함수 `scripts/regression/report.ts`(시험 23개) · 세션 `session.ts`(쿠키 세션, 서비스 키 없음), 기록 파일 가리기, `npm run measure`
+- 직접 확인한 것: 회귀 실행 통과 52 · 실패 0 · E2E 미실행 1(종료 0), 임시 실패 시험 C-99 → 표에 실패 · 종료 1 → 지운 뒤 종료 0. dev 배포 측정: small 대시보드 p50 669ms · 이력 213ms, large 640ms · 212ms. 생성 파일 비밀값 검사 통과(시험 산출물은 커밋 안 함). lint · typecheck · unit 724개 통과(관리 세션 재실행)
+- 확인 못 한 것: E2E(Playwright) 실행 경로 — 이 PC에 브라우저 · 로컬 서버가 없어 리뷰어 PC에서 첫 확인. import 4곳 `@ts-expect-error TS5097`(tsconfig `allowImportingTsExtensions`는 eple 결정)
+- AI가 틀린 것과 고친 과정: 테스트 ID 정규식이 `T-AI-1a` 같은 접미사를 못 잡아 '기타'가 24줄 → 기대 시험을 먼저 추가해 실패를 확인한 뒤 정규식 수정, 기타 0줄. [ai-cases-eple](../records/ai-cases-eple.md) 사례 3
+- PR: #49 (리뷰 sorek-charlie, 리뷰 중)

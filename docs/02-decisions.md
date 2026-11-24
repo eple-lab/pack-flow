@@ -14,7 +14,7 @@
 | D-03 | 웹 · API는 Next.js + React (API 라우트로 서버 로직) | 계획서 8절 |
 | D-04 | DB · 인증은 Supabase (Postgres + Auth 이메일 · 비밀번호 + RLS `user_id = auth.uid()`) | 계획서 3절 Step 2 |
 | D-05 | 배포는 Render 무료. GCP · Vercel은 보류 | 계획서 8절 |
-| D-06 | LLM: 개발 중 각자 PC Ollama, 배포 · 발표는 Gemini 무료 티어. 호출은 `lib/llm.ts` 한곳, 설정값으로 전환 | 계획서 8절 |
+| D-06 | LLM: 개발 중 각자 PC Ollama, 배포 · 발표는 Gemini 무료 티어. 호출은 `lib/llm.ts` 한곳, 설정값으로 전환. **(11/24 추가)** Ollama로 진행이 어려우면 각자 **본인 계정의 개발용 Gemini 키**를 자기 PC `.env.local`에만 두고 쓴다 — 공유 · 저장소 업로드 금지, 무료 티어 데이터 정책 대상이라 가상 데이터만 | 계획서 8절, 11/24 eple |
 | D-07 | 구매 · 판매 상태값과 전이표는 계획서 7절 그대로 | 계획서 7절 |
 | D-08 | 차트 · 배송 단계 · 자금회수 · 구글 로그인 · OCR은 MVP 이후 | 계획서 4절 |
 | D-09 | 역할: eple 백엔드 기반 · 통합 · 배포 · 문서 / sorek-charlie 재고 로직 · 시드 · QA / jkspawn 프론트 / skygaul AI 에이전트 | 계획서 11절 |
@@ -46,6 +46,8 @@
 | D-35 | **Supabase Data API 설정**: Data API 켜기, '새 테이블 API 자동 공개' 끄기, '새 테이블 RLS 자동 켜기' 켜기(두 프로젝트 같게). 권한은 마이그레이션에 직접 적는다. 팀원 초대는 하지 않는다(D-28 대안). 설정 전체는 [records/eple-supabase-setup.md](records/eple-supabase-setup.md) | eple, 11/23 |
 | D-36 | **D-13 예외: 11/23 Wave 0 마무리(render.yaml · 기록 문서)는 eple이 main에 직접 push한다.** eple 수업 중(11시 무렵까지)이라 리뷰 대기 없이 진행. PR 흐름은 WU-01 시험 PR #1에서 이미 확인했다. 팀원 WU와 그 밖의 eple 작업은 D-13대로 브랜치 + PR | eple, 11/23 |
 | D-37 | **Render 서비스를 dev · demo 둘로 나눈다.** `render.yaml` → `pack-flow`(Supabase dev 값, 팀원 테스트 · 검증자의 배포 URL E2E를 dev 테스트 계정으로), `render.demo.yaml` → `pack-flow-demo`(Supabase demo 값, 발표 · 시연 — 시연 계정 A · B만). 이유: 한 서비스를 demo로 바꾸면 dev 테스트 계정으로 배포 URL을 시험할 수 없고(2일차 "다른 팀원이 배포 URL에서 테스트", WU-42), dev로 두면 시연 데이터가 섞인다. 두 서비스 모두 main 병합 때마다 다시 배포된다. 서비스 키는 둘 다 없음(D-20) | eple, 11/23 |
+| D-38 | **일괄 미리보기 행 사유 `BulkRow.errors`를 `string[]`로 넓힌다.** 04 3.6 사유 7개에 더해 칸 규칙(04 4.3) 문구(예: "200자 이하로 입력해 주세요")도 그대로 싣는다. 이유: WU-13 `parse`가 칸 문구를 내는데 타입이 3.6 사유만 받아 메모 201자 · 송장 공백 행의 이유를 화면에 보일 수 없었다. 04 3.6 · `src/types/erp.ts` 함께 변경 (#46 WU-43 · #57 WU-13) | eple, 11/24 |
+| D-39 | **일괄 등록의 두 한계를 설계로 둔다.** ① 비고(`memo`)는 미리보기 · 반영 검사에만 쓰고 저장하지 않는다 — 구매 · 판매 표에 비고 칸이 없다(`pf_bulk_apply`). ② 중복 반영은 송장번호로만 막는다 — 송장번호가 빈 행은 같은 내용을 다시 반영하면 한 번 더 들어간다(가릴 근거가 없음). 04 3.6에 명시, 발표 '한계'에 넣는다 (#57 리뷰 skygaul 참고 1) | eple, 11/24 |
 
 ## 2. 제안에서 확정된 결정 (P-01~P-19, 2026-11-20 eple 승인)
 
@@ -99,3 +101,5 @@ P-01 · P-08 · P-12 · P-19는 D-16~19와 같은 내용이다(계획서 반영 
 | 2026-11-23 | D-35 Supabase Data API · 초대 설정 |
 | 2026-11-23 | D-36 Wave 0 마무리 main 직접 push (D-13 예외) |
 | 2026-11-23 | D-37 Render dev · demo 두 서비스 |
+| 2026-11-24 | D-06에 개인 개발용 Gemini 키 허용을 추가 — 실제 운영(Ollama thinking 모델 빈 응답으로 skygaul이 개발용 Gemini 키 사용, WU-31 결과)에 맞춤. 계획서 9절 키 관리도 같이 고침 (skygaul 확인 요청) |
+| 2026-11-24 | D-38 일괄 미리보기 행 사유를 `string[]`로(04 3.6 · erp.ts), D-39 일괄 등록 한계(비고 미저장 · 송장 없는 행 중복) |

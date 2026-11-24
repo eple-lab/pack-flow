@@ -33,12 +33,28 @@
 
 ## 다 됐다의 기준
 
-- [ ] sorek-charlie의 `tests/db/bulk.test.ts` 통과(T-S3-5 DB 쪽, T-S4-4), 실패 행이 있어도 성공 행은 남고 T-INV-1 0행
-- [ ] 미리보기는 DB를 바꾸지 않음(호출 전후 건수 같음)
-- [ ] 501행 · 100KB 초과 → 400
+- [x] sorek-charlie의 `tests/db/bulk.test.ts` 통과(T-S3-5 DB 쪽, T-S4-4), 실패 행이 있어도 성공 행은 남고 T-INV-1 0행
+- [x] 미리보기는 DB를 바꾸지 않음(호출 전후 건수 같음)
+- [x] 501행 · 100KB 초과 → 400
 - [ ] 배포 URL에서 Step 3 · 5 시연 가능 상태
 - [ ] 중간 점검 기록 완료
 
+## 테스트 방법
+
+- 자동(DB): `npm run test:db -- tests/db/bulk.test.ts tests/api/bulk.test.ts` — T-S3-5(실패 행이 있어도 성공 행은 남고 T-INV-1 0행) · T-S4-4(재시도 중복) · 미리보기 전후 건수 · 501행 거부. dev에 `20261124090000_bulk_apply.sql`이 적용돼 있어야 한다. `tests/api/bulk.test.ts`는 PR #46에 있다
+- 자동(단위): `npm run test:unit -- src/app/api/bulk src/app/api/seed` — bulk 라우트 C-71~C-82(100KB · 501행 · X-PF · 미로그인, preview가 쓰기 · rpc를 부르지 않음), seed 라우트 C-60~C-65. bulk 단위 시험은 PR #46에 있다
+- 직접: 일괄 등록 탭(WU-13 화면)에서 붙여넣기 → 미리보기 → 반영 후 대시보드 재고 확인. `src/lib/bulk/parse.ts`(WU-13)가 채워지기 전에는 `/api/bulk/preview`가 501
+- 준비: `.env.local`의 dev 프로젝트와 본인 테스트 계정(값은 적지 않는다)
+
 ## 결과
 
-- 한 것 / 직접 확인한 것 / 확인 못 한 것 / PR:
+(작성: eple 세션의 Claude, 2026-11-23. 두 PR로 나눔 — `/api/seed` 먼저(배포 E2E가 기다림, eple 결정), bulk 나중)
+
+- 한 것:
+  - (1/2) `POST /api/seed`: 시드 로더 → `pf_reset_and_seed`(본인 데이터만), 시드 오류는 400 `field: dataset`(경로 미노출). 단위 C-60~C-65, T-AUTH-7을 라우트로
+  - (2/2) `20261124090000_bulk_apply.sql` `pf_bulk_apply`(stub과 시그니처 같음, 행마다 서브트랜잭션으로 재고 함수만 호출, 실패 행 `{line, code, message}`, 500행 상한, 알려진 코드 외 `PF_INTERNAL`), `/api/bulk/preview`(조회만) · `/commit`, 단위 C-71~C-82 · `tests/api/bulk.test.ts`. 구현은 하위 에이전트(Sonnet), SQL은 관리 세션이 직접 검토
+  - small · large 로더 등록과 demo 8품목 시험 갱신은 sorek-charlie가 #40에서 함께 처리(eple 리뷰)
+- 직접 확인한 것: bulk 마이그레이션 dev 적용(eple 승인, dry-run으로 1개만 확인, dev 9개 · stub 아님 · authenticated만 실행 · 오버로드 없음). test:db 16파일 76건 통과(WU-23의 `bulk` · `cancel` · `transition` 시험 함께 — T-S3-5: 10행 중 3행 실패 → 재고 17, T-S4-4 재시도 중복). 미리보기 전후 건수 같음, 501행 · 100KB → 400(단위 · DB). unit 702개(하위 에이전트), lint · typecheck 통과
+- 확인 못 한 것: 배포 URL에서 Step 3 · 5 시연 — `src/lib/bulk/parse.ts`(WU-13)가 아직 자리라 `/api/bulk/preview`는 501, demo DB에 WU-23 · WU-43 마이그레이션 미적용(#46 병합 뒤 적용 예정). 중간 점검 기록은 11/24 오후
+- AI가 틀린 것과 고친 과정: (1) `/api/seed` 단위 시험에 가짜 클라이언트 대신 도우미 반환 객체를 넘겨 5건 모두 500 → 로그(`getClaims` 없음)로 원인 찾아 시험만 고침 (2) bulk 단위 시험 데이터의 마지막 칸이 비어 열 수 오류 4건 → 시험 데이터 고침. [ai-cases-eple](../records/ai-cases-eple.md) 사례 2
+- PR: #41(병합) · #43(SeedError 실패 시험 복원, 병합) · #46(bulk, 리뷰 중)

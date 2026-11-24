@@ -14,6 +14,7 @@
  *
  * 이력
  * 2026-11-23  eple  처음 작성 — 공통 타입 · 상태 · 전이표 · 사유 · 오류 코드 상수 (WU-03)
+ * 2026-11-24  eple  BulkRow.errors를 string[]로 — 04 4.3 칸 문구도 미리보기 행에 싣는다 (WU-43 · WU-13)
  */
 
 // ── 상태값 · 사유 (09 3절) ─────────────────────────────────────────────
@@ -270,7 +271,8 @@ export type BulkRow = {
   invoice_no: string | null;
   memo: string | null;
   valid: boolean;
-  errors: BulkErrorReason[];
+  // [WU-43] 칸 문구(04 4.3, 예: 메모 200자 초과)가 행 사유에 못 실리던 것 → 04 3.6 사유 또는 4.3 칸 문구 (eple)
+  errors: string[];
 };
 
 /** 반영하지 못한 행과 사유. */

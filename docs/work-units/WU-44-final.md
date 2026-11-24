@@ -31,6 +31,12 @@
 - [ ] 다른 PC(팀원)에서 README만 보고 실행 성공 (피드백 기준 5)
 - [ ] 저장소 전체에 키 · 비밀번호 · 실제 이메일 · 실명 없음
 
+## 테스트 방법
+
+- 자동: `npm run lint && npm run typecheck && npm run test:unit && npm run test:db`, `npm run check:secrets`. 회귀 실행은 `npm run test:regression` (스크립트 항목은 있으나 실행 파일 `tests/regression/run.ts`는 이 브랜치에 없다 — WU-45, PR #49에 있다)
+- 직접: 다른 PC에서 README만 보고 `npm ci`부터 실행해 본다. 배포 URL에서 `E2E_BASE_URL=<배포 URL> npm run test:e2e`를 1회 돌린다. 저장소 전체(이력 포함)에 키 · 비밀번호 · 실제 이메일 · 실명이 없는지 보안 점검 기록(`docs/records/security-check-1125.md`, 아직 없음 — 11/25에 만든다)으로 확인한다
+- 준비: 11/26 제출 전에 demo를 `demo` 시드로 초기화하고 Render · Supabase를 깨워 둔다. 값은 적지 않는다
+
 ## 결과
 
 - 한 것 / 직접 확인한 것 / 확인 못 한 것 / 제출 커밋:
