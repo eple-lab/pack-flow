@@ -45,6 +45,12 @@
 - [x] lint · typecheck · test:unit 통과
 - [x] T-VAL-2 · T-VAL-3 · T-VAL-4 통과 (`tests/api/validation.test.ts`)
 
+## 테스트 방법
+
+- 자동: `npm run test:db -- tests/api/validation.test.ts tests/api/dashboard.test.ts tests/api/stock-logs.test.ts` (T-VAL · T-S1-3 · T-S4-2). 함께 `npm run lint && npm run typecheck && npm run test:unit`
+- 직접: `NEXT_PUBLIC_USE_MOCK=0`으로 띄운 화면에서 입고 → 출고 → 대시보드 갱신을 확인하고, `/api/dashboard` 값이 DB 직접 집계(`demo` 시드의 expected)와 같은지 본다. `large` 시드에서 `stock-logs`가 20 · 20 · 10건으로 나뉘고 마지막 `next_cursor`가 `null`인지 본다
+- 준비: `.env.local`에 dev 프로젝트 값과 본인 테스트 계정(`TEST_USER_A_*` · `TEST_USER_B_*`)이 필요하다 (로컬에서만). 값은 적지 않는다
+
 ## 실제 동작 확인 항목 (리뷰어 sorek-charlie)
 
 - [ ] `test:db`와 화면 결과가 같은 재고를 가리킴

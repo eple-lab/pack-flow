@@ -36,6 +36,12 @@
 - [x] `npm run measure` → `performance.md`에 두 시드 행 추가
 - [x] 생성 파일에 이메일 · 키 없음(비밀값 검사 통과)
 
+## 테스트 방법
+
+- 자동: `npm run test:regression` → `docs/records/regression-<YYYYMMDD-HHmm>.md` 생성. 일부러 실패시킨 테스트 1개가 '실패'로 나오고 종료 코드가 1인지 확인한 뒤 되돌린다. `npm run measure` → `docs/records/performance.md`에 두 시드 행 추가
+- 직접: 자기 PC에서 `npm run test:regression`을 돌려 같은 형식의 결과표가 나오는지 본다 (리뷰어 sorek-charlie, 아래 확인 항목)
+- 준비: 실행 파일(`tests/regression/run.ts` · `tests/regression/measure.ts`)은 이 브랜치에 없다. PR #49(`feat/WU-45-regression-runner`, 커밋 `faa6897`)에 있으니 그 PR을 받은 뒤 돌린다. `test:db`가 필요하므로 `.env.local`의 dev 프로젝트와 본인 계정을 준비한다
+
 ## 실제 동작 확인 항목 (리뷰어 sorek-charlie)
 
 - [ ] 자기 PC에서 `npm run test:regression` → 같은 형식의 결과표

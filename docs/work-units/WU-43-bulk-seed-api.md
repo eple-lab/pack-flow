@@ -39,6 +39,13 @@
 - [ ] 배포 URL에서 Step 3 · 5 시연 가능 상태
 - [ ] 중간 점검 기록 완료
 
+## 테스트 방법
+
+- 자동(DB): `npm run test:db -- tests/db/bulk.test.ts tests/api/bulk.test.ts` — T-S3-5(실패 행이 있어도 성공 행은 남고 T-INV-1 0행) · T-S4-4(재시도 중복) · 미리보기 전후 건수 · 501행 거부. dev에 `20261124090000_bulk_apply.sql`이 적용돼 있어야 한다. `tests/api/bulk.test.ts`는 PR #46에 있다
+- 자동(단위): `npm run test:unit -- src/app/api/bulk src/app/api/seed` — bulk 라우트 C-71~C-82(100KB · 501행 · X-PF · 미로그인, preview가 쓰기 · rpc를 부르지 않음), seed 라우트 C-60~C-65. bulk 단위 시험은 PR #46에 있다
+- 직접: 일괄 등록 탭(WU-13 화면)에서 붙여넣기 → 미리보기 → 반영 후 대시보드 재고 확인. `src/lib/bulk/parse.ts`(WU-13)가 채워지기 전에는 `/api/bulk/preview`가 501
+- 준비: `.env.local`의 dev 프로젝트와 본인 테스트 계정(값은 적지 않는다)
+
 ## 결과
 
 (작성: eple 세션의 Claude, 2026-11-23. 두 PR로 나눔 — `/api/seed` 먼저(배포 E2E가 기다림, eple 결정), bulk 나중)
