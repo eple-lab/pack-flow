@@ -51,7 +51,7 @@ D-06 "LLM 호출은 `lib/llm.ts` 한곳, 설정값으로 Ollama ↔ Gemini 전�
 
 ## 실제 동작 확인 항목 (리뷰어 eple)
 
-- [ ] 잘못된 `OLLAMA_BASE_URL`로 바꾸면 20초 안에 `PF_LLM_UNAVAILABLE`, 서버가 죽지 않음
+- [x] 잘못된 `OLLAMA_BASE_URL`로 바꾸면 20초 안에 `PF_LLM_UNAVAILABLE`, 서버가 죽지 않음 — 11/24 eple: `LLM_TIMEOUT_MS = 20_000`, main에서 O-3 · O-4 · L-3(T-AI-6) 재실행 통과 + skygaul PoC 실측. 로컬 서버 재현은 안 함 (근거 #6 댓글)
 
 ## 결과 (담당자가 채움)
 
