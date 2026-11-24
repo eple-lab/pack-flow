@@ -17,6 +17,7 @@
  * 이력
  * 2026-11-23  eple  처음 작성 — 시드 로더 · 형식 검사 · demo (WU-08)
  * 2026-11-23  sorek-charlie  small·large 등록 (WU-22)
+ * 2026-11-24  eple  JSON import에 type: json 표시 — Playwright E2E T-S4-1 실패 (회귀 11/24)
  */
 import { z } from 'zod';
 import { SEED_DATASETS, type SeedDataset } from '@/types/erp';
@@ -151,10 +152,11 @@ export function isSeedName(value: unknown): value is SeedDataset {
 /**
  * 이름 → JSON 불러오기. 파일마다 글자 그대로 import해야 Next 번들러가 파일을 포함한다(변수로 만든 경로는 번들에 안 들어간다).
  */
+// [seed-json bug] Playwright(Node ESM)에서 JSON import에 type 표시가 없어 T-S4-1이 실패 → import attribute { type: 'json' } 추가 (eple)
 const LOADERS: Record<SeedDataset, () => Promise<{ default: unknown }>> = {
-  demo: () => import('./demo.json'),
-  small: () => import('./small.json'),
-  large: () => import('./large.json'),
+  demo: () => import('./demo.json', { with: { type: 'json' } }),
+  small: () => import('./small.json', { with: { type: 'json' } }),
+  large: () => import('./large.json', { with: { type: 'json' } }),
 };
 
 /**
