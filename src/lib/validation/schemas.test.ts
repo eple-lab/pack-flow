@@ -9,6 +9,7 @@
  *
  * 이력
  * 2026-11-23  eple  처음 작성 — T-VAL-7 필드별 경계 · 정규화 · strict 시험 (WU-03)
+ * 2026-11-24  eple  C-86 bulkPreview 끝 탭 보존 시험 추가 (#60)
  */
 import { describe, expect, it } from 'vitest';
 import type { z } from 'zod';
@@ -424,6 +425,11 @@ describe('T-VAL-7 일괄 등록 (bulkPreview · bulkRow · bulkCommit)', () => {
     expect(fail(bulkPreview, { format: 'xlsx', text: 'a' })).toEqual({ field: 'format', reason: 'not_allowed_value' });
     expect(fail(bulkPreview, { format: 'csv', text: '  ' })).toEqual(req('text'));
     expect(fail(bulkPreview, { format: 'csv' })).toEqual(req('text'));
+  });
+  it('C-86 bulkPreview는 text 끝의 탭을 지우지 않고, 공백만 있는 text는 여전히 required', () => {
+    const raw = '입고\tPRD-001\t1\t가나\t\t';
+    expect(ok(bulkPreview, { format: 'tsv', text: raw }).text).toBe(raw);
+    expect(fail(bulkPreview, { format: 'tsv', text: ' \t \n ' })).toEqual(req('text'));
   });
 });
 

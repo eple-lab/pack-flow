@@ -12,6 +12,7 @@
  *
  * 이력
  * 2026-11-23  eple  처음 작성 — 라우트별 입력 스키마 (WU-03)
+ * 2026-11-24  eple  bulkPreview.text는 trim하지 않게 (#60)
  */
 import { z } from 'zod';
 import type { AgentAction, PoConfirmLine } from '@/types/agent';
@@ -188,7 +189,8 @@ export const stockLogsQuery = strict<StockLogsQuery>({
 /** `POST /api/bulk/preview` — 행 수(최대 500) 검사는 파싱 단계(src/lib/bulk/parse.ts)가 한다. */
 export const bulkPreview = strict<{ format: BulkFormat; text: string }>({
   format: oneOf(BULK_FORMATS),
-  text: text({ max: BODY_MAX_BYTES }),
+  // [#60 bug] 붙여넣은 글자 끝 빈 칸(탭)이 잘려 마지막 줄이 열 개수 오류 → 미리보기 원문은 trim하지 않음 (eple)
+  text: text({ max: BODY_MAX_BYTES, trim: false }),
 });
 
 /**
