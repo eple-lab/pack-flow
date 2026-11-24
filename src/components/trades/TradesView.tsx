@@ -16,10 +16,12 @@
  *
  * 이력
  * 2026-11-23  jkspawn  처음 작성 — 입출고 탭 · 불러오기 · 작업 처리 (WU-12)
+ * 2026-11-24  jkspawn  일괄 등록 탭(BulkTab) 추가 — 반영 뒤 목록 새로고침 · 알림 (WU-13)
  */
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { BulkTab } from '@/components/bulk/BulkTab';
 import { ErrorBanner } from '@/components/common/ErrorBanner';
 import { Loading } from '@/components/common/Loading';
 import { useToast } from '@/components/common/Toast';
@@ -138,6 +140,7 @@ export function TradesView({ query }: { query: TradesQuery }) {
           [
             ['purchase', '구매 · 입고'],
             ['sale', '판매 · 출고'],
+            ['bulk', '일괄 등록'],
           ] as const
         ).map(([tab, label]) => (
           <button
@@ -214,6 +217,8 @@ export function TradesView({ query }: { query: TradesQuery }) {
           />
         </>
       )}
+
+      {lists && query.tab === 'bulk' && <BulkTab onApplied={succeed} onError={fail} />}
     </div>
   );
 }
