@@ -1,6 +1,6 @@
 # PackFlow 기술 명세 (TECH_SPEC)
 
-작성일: 2026-11-23 · 근거: [01 아키텍처](../docs/01-enterprise-architecture.md) · [03 데이터 모델](../docs/03-data-model.md) · [04 API 계약](../docs/04-api-contract.md) · [05 보안](../docs/05-security.md), 계획서 6~9절 · 상태: **초안 — 11/25 최종 점검에서 갱신**
+작성일: 2026-11-23 · 근거: [01 아키텍처](../docs/01-enterprise-architecture.md) · [03 데이터 모델](../docs/03-data-model.md) · [04 API 계약](../docs/04-api-contract.md) · [05 보안](../docs/05-security.md), 계획서 6~9절 · 상태: **초안 — 11/25 최종 점검에서 갱신** · 11/24 밤 사실 대조 반영(5 · 6 · 7 · 8 · 9절)
 
 원본은 `docs/`이고 이 문서는 요약이다. 코드와 다르면 코드 · 원본 문서가 맞다. 정확한 컬럼 · 정규식 · 문구는 각 원본 링크를 본다.
 
@@ -104,7 +104,10 @@ LLM이 꺼져도 입출고는 동작한다(LLM 오류는 에이전트 패널에�
 | `pf_cancel_shipment` | 출고취소 | +sold_qty, `출고취소` |
 | `pf_bulk_apply` | 일괄 등록 반영, 행마다 위 함수를 부르고 실패 행은 사유 반환 | 위와 같음 |
 | `pf_reset_and_seed` | **본인 데이터만** 지우고 시드 재주입 | 초기 재고는 `재고조정` |
+| `pf_purchase_transition_ok` · `pf_sale_transition_ok` | 구매 · 판매 상태 전이가 허용되는지 판정(03 3절). 오류와 부작용 없음 — 위 상태 변경 함수가 내부에서 부르며 authenticated에는 실행 권한을 주지 않음 | — |
 | `pf_llm_take` · `pf_require_user` | LLM 일일 호출 상한 / 로그인 확인 | — |
+
+그 밖에 `pf_touch_updated_at`(`updated_at` 갱신 트리거 전용 보조 함수)이 있으나 표에서는 생략했다.
 
 ## 6. API 계약
 
@@ -130,7 +133,7 @@ LLM이 꺼져도 입출고는 동작한다(LLM 오류는 에이전트 패널에�
 
 | 묶음 | 라우트 | DB 함수 |
 |---|---|---|
-| 상태 · 인증 | `GET /api/health`, `GET /api/me` | — |
+| 상태 · 인증 | `GET /api/health`, `GET /api/me`, `POST /api/auth/logout`(세션 쿠키 삭제) | — |
 | 품목 | `GET · POST /api/items`, `PATCH /api/items/{sku_id}` | `pf_create_item` |
 | 구매 · 입고 | `GET · POST /api/purchases`, `POST /api/purchases/{id}/status · receive · cancel-receipt` | `pf_create_purchase` · `pf_set_purchase_status` · `pf_receive_purchase` · `pf_cancel_receipt` |
 | 판매 · 출고 | `GET · POST /api/sales`, `POST /api/sales/{id}/status · ship · cancel-shipment` | `pf_create_sale` · `pf_set_sale_status` · `pf_ship_sale` · `pf_cancel_shipment` |
@@ -163,11 +166,14 @@ LLM이 꺼져도 입출고는 동작한다(LLM 오류는 에이전트 패널에�
 - **권한 테스트 T-AUTH-1~8**: 미로그인 401, B가 A의 구매 · 판매 id로 호출 시 404 · 변화 없음, B JWT로 직접 조회 시 B의 행만, REST로 재고 수정 · 이력 삭제 시 권한 오류, B의 seed가 A에 영향 없음, `X-PF` 없으면 403. 결과는 [eple-step2-evidence](../docs/records/eple-step2-evidence.md).
 - **LLM 위험 대응**: 정해진 JSON(허용 액션 6개)만 받고 서버가 스키마로 검사, 품목명 · 메모는 프롬프트의 '자료' 구역에 넣어 지시로 읽지 않게 함, 수치는 서버 계산값과 대조, 쓰기는 확인 API에서 재검증, 호출 상한 `pf_llm_take()`, 응답은 글자로만 렌더링.
 - 남는 위험: 역할별 권한 없음, 동시 출고 부하 검증 없음, 무료 티어 가용성, `security definer` 함수 실수(T-AUTH로 보완).
+- 일괄 등록의 설계 한계(D-39, [02 결정](../docs/02-decisions.md) · [04 3.6](../docs/04-api-contract.md)): 송장번호가 빈 행은 같은 내용을 다시 반영하면 한 번 더 들어가고(중복은 송장번호로만 가림), 비고(`memo`)는 검사에만 쓰고 저장하지 않는다.
+- Gemini 무료 티어는 응답 시간 편차가 크고(초안 1.4 ~ 12.6초) 가끔 503을 돌려준다. 재시도 로직이 없어 사용자가 다시 눌러야 한다([ai-limits](../docs/records/ai-limits.md) 1절).
+- 알려진 버그(이슈 #77, 열림): 발주 확정 뒤 대시보드의 진행 단계 숫자가 새로고침하기 전까지 그대로다.
 
 ## 8. 비용 · 사용량 상한 · 실패 시 대안
 
 - 비용 0원(Gemini · Supabase · Render 무료). 유료 전환은 팀 합의 후에만.
-- LLM 호출 상한: 사용자당 하루 30회 · 앱 전체 하루 300회(P-09). 넘으면 안내 후 거절.
+- LLM 호출 상한: 사용자당 하루 30회 · 앱 전체 하루 300회(P-09). 넘으면 안내 후 거절. 하루의 기준은 **한국 시간 날짜**라 한국 시간 자정에 새로 시작한다([llm-usage](../docs/records/llm-usage.md) 1절). 오류 문구가 "오후 5시 이후"라고 안내해 실제와 어긋나는 문제는 11/25 팀 결정 대기.
 - Gemini 오류 · 한도 초과: 에이전트 패널에 오류를 표시하고 코드가 계산한 발주 후보 표만 보여 준다(미리 만든 초안을 AI 결과처럼 보이지 않음). 입출고는 LLM과 무관하게 동작.
 - Render 무료는 접속이 없으면 잠듦 → 시연 직전에 URL을 열어 둔다. Supabase는 1주일 미사용 시 일시정지 → 전날 · 당일 오전 접속.
 - 라이브 시연 실패 대비 2분 백업 시연 영상.
@@ -175,7 +181,14 @@ LLM이 꺼져도 입출고는 동작한다(LLM 오류는 에이전트 패널에�
 
 ## 9. 성능 측정 (Step 4)
 
-대량 시드(품목 10 · 이력 50)에서 대시보드 · 이력 응답 시간을 측정해 기록한다(첫 호출은 따로). 결과: (11/25 확인)
+대량 시드(품목 10 · 이력 50)에서 대시보드 · 이력 응답 시간을 측정해 기록한다(첫 호출은 따로). 결과(2026-11-24 14:18, [performance.md](../docs/records/performance.md)): **로컬 서버(Windows의 Next.js 개발 서버 → Supabase dev)에서 측정했고 배포 URL(Render) 측정이 아니다.** 각 엔드포인트 첫 호출 뒤 10번의 p50 / 최대.
+
+| 시드 | 대시보드 p50 / 최대 | 이력 1페이지(`limit=20`) p50 / 최대 |
+|---|---|---|
+| small(품목 5 · 이력 20) | 691ms / 762ms | 257ms / 270ms |
+| large(품목 10 · 이력 50) | 665ms / 710ms | 236ms / 243ms |
+
+배포 URL에서의 측정은 11/25 확인.
 
 ## 10. 코드 구조 · 소유
 

@@ -1,12 +1,12 @@
 # PackFlow 작업 단위 (WORK_UNITS)
 
-작성일: 2026-11-23 · 근거: [docs/work-units/](../docs/work-units/README.md)의 각 WU 문서 · 상태: **초안 — 11/25 최종 점검에서 갱신**
+작성일: 2026-11-23 · 근거: [docs/work-units/](../docs/work-units/README.md)의 각 WU 문서 · 상태: **초안 — 11/25 최종 점검에서 갱신** · 11/24 밤 사실 대조 반영
 
-**기준 커밋 82cb987(origin/main), 11/25에 다시 셈.** 체크 수는 각 WU 문서의 '다 됐다의 기준'에 적힌 항목을 `origin/main`의 문서 기준으로 센 값(체크됨/전체)이다. 코드가 병합됐어도 문서의 체크박스는 담당자가 결과 절을 채울 때 따로 바뀌므로, **"병합됨"과 "n/m"이 어긋날 수 있다.** 11/25에 병합된 PR 기준으로 다시 센다. WU 하나 = 브랜치 하나 = PR 하나가 원칙이다.
+**기준 커밋 45c4763(11/24 밤 main) — PR 칸만 이 시점으로 갱신했고, '기준 체크'(n/m)는 82cb987(11/23) 기준 그대로이며 11/25에 다시 셈.** 체크 수는 각 WU 문서의 '다 됐다의 기준'에 적힌 항목을 `origin/main`의 문서 기준으로 센 값(체크됨/전체)이다. 코드가 병합됐어도 문서의 체크박스는 담당자가 결과 절을 채울 때 따로 바뀌므로, **"병합됨"과 "n/m"이 어긋날 수 있다.** 11/25에 병합된 PR 기준으로 다시 센다. WU 하나 = 브랜치 하나 = PR 하나가 원칙이다.
 
 ## 1. 목록
 
-PR 칸은 기준 커밋 시점의 저장소 PR 목록에서 확인한 것이다. "열림"은 아직 병합 전, 비어 있는 칸은 PR 없음이다. 상태: (11/25 확인)
+PR 칸은 11/24 밤(main 45c4763) 시점에 `gh pr view`로 확인한 것이다. 적힌 PR은 모두 병합됐다. 비어 있는 칸은 PR 없음이다. 11/25 병합분은 11/25에 더한다.
 
 | WU | 제목 | 담당 | 검증 | 기준 체크 | PR |
 |---|---|---|---|---|---|
@@ -14,25 +14,25 @@ PR 칸은 기준 커밋 시점의 저장소 PR 목록에서 확인한 것이다.
 | [WU-11](../docs/work-units/WU-11-dashboard.md) | 대시보드 | jkspawn | skygaul | 0/6 | #4 · #36(결과 절) |
 | [WU-12](../docs/work-units/WU-12-trades.md) | 입출고 화면 | jkspawn | skygaul | 0/7 | #5 · #37(결과 절) |
 | [WU-16](../docs/work-units/WU-16-items.md) | 품목 화면 | jkspawn | skygaul | 0/6 | #28 |
-| [WU-13](../docs/work-units/WU-13-bulk.md) | 일괄 등록(파싱 · 미리보기) | jkspawn | skygaul | 0/5 | (11/25 확인) |
-| [WU-14](../docs/work-units/WU-14-history-cancel.md) | 이력 · 취소 · 상태 버튼 | jkspawn | skygaul | 0/3 | (11/25 확인) |
-| [WU-15](../docs/work-units/WU-15-demo-polish.md) | 시연 동선 · 백업 영상 | jkspawn | skygaul | 0/3 | (11/25 확인) |
+| [WU-13](../docs/work-units/WU-13-bulk.md) | 일괄 등록(파싱 · 미리보기) | jkspawn | skygaul | 0/5 | #57 |
+| [WU-14](../docs/work-units/WU-14-history-cancel.md) | 이력 · 취소 · 상태 버튼 | jkspawn | skygaul | 0/3 | #58 |
+| [WU-15](../docs/work-units/WU-15-demo-polish.md) | 시연 동선 · 백업 영상 | jkspawn | skygaul | 0/3 | #67 |
 | [WU-21](../docs/work-units/WU-21-inventory-core.md) | 재고 함수 1(등록 · 입고 · 출고) | sorek-charlie | jkspawn | 0/4 | #29 |
 | [WU-22](../docs/work-units/WU-22-seed-e2e.md) | 시드 3벌 · 정답표 · E2E Step 1 · 2 | sorek-charlie | jkspawn | 0/4 | #40 |
 | [WU-23](../docs/work-units/WU-23-inventory-cancel-bulk.md) | 재고 함수 2(취소 · 전이) | sorek-charlie | jkspawn | 0/2 | #44 |
-| [WU-24](../docs/work-units/WU-24-regression.md) | E2E Step 3 · 회귀 실행 · 판정 · 측정 | sorek-charlie | jkspawn | 0/5 | (11/25 확인) |
+| [WU-24](../docs/work-units/WU-24-regression.md) | E2E Step 3 · 회귀 실행 · 판정 · 측정 | sorek-charlie | jkspawn | 0/5 | #64 · #68 · #73(결과 절) |
 | [WU-31](../docs/work-units/WU-31-llm.md) | LLM 호출층 · 호출 상한 | skygaul | eple | 0/4 | #6 |
 | [WU-32](../docs/work-units/WU-32-reorder.md) | 발주 후보 계산 · 발주서 프롬프트 | skygaul | eple | 0/3 | #3 |
 | [WU-33](../docs/work-units/WU-33-draft-po.md) | 발주서 초안 API · 에이전트 패널 | skygaul | eple | 5/5 | #34 · #45 |
-| [WU-34](../docs/work-units/WU-34-chat.md) | 자연어 조회 · 출고 | skygaul | eple | 0/4 | (11/25 확인) |
-| [WU-35](../docs/work-units/WU-35-ai-ops.md) | Gemini 리허설 · 한계 문서 · AI 사례 | skygaul | eple | 0/3 | (11/25 확인) |
+| [WU-34](../docs/work-units/WU-34-chat.md) | 자연어 조회 · 출고 | skygaul | eple | 0/4 | #51 |
+| [WU-35](../docs/work-units/WU-35-ai-ops.md) | Gemini 리허설 · 한계 문서 · AI 사례 | skygaul | eple | 0/3 | #63 |
 | [WU-41](../docs/work-units/WU-41-api-core.md) | 업무 API 실제 연결 | eple | sorek-charlie | 0/5 | #38 |
 | [WU-42](../docs/work-units/WU-42-auth-tests-deploy.md) | 권한 테스트 · 배포 검증 | eple | sorek-charlie | 0/3 | #39 |
-| [WU-43](../docs/work-units/WU-43-bulk-seed-api.md) | 일괄 반영 · 일괄 등록 · 시드 API | eple | sorek-charlie | 0/5 | #41 · #43 (열림: #46) |
-| [WU-45](../docs/work-units/WU-45-regression-runner.md) | 회귀 실행기 · 측정 스크립트 | eple | sorek-charlie | 0/3 | (열림: #49) |
-| [WU-44](../docs/work-units/WU-44-final.md) | 최종 병합 · DevelopDoc · 제출 | eple | sorek-charlie | 0/3 | #31 · #42 (열림: #48 · #50) |
+| [WU-43](../docs/work-units/WU-43-bulk-seed-api.md) | 일괄 반영 · 일괄 등록 · 시드 API | eple | sorek-charlie | 0/5 | #41 · #43 · #46 |
+| [WU-45](../docs/work-units/WU-45-regression-runner.md) | 회귀 실행기 · 측정 스크립트 | eple | sorek-charlie | 0/3 | #49 |
+| [WU-44](../docs/work-units/WU-44-final.md) | 최종 병합 · DevelopDoc · 제출 | eple | sorek-charlie | 0/3 | #31 · #42 · #48 · #50 |
 
-PR 번호는 병합된 PR과 일부 열린 PR만 적었다. 결과 절 · 문서만 담은 PR은 "(결과 절)" 등으로 표시했다. 병합 이력 상세: [daily/day-02](../docs/daily/day-02.md).
+PR 번호는 병합된 PR만 적었다. 결과 절 · 문서만 담은 PR은 "(결과 절)" 등으로 표시했다. 병합 이력 상세: [daily/day-02](../docs/daily/day-02.md).
 
 ## 2. Step별로 본 WU
 
@@ -45,7 +45,7 @@ PR 번호는 병합된 PR과 일부 열린 PR만 적었다. 결과 절 · 문서
 | 5 AI 에이전트 | WU-31 · 32 · 33 · 34 · 35 |
 | 전 Step | WU-44 |
 
-## 3. 완료 조건 체크리스트 (WU별, 기준 커밋 82cb987)
+## 3. 완료 조건 체크리스트 (WU별, 체크는 기준 커밋 82cb987 그대로)
 
 각 항목은 WU 문서에서 그대로 옮긴 것이다. 원본은 각 WU 문서이고, 실제 확인 방법 · 결과는 WU 문서의 '테스트 방법' · '결과' 절에 있다. 체크 상태는 11/25에 다시 옮긴다.
 
