@@ -118,7 +118,7 @@ WU 번호: `0x` eple 골격, `1x` jkspawn, `2x` sorek-charlie, `3x` skygaul, `4x
 3. 하루에 한 번 이상 `main`을 받아 합친다: `git fetch origin && git merge origin/main` (rebase는 쓰지 않는다 — 이미 push한 커밋이 바뀐다)
 4. push → PR 생성. 제목 `WU-11 대시보드 KPI · 재고 표`, 본문은 아래 양식
 5. 검증자(역할표)가 리뷰한다. 리뷰어는 **브랜치를 받아 직접 실행**해 보고 승인한다
-6. 작성자 또는 eple이 **"Create a merge commit"**으로 병합한다(D-14). 병합 메시지 본문은 아래 양식
+6. 작성자 또는 eple이 **"Create a merge commit"**으로 병합한다(D-14). 지난 커밋에 PC 경로 · 색 코드 같은 가릴 값이 남은 PR만 squash 병합한다(D-40). 병합 메시지 본문은 아래 양식
 7. 병합 뒤 브랜치를 지운다
 
 | 작성자 | 검증자(리뷰어) |

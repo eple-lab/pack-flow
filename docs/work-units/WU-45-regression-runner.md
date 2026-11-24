@@ -54,4 +54,4 @@
 - 직접 확인한 것: 회귀 실행 통과 52 · 실패 0 · E2E 미실행 1(종료 0), 임시 실패 시험 C-99 → 표에 실패 · 종료 1 → 지운 뒤 종료 0. dev 배포 측정: small 대시보드 p50 669ms · 이력 213ms, large 640ms · 212ms. 생성 파일 비밀값 검사 통과(시험 산출물은 커밋 안 함). lint · typecheck · unit 724개 통과(관리 세션 재실행)
 - 확인 못 한 것: E2E(Playwright) 실행 경로 — 이 PC에 브라우저 · 로컬 서버가 없어 리뷰어 PC에서 첫 확인. import 4곳 `@ts-expect-error TS5097`(tsconfig `allowImportingTsExtensions`는 eple 결정)
 - AI가 틀린 것과 고친 과정: 테스트 ID 정규식이 `T-AI-1a` 같은 접미사를 못 잡아 '기타'가 24줄 → 기대 시험을 먼저 추가해 실패를 확인한 뒤 정규식 수정, 기타 0줄. [ai-cases-eple](../records/ai-cases-eple.md) 사례 3
-- PR: #49 (리뷰 sorek-charlie, 리뷰 중)
+- PR: #49 (리뷰 sorek-charlie) — 병합 11/24 12:31 (`65d72d1`)
