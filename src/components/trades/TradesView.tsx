@@ -10,29 +10,32 @@
  * 3. 실패는 ErrorBanner에 error.message 그대로(남은 수량 문구는 서버 · api-client가 만든다).
  *    재고 부족이면 목록을 그대로 두고, 전이 오류면 목록을 새로고침한다(04 4.4).
  * 4. 탭을 바꾸면 주소(`?tab=`)를 바꾼다. page.tsx가 주소마다 이 컴포넌트를 새로 그린다(key).
+ * 5. 취소류(입고 취소 · 출고 취소 · 주문 취소 · 발주 취소)는 ConfirmDialog로 한 번 더 묻고, 확인하면 요청한다(WU-14).
  *
  * 근거: docs/04-api-contract.md 3.3 · 3.4 · 4.4 · 4.6, docs/work-units/WU-12-trades.md
  * 구역: jkspawn (docs/06-work-plan.md 1절)
  *
  * 이력
  * 2026-11-23  jkspawn  처음 작성 — 입출고 탭 · 불러오기 · 작업 처리 (WU-12)
+ * 2026-11-24  jkspawn  상태 변경 · 입고 취소 · 출고 취소 · 주문 취소와 확인 창 연결 (WU-14)
  */
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { ConfirmDialog } from '@/components/common/ConfirmDialog';
 import { ErrorBanner } from '@/components/common/ErrorBanner';
 import { Loading } from '@/components/common/Loading';
 import { useToast } from '@/components/common/Toast';
 import { api, ApiError } from '@/lib/api-client';
-import type { Item, Purchase, PurchaseWithStock, Sale } from '@/types/erp';
-import { stockChangeMessage } from './form-utils';
+import type { Item, Purchase, PurchaseStatusChangeTarget, PurchaseWithStock, Sale } from '@/types/erp';
+import { cancelConfirmMessage, stockChangeMessage } from './form-utils';
 import { PurchaseForm } from './PurchaseForm';
 import { PurchaseTable } from './PurchaseTable';
 import type { TradesQuery, TradesTab } from './query';
 import { tradesUrl } from './query';
 import { ReceiveDialog } from './ReceiveDialog';
 import { SaleForm } from './SaleForm';
-import { SALE_READY, SaleTable } from './SaleTable';
+import { SALE_ORDER_CANCELLED, SALE_READY, SaleTable } from './SaleTable';
 import styles from './trades.module.css';
 
 type Lists = { items: Item[]; purchases: Purchase[]; sales: Sale[] };
@@ -50,7 +53,7 @@ function toApiError(error: unknown): ApiError {
  * - query: 주소에서 읽은 탭 · 상태 필터(`parseTradesQuery`)
  *
  * testid: tab-purchase, tab-sale, status-filter, error-banner(배너), toast(알림)
- * 부작용: GET items · purchases · sales, POST purchases · sales · receive · status · ship
+ * 부작용: GET items · purchases · sales, POST purchases · sales · receive · status · ship · cancel-receipt · cancel-shipment
  */
 export function TradesView({ query }: { query: TradesQuery }) {
   const router = useRouter();
@@ -58,6 +61,9 @@ export function TradesView({ query }: { query: TradesQuery }) {
   const [state, setState] = useState<LoadState>({ status: 'loading' });
   const [banner, setBanner] = useState<ApiError | null>(null);
   const [receiving, setReceiving] = useState<Purchase | null>(null);
+  // 취소류 확인 창: 문구와 확인하면 할 일. pending이면 확인 버튼 잠금
+  const [confirm, setConfirm] = useState<{ message: string; run: () => Promise<void> } | null>(null);
+  const [confirmPending, setConfirmPending] = useState(false);
   // 몇 번째 불러오기인지. 올리면 effect가 다시 돈다(늦게 온 이전 응답은 버린다).
   const [attempt, setAttempt] = useState(0);
 
@@ -120,6 +126,75 @@ export function TradesView({ query }: { query: TradesQuery }) {
       succeed(stockChangeMessage(`${result.sale.sale_id} 출고`, result.sale.sku_id, before, result.stock_qty));
     } catch (error) {
       fail(error);
+    }
+  };
+
+  /** 상태 변경. 발주 취소만 확인 창을 거친다(되돌릴 수 없는 끝 상태). */
+  const onPurchaseStatus = async (purchase: Purchase, to: PurchaseStatusChangeTarget) => {
+    const run = async () => {
+      try {
+        const updated = await api.setPurchaseStatus(purchase.id, to);
+        succeed(`${updated.purchase_id} ${updated.status}(으)로 바꿨어요`);
+      } catch (error) {
+        fail(error);
+      }
+    };
+    if (to === '취소') {
+      setConfirm({ message: cancelConfirmMessage('purchase-cancel', purchase.purchase_id, purchase.sku_id, null), run });
+      return;
+    }
+    await run();
+  };
+
+  const onCancelReceipt = (purchase: Purchase) =>
+    setConfirm({
+      message: cancelConfirmMessage('cancel-receipt', purchase.purchase_id, purchase.sku_id, purchase.received_qty),
+      run: async () => {
+        const before = stockBefore(purchase.sku_id);
+        try {
+          const result = await api.cancelReceipt(purchase.id);
+          succeed(stockChangeMessage(`${result.purchase.purchase_id} 입고 취소`, result.purchase.sku_id, before, result.stock_qty));
+        } catch (error) {
+          fail(error); // 재고 부족이면 배너에 남은 수량, 목록은 그대로
+        }
+      },
+    });
+
+  const onCancelShipment = (sale: Sale) =>
+    setConfirm({
+      message: cancelConfirmMessage('cancel-shipment', sale.sale_id, sale.sku_id, sale.sold_qty),
+      run: async () => {
+        const before = stockBefore(sale.sku_id);
+        try {
+          const result = await api.cancelShipment(sale.id);
+          succeed(stockChangeMessage(`${result.sale.sale_id} 출고 취소`, result.sale.sku_id, before, result.stock_qty));
+        } catch (error) {
+          fail(error);
+        }
+      },
+    });
+
+  const onOrderCancel = (sale: Sale) =>
+    setConfirm({
+      message: cancelConfirmMessage('order-cancel', sale.sale_id, sale.sku_id, null),
+      run: async () => {
+        try {
+          const updated = await api.setSaleStatus(sale.id, SALE_ORDER_CANCELLED);
+          succeed(`${updated.sale_id} ${updated.fulfillment_status}로 바꿨어요`);
+        } catch (error) {
+          fail(error);
+        }
+      },
+    });
+
+  const confirmRun = async () => {
+    if (!confirm) return;
+    setConfirmPending(true);
+    try {
+      await confirm.run();
+    } finally {
+      setConfirmPending(false);
+      setConfirm(null);
     }
   };
 
@@ -187,6 +262,8 @@ export function TradesView({ query }: { query: TradesQuery }) {
               setBanner(null);
               setReceiving(p);
             }}
+            onStatus={onPurchaseStatus}
+            onCancelReceipt={onCancelReceipt}
             emptyText={filterText ? `${filterText} 구매가 없어요` : undefined}
           />
           <ReceiveDialog
@@ -210,10 +287,22 @@ export function TradesView({ query }: { query: TradesQuery }) {
             itemNames={itemNames}
             onReady={onReady}
             onShip={onShip}
+            onOrderCancel={onOrderCancel}
+            onCancelShipment={onCancelShipment}
             emptyText={filterText ? `${filterText} 판매가 없어요` : undefined}
           />
         </>
       )}
+
+      <ConfirmDialog
+        open={confirm !== null}
+        message={confirm?.message ?? ''}
+        confirmLabel="취소하기"
+        cancelLabel="닫기"
+        pending={confirmPending}
+        onConfirm={() => void confirmRun()}
+        onCancel={() => setConfirm(null)}
+      />
     </div>
   );
 }

@@ -13,6 +13,7 @@
  *
  * 이력
  * 2026-11-23  jkspawn  처음 작성 — 칸 오류 · 재고 변화 문구 · 숫자 칸 천 단위 쉼표 처리 (WU-12)
+ * 2026-11-24  jkspawn  취소 확인 창 문구 cancelConfirmMessage 추가 (WU-14)
  */
 import type { ApiError } from '@/lib/api-client';
 import { formatNumber } from '@/lib/format';
@@ -78,4 +79,25 @@ export function fieldErrorFromApi(error: ApiError, fields: readonly string[]): F
 export function stockChangeMessage(action: string, sku_id: string, before: number | null, after: number): string {
   const stock = before === null ? `재고 ${formatNumber(after)}` : `재고 ${formatNumber(before)} → ${formatNumber(after)}`;
   return `${action} — ${sku_id} ${stock}`;
+}
+
+/** 확인 창을 띄우는 취소 종류(WU-14 5번). */
+export type CancelKind = 'cancel-receipt' | 'cancel-shipment' | 'order-cancel' | 'purchase-cancel';
+
+/**
+ * 취소류 확인 창 문구 — 결과를 한 문장으로(ConfirmDialog 안내). 수량은 그 거래의 값 그대로(화면에서 계산하지 않음).
+ * 예: "S-201 출고를 취소하면 PRD-001 재고가 6개 돌아오고, 기록은 남아요"
+ */
+export function cancelConfirmMessage(kind: CancelKind, ref: string, sku_id: string, qty: number | null): string {
+  const n = qty === null ? '' : `${formatNumber(qty)}개 `;
+  switch (kind) {
+    case 'cancel-receipt':
+      return `${ref} 입고를 취소하면 ${sku_id} 재고가 ${n}줄고, 기록은 남아요`;
+    case 'cancel-shipment':
+      return `${ref} 출고를 취소하면 ${sku_id} 재고가 ${n}돌아오고, 기록은 남아요`;
+    case 'order-cancel':
+      return `${ref} 주문을 취소해요. 재고는 그대로이고, 기록은 남아요`;
+    case 'purchase-cancel':
+      return `${ref} 발주를 취소해요. 재고는 그대로이고, 기록은 남아요`;
+  }
 }
