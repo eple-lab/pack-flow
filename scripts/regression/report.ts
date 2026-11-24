@@ -15,6 +15,8 @@
  * 이력
  * 2026-11-23  eple  처음 작성 — 결과 묶기 · 결과표 · p50 · 가리기 (WU-45)
  * 2026-11-24  eple  헤더형 비밀(cookie · authorization · sb 세션 쿠키) 가리기 + 비정상 종료 코드 반영 withExitCode (#49 리뷰)
+ * 2026-11-24  eple  redact에 터미널 색 코드 제거 · 절대 경로 가리기 — 회귀 결과표에 PC 경로가 남음 (WU-24 #68)
+ * 2026-11-24  eple  따옴표 안 공백 경로도 끝까지 가림 (#70 리뷰)
  */
 
 /** 한 테스트의 결과. */
@@ -376,8 +378,27 @@ export function runnerLabel(value: string | undefined): string {
   return /^[A-Za-z0-9][A-Za-z0-9-]{0,38}$/.test(v) ? v : '미기재';
 }
 
+// 윈도 절대 경로(`file:///C:/…` · `C:\…` · `C:/…`). 앞이 영숫자면(`https:` 등) 경로가 아니다.
+const WIN_PATH_RE = /(?<![A-Za-z0-9])(?:file:\/\/\/)?[A-Za-z]:[\\/][^\s'"<>)]*/g;
+// POSIX 절대 경로(`/home/` · `/Users/` · `/root/`). 주소 안의 `/home/`은 앞 글자 때문에 걸리지 않는다.
+const POSIX_PATH_RE = /(?<![A-Za-z0-9.:/_-])(?:file:\/\/)?\/(?:home|Users|root)\/[^\s'"<>)]*/g;
+
+// 따옴표(`"` · `'` · 백틱)로 연 절대 경로: 같은 따옴표로 닫힐 때까지(공백 포함, 줄바꿈 제외) 한 덩어리.
+const QUOTED_WIN_PATH_RE = /(["'`])((?:file:\/\/\/)?[A-Za-z]:[\\/][^\r\n]*?)\1/g;
+const QUOTED_POSIX_PATH_RE = /(["'`])((?:file:\/\/)?\/(?:home|Users|root)\/[^\r\n]*?)\1/g;
+
+/** 절대 경로 한 덩어리를 가린다. `pack-flow` 폴더가 있으면 `<repo>/뒷부분`, 없으면 `[경로]`. */
+function maskPath(match: string): string {
+  const norm = match.replace(/\\/g, '/');
+  const at = norm.indexOf('/pack-flow/');
+  return at >= 0 ? `<repo>/${norm.slice(at + '/pack-flow/'.length)}` : '[경로]';
+}
+
 /**
  * 결과 · 기록 파일에 쓰기 전에 비밀값 · 개인정보를 가린다.
+ * (#68) 맨 먼저 터미널 색 코드(ANSI `ESC[…m` 등)를 지운다(표 칸이 깨짐). 이어서 절대 경로(`file:///C:/…` · `C:\…` · `C:/…` ·
+ * `/home/` · `/Users/` · `/root/`로 시작)를 가린다: 경로에 `pack-flow` 폴더가 있으면 그 앞까지를 `<repo>/`로 바꿔 저장소 안 경로만 남기고,
+ * 없으면 통째로 `[경로]`. `https://…` 같은 주소는 건드리지 않는다.
  * secrets: 실행 환경의 실제 값들(비밀번호 · 키 등). 4글자 미만은 무시한다(오탐 방지).
  * 가리는 것: 알려 준 값, 이메일, JWT, Bearer 토큰, 접두사 있는 키(sb_ · sk- · AIza · ghp_ …),
  * 사용자 홈 경로, URL 쿼리, 32자 이상 긴 영숫자 덩어리.
@@ -390,6 +411,15 @@ export function redact(text: string, secrets: string[] = []): string {
     if (secret.length >= 4) out = out.split(secret).join('[가림]');
   }
   return out
+    // [#68 수정] 터미널 색 코드가 표 칸에 남음 → 맨 먼저 지움 (eple)
+    .replace(/\x1b\[[0-?]*[ -/]*[@-~]/g, '')
+    .replace(/\x1b/g, '')
+    // [#70 리뷰] 따옴표 안 경로가 공백에서 끊겨 일부가 남음 → 닫는 따옴표까지 가림 (eple)
+    .replace(QUOTED_WIN_PATH_RE, (_m, q: string, path: string) => `${q}${maskPath(path)}${q}`)
+    .replace(QUOTED_POSIX_PATH_RE, (_m, q: string, path: string) => `${q}${maskPath(path)}${q}`)
+    // [#68 수정] PC 절대 경로가 남음 → 저장소 안 경로만 남기고 가림 (eple)
+    .replace(WIN_PATH_RE, maskPath)
+    .replace(POSIX_PATH_RE, maskPath)
     .replace(/("(?:set-cookie|cookie|authorization)"\s*:\s*)"(?:[^"\\]|\\.)*"/gi, '$1"[가림]"')
     .replace(/\b((?:set-cookie|cookie|authorization)\s*:)[^\r\n]*/gi, '$1 [가림]')
     .replace(/sb-[A-Za-z0-9_-]+-auth-token(?:\.\d+)?=[^;\s'"]+/g, 'sb-…-auth-token=[세션]')

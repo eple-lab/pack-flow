@@ -16,14 +16,22 @@
  *   → 원래 값이 하나도 안 남고 헤더 이름은 남는다
  * - (#49 리뷰) C-25 redact: 평범한 글(`PRD-001 재고 10`)은 그대로
  * - (#49 리뷰) C-26 withExitCode: (실패 없음, 코드 1) → 실패 한 건 추가 / (코드 0) → 그대로 / (이미 실패 있음, 코드 1) → 그대로 / 원본 불변
+ * - (#68) C-27 redact ANSI: `ESC[31m…ESC[39m` → 색 코드만 사라지고 글은 그대로 / `ESC[2mexpect(ESC[22m` → ESC 문자 없음
+ * - (#68) C-28 redact 경로: `file:///C:/work/me/git/pack-flow/src/…/demo.json` → `<repo>/src/lib/seed/demo.json`(`C:` · `work/me` 없음) /
+ *   윈도 사용자 폴더 경로(가짜 이름 kim) → `kim` 없음 / `D:/other/place/file.ts`(저장소 아님) → `[경로]` / POSIX 홈 아래 pack-flow 경로 → `<repo>/tests/a.ts`
+ *   (#70 리뷰) 따옴표 안 공백 경로: `at open ("C:\Work Folder\pack-flow\src\demo.ts:8")` → `at open ("<repo>/src/demo.ts:8")`(`Work` · `Folder` 없음) /
+ *   `'D:\My Docs\x.txt'` → `'[경로]'` / 따옴표 안 윈도 사용자 경로(`Kim Lee`) → `Kim` · `Lee` 없음 / 따옴표 안 URL · 따옴표 없는 경로는 전과 같음
+ *   (가짜 사용자 경로는 비밀값 검사 훅에 걸리지 않게 시험 안에서 이어 붙여 만든다)
+ * - (#68) C-29 redact 경로 아님: `https://pack-flow.onrender.com/api/health` · `http://localhost:3000/` · `PRD-001 재고 10` · `T-S1-1 | 통과 | 0.8s` → 그대로
  *
-
  * 근거: WU-45 · docs/07-test-strategy.md 5절
  * 구역: eple (docs/06-work-plan.md 1절 '테스트 기반')
  *
  * 이력
  * 2026-11-23  eple  처음 작성 — 결과표 · p50 · 가리기 시험 (WU-45)
  * 2026-11-24  eple  헤더형 비밀 가리기 · 비정상 종료 코드 반영 시험 추가 (#49 리뷰)
+ * 2026-11-24  eple  색 코드 제거 · 절대 경로 가리기 시험 추가 C-27~C-29 (WU-24 #68)
+ * 2026-11-24  eple  따옴표 안 공백 경로 시험을 C-28에 추가 (#70 리뷰)
  */
 import { describe, expect, it } from 'vitest';
 import {
@@ -283,6 +291,49 @@ describe('헤더형 비밀 가리기 · 종료 코드 (#49 리뷰)', () => {
   });
   it('C-25 평범한 글은 그대로 둔다', () => {
     expect(redact('PRD-001 재고 10')).toBe('PRD-001 재고 10');
+  });
+  it('C-27 터미널 색 코드를 지운다', () => {
+    expect(redact('\x1b[31mTest timeout of 30000ms exceeded.\x1b[39m')).toBe('Test timeout of 30000ms exceeded.');
+    const mixed = redact('\x1b[2mexpect(\x1b[22m\x1b[31mreceived\x1b[39m\x1b[2m)\x1b[22m 끝\x1b');
+    expect(mixed).not.toContain('\x1b');
+    expect(mixed).toContain('expect(');
+    expect(mixed).toContain('끝');
+  });
+  it('C-28 절대 경로를 가린다(저장소 안 경로는 남김)', () => {
+    const url = redact('Module "file:///C:/work/me/git/pack-flow/src/lib/seed/demo.json" needs an import attribute');
+    expect(url).toContain('<repo>/src/lib/seed/demo.json');
+    expect(url).not.toContain('C:');
+    expect(url).not.toContain('work/me');
+    // 가짜 사용자 경로 — 비밀값 검사 훅이 글자 그대로의 사용자 폴더 경로를 막으므로 이어 붙여 만든다
+    const winHome = ['C:', 'Users', 'kim', 'x.txt'].join('\\');
+    const posixHome = ['', 'home', 'someone', 'pack-flow', 'tests', 'a.ts'].join('/');
+    expect(redact(winHome)).not.toContain('kim');
+    expect(redact('오류 D:/other/place/file.ts 에서')).toBe('오류 [경로] 에서');
+    expect(redact(posixHome)).toBe('<repo>/tests/a.ts');
+    expect(redact('E:\\dev\\pack-flow\\src\\a.ts:3')).toBe('<repo>/src/a.ts:3');
+    // [#70 리뷰] 따옴표 안 공백 경로 — 닫는 따옴표까지 가린다
+    const quotedRepo = redact('at open ("C:\\Work Folder\\pack-flow\\src\\demo.ts:8")');
+    expect(quotedRepo).toBe('at open ("<repo>/src/demo.ts:8")');
+    expect(quotedRepo).not.toContain('Work');
+    expect(quotedRepo).not.toContain('Folder');
+    const quotedOther = redact("'D:\\My Docs\\x.txt'");
+    expect(quotedOther).toBe("'[경로]'");
+    expect(quotedOther).not.toContain('My');
+    expect(quotedOther).not.toContain('Docs');
+    const quotedHome = redact('"' + ['C:', 'Users', 'Kim Lee', 'a b', 'f.txt'].join('\\') + '"');
+    expect(quotedHome).not.toContain('Kim');
+    expect(quotedHome).not.toContain('Lee');
+    expect(redact('"https://pack-flow.onrender.com/api"')).toBe('"https://pack-flow.onrender.com/api"');
+  });
+  it('C-29 경로가 아닌 글은 그대로 둔다', () => {
+    for (const t of [
+      'https://pack-flow.onrender.com/api/health',
+      'http://localhost:3000/',
+      'PRD-001 재고 10',
+      'T-S1-1 | 통과 | 0.8s',
+    ]) {
+      expect(redact(t)).toBe(t);
+    }
   });
   it('C-26 withExitCode: 실패 없이 비정상 종료면 실패 한 건 추가, 코드 0이거나 이미 실패가 있으면 그대로', () => {
     const base = [pass('T-S1-1 출고')];
