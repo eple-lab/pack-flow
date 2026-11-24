@@ -8,6 +8,7 @@
  *    설정 누락은 상한을 쓰기 전에 걸러서, 잘못된 설정이 하루 호출 수를 깎지 않게 한다.
  * 3. 20초 안에 응답이 없거나 네트워크 · HTTP 오류 · 빈 응답이면 PF_LLM_UNAVAILABLE(P-08, 04 4.6).
  *    원문 오류 · 응답 본문은 밖으로 내보내지 않고, 로그에는 제공자 · 이유 · 상태 · 길이 · 지연만 남긴다.
+ *    Gemini 성공 로그(`llm.ok`)에는 응답의 토큰 사용량 숫자(prompt · candidates · thoughts)도 남긴다(지연 원인 확인용, #59).
  * 4. 키는 gemini 요청 헤더에만 싣는다(주소 · 로그에 없다). 프롬프트 전문은 로그에 남기지 않는다.
  *
  * 서버에서만 쓴다(`import 'server-only'`). 호출하는 쪽이 LLM 실패를 200 + llm_error로 바꾸는 것(WU-33)은 여기 일이 아니다.
@@ -18,6 +19,7 @@
  * 이력
  * 2026-11-23  eple     자리 생성 (WU-04) — 구현은 skygaul WU-31
  * 2026-11-23  skygaul  처음 구현 — 제공자 3종 · 시간 초과 · 호출 상한 · 안전한 로그 (WU-31)
+ * 2026-11-24  skygaul  Gemini 응답의 토큰 사용량 숫자를 llm.ok 로그에 남김 — 배포 지연 원인 확인 (#59)
  */
 import 'server-only';
 import { PfError, fromSupabaseError } from '@/lib/api/errors';
@@ -188,8 +190,35 @@ async function callOllama(request: LlmRequest, env: ServerEnv, fetchFn: typeof f
   return isRecord(message) && typeof message.content === 'string' ? message.content : '';
 }
 
-/** Gemini `generateContent`: 첫 후보의 글자 조각을 이어 붙인다. 키는 헤더로만 보낸다. */
-async function callGemini(request: LlmRequest, env: ServerEnv, fetchFn: typeof fetch, signal: AbortSignal): Promise<string> {
+/** 로그에 남기는 Gemini 토큰 사용량. 응답의 `usageMetadata`에 있는 이름 그대로, 숫자일 때만. */
+const USAGE_KEYS = ['promptTokenCount', 'candidatesTokenCount', 'thoughtsTokenCount'] as const;
+type GeminiUsage = Partial<Record<(typeof USAGE_KEYS)[number], number>>;
+
+// [#59 request] 배포 초안이 4초대로 느린데 생각 토큰 때문인지 알 수 없었음 → usageMetadata의 숫자 세 개만 골라 로그에 남김 (skygaul)
+// 값이 없거나 숫자가 아니거나 음수면 그 칸은 뺀다(0 · null로 쓰지 않음). 글자 · 프롬프트는 읽지 않는다.
+// 키 이름의 `TokenCount`는 log.ts가 "숫자이고 Count로 끝나면 남긴다"는 예외로 가리지 않는다.
+function usageOf(data: unknown): GeminiUsage {
+  const meta = isRecord(data) ? data.usageMetadata : undefined;
+  const usage: GeminiUsage = {};
+  if (!isRecord(meta)) return usage;
+  for (const key of USAGE_KEYS) {
+    const value = meta[key];
+    if (typeof value === 'number' && Number.isFinite(value) && value >= 0) usage[key] = value;
+  }
+  return usage;
+}
+
+/**
+ * Gemini `generateContent`: 첫 후보의 글자 조각을 이어 붙인다. 키는 헤더로만 보낸다.
+ * @param onUsage 응답을 읽은 뒤 토큰 사용량 숫자를 알려 준다(로그용). 반환값 모양은 그대로다.
+ */
+async function callGemini(
+  request: LlmRequest,
+  env: ServerEnv,
+  fetchFn: typeof fetch,
+  signal: AbortSignal,
+  onUsage?: (usage: GeminiUsage) => void,
+): Promise<string> {
   const generationConfig = {
     ...(request.json ? { responseMimeType: 'application/json' } : {}),
     ...(request.maxTokens !== undefined ? { maxOutputTokens: request.maxTokens } : {}),
@@ -205,6 +234,7 @@ async function callGemini(request: LlmRequest, env: ServerEnv, fetchFn: typeof f
     signal,
   });
   const data = await readJsonBody(response);
+  onUsage?.(usageOf(data));
   const candidates = isRecord(data) && Array.isArray(data.candidates) ? data.candidates : [];
   const content = isRecord(candidates[0]) ? candidates[0].content : undefined;
   const parts = isRecord(content) && Array.isArray(content.parts) ? content.parts : [];
@@ -251,15 +281,16 @@ export async function generate(request: LlmRequest, overrides: Partial<LlmDeps> 
   await deps.takeQuota({ user: env.llmLimitUser, global: env.llmLimitGlobal });
 
   const startedAt = deps.now();
+  let usage: GeminiUsage = {}; // [#59] Gemini만 채운다(Ollama · fake는 빈 채로 → 로그에 칸 없음)
   try {
     const text = await runWithTimeout(deps.timeoutMs, (signal) => {
       if (provider === 'ollama') return callOllama(request, env, deps.fetch, signal);
-      if (provider === 'gemini') return callGemini(request, env, deps.fetch, signal);
+      if (provider === 'gemini') return callGemini(request, env, deps.fetch, signal, (u) => void (usage = u));
       return callFake(request);
     });
     if (text.trim() === '') throw new LlmFailure('empty');
     const latencyMs = deps.now() - startedAt;
-    log.info('llm.ok', { provider, ms: latencyMs, promptLen, textLen: text.length });
+    log.info('llm.ok', { provider, ms: latencyMs, promptLen, textLen: text.length, ...usage });
     return { text, provider, latencyMs };
   } catch (error) {
     const failure = error instanceof LlmFailure ? error : new LlmFailure('exception');
