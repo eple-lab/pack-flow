@@ -15,6 +15,7 @@
 # 이력
 # 2026-11-23  eple  처음 작성 — Render Web Service 설정 (WU-06)
 # 2026-11-23  eple  dev 서비스로 역할 정리 — 시연은 render.demo.yaml로 분리 (D-37)
+# 2026-11-24  eple  LLM_MODEL 주석에 모델 ID 예시 — 표시 이름을 넣어 배포 Gemini 400 (WU-35)
 
 services:
   - type: web
@@ -39,7 +40,7 @@ services:
       # ── LLM (D-06): 배포는 gemini ──
       - key: LLM_PROVIDER
         value: gemini
-      # AI Studio의 Flash-Lite 모델 ID. eple이 입력
+      # AI Studio의 Flash-Lite 모델 ID(예: gemini-3.5-flash-lite). 화면 표시 이름("Gemini Flash-Lite")을 넣으면 Gemini가 400. eple이 입력
       - key: LLM_MODEL
         sync: false
       # 서버 전용 키. eple이 직접 입력(D-27)
