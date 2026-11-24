@@ -436,7 +436,7 @@ pack-flow/  (저장소 루트)
 - Supabase는 1주일 미사용 시 일시정지 → 발표 전날과 당일 오전에 접속
 - 라이브 시연 실패 대비: 2분 백업 시연 영상 미리 녹화
 - 실제 거래처 · 매출 데이터는 넣지 않음 (무료 티어 학습 정책)
-- 키 관리: Gemini 키는 발표용 1개만 발급, 발급자 본인 계정으로만 관리 · 공유 금지, Render 환경변수(`GEMINI_API_KEY`)에만 등록, GitHub에 올리지 않음 (`.env`, `.gitignore`). Supabase 서비스 키는 **eple PC의 `.env.local`에만**(dev 테스트 계정 생성 스크립트용), Render · 팀원 PC에는 넣지 않음. 공개 저장소라 다섯 겹(키 위치 · `.gitignore` · 스크립트 안전장치 · pre-commit 검사 · GitHub Push protection)으로 막음 — `docs/05-security.md` 2.1절
+- 키 관리: 배포 · 발표용 Gemini 키는 1개(발급자 eple 계정, D-27), Render 환경변수(`GEMINI_API_KEY`)에만 등록. 개발용은 Ollama로 진행이 어려울 때 각자 **본인 계정의 Gemini 키**를 자기 PC `.env.local`에만 둔다(D-06, 11/24 추가). 어느 키든 공유 금지, GitHub에 올리지 않음 (`.env`, `.gitignore`). Supabase 서비스 키는 **eple PC의 `.env.local`에만**(dev 테스트 계정 생성 스크립트용), Render · 팀원 PC에는 넣지 않음. 공개 저장소라 다섯 겹(키 위치 · `.gitignore` · 스크립트 안전장치 · pre-commit 검사 · GitHub Push protection)으로 막음 — `docs/05-security.md` 2.1절
 - 시연 계정 비밀번호는 README 등 공개 문서에 적지 않음
 
 ---
@@ -516,7 +516,7 @@ pack-flow/  (저장소 루트)
 **공통 안내 '제출과 시연' — README나 개발 문서에 함께**
 
 - [ ] 팀 목표 합의서와 변경 이력
-- [ ] 테스트 결과표 (완료 판정 테스트 + 실패 사례: 빈 입력 · 재고 초과 · 권한 없음 등 각 1개 이상) — 양식: 구현시 작성
+- [ ] 테스트 결과표 (완료 판정 테스트 + 실패 사례: 빈 입력 · 재고 초과 · 권한 없음 등 각 1개 이상) — 양식: [07 테스트 전략 5절](07-test-strategy.md) '제출용 테스트 결과서'
 - [ ] AI 활용 · 디버깅 사례 3개
 - [ ] 팀원별 기여 · 회고
 - [ ] 짧은 시연 영상 (백업용 2분 영상 겸용)

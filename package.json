@@ -16,6 +16,7 @@
     "test:db": "vitest run --project db",
     "test:e2e": "playwright test",
     "test:regression": "node tests/regression/run.ts",
+    "measure": "node tests/regression/measure.ts",
     "check:secrets": "bash scripts/check-secrets.sh --staged",
     "users:create": "node --env-file=.env.local scripts/create-test-users.ts",
     "prepare": "node scripts/install-hooks.mjs"

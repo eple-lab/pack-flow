@@ -12,6 +12,7 @@
  *
  * 이력
  * 2026-11-23  skygaul  처음 작성 — fake · ollama · gemini · 시간 초과 · 상한 · 로그 시험 (WU-31)
+ * 2026-11-24  skygaul  Gemini usageMetadata 토큰 숫자 로그 시험 G-4~G-6 · O-6 추가 (#59)
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { PfError } from '@/lib/api/errors';
@@ -191,6 +192,23 @@ describe('O: ollama 제공자', () => {
       expect((await failureOf(generate(REQUEST, deps({ env: ollamaEnv(), fetch }))))?.code).toBe('PF_LLM_UNAVAILABLE');
     }
   });
+
+  // [#59 시험] 토큰 사용량 칸은 Gemini 응답에서만 나온다 — Ollama · fake의 llm.ok에는 없어야 한다
+  it('O-6 #59 Ollama · fake 호출의 llm.ok 로그에는 토큰 칸이 없다', async () => {
+    const lines: string[] = [];
+    for (const method of ['log', 'warn', 'error'] as const) {
+      vi.spyOn(console, method).mockImplementation((line) => void lines.push(String(line)));
+    }
+    const { fetch } = fakeFetch(() =>
+      json({ message: { content: '답' }, usageMetadata: { promptTokenCount: 9, candidatesTokenCount: 9, thoughtsTokenCount: 9 } }),
+    );
+    await generate(REQUEST, deps({ env: ollamaEnv(), fetch }));
+    setFakeLlmResponder(() => '답');
+    await generate(REQUEST, deps({ env: env({ llmProvider: 'fake' }) }));
+    const oks = lines.filter((l) => l.includes('"event":"llm.ok"'));
+    expect(oks).toHaveLength(2);
+    for (const line of oks) expect(line).not.toMatch(/TokenCount/);
+  });
 });
 
 describe('G: gemini 제공자', () => {
@@ -231,6 +249,78 @@ describe('G: gemini 제공자', () => {
     for (const { fetch } of bad) {
       expect((await failureOf(generate(REQUEST, deps({ env: geminiEnv(), fetch }))))?.code).toBe('PF_LLM_UNAVAILABLE');
     }
+  });
+
+  // [#59 시험] Gemini 응답의 토큰 사용량(숫자만)이 llm.ok 로그에 남는지 — 지연 원인(생각 토큰)을 보려는 것
+  /** console로 나가는 로그 줄을 모은다. */
+  function captureLog() {
+    const lines: string[] = [];
+    for (const method of ['log', 'warn', 'error'] as const) {
+      vi.spyOn(console, method).mockImplementation((line) => void lines.push(String(line)));
+    }
+    return lines;
+  }
+  /** llm.ok 로그 한 줄을 JSON으로. */
+  const okLine = (lines: string[]) => {
+    const line = lines.find((l) => l.includes('"event":"llm.ok"'));
+    return line ? (JSON.parse(line) as Record<string, unknown>) : null;
+  };
+  const reply = (extra: Record<string, unknown>) =>
+    json({ candidates: [{ content: { parts: [{ text: '응답 글자 ZZZ-ANSWER' }] } }], ...extra });
+
+  it('G-4 #59 usageMetadata의 세 숫자가 llm.ok 로그에 남고, 반환값 모양은 그대로다', async () => {
+    const lines = captureLog();
+    const { fetch } = fakeFetch(() =>
+      reply({ usageMetadata: { promptTokenCount: 120, candidatesTokenCount: 35, thoughtsTokenCount: 410 } }),
+    );
+    const result = await generate(REQUEST, deps({ env: geminiEnv(), fetch }));
+    expect(Object.keys(result).sort()).toEqual(['latencyMs', 'provider', 'text']);
+    const ok = okLine(lines);
+    expect(ok).toMatchObject({ provider: 'gemini', promptTokenCount: 120, candidatesTokenCount: 35, thoughtsTokenCount: 410 });
+    // 기존 칸도 그대로
+    expect(ok).toHaveProperty('ms');
+    expect(ok).toHaveProperty('promptLen');
+    expect(ok).toHaveProperty('textLen');
+  });
+
+  it('G-5 #59 usageMetadata가 없거나 thoughtsTokenCount만 없으면 없는 값은 키 자체를 생략한다(0 · null로 쓰지 않음)', async () => {
+    const none = captureLog();
+    await generate(REQUEST, deps({ env: geminiEnv(), fetch: fakeFetch(() => reply({})).fetch }));
+    const okNone = okLine(none);
+    expect(okNone).not.toBeNull();
+    expect(Object.keys(okNone ?? {}).filter((k) => /TokenCount$/.test(k))).toEqual([]);
+
+    vi.restoreAllMocks();
+    const part = captureLog();
+    await generate(
+      REQUEST,
+      deps({
+        env: geminiEnv(),
+        fetch: fakeFetch(() => reply({ usageMetadata: { promptTokenCount: 50, candidatesTokenCount: 7 } })).fetch,
+      }),
+    );
+    const okPart = okLine(part);
+    expect(okPart).toMatchObject({ promptTokenCount: 50, candidatesTokenCount: 7 });
+    expect(okPart).not.toHaveProperty('thoughtsTokenCount');
+  });
+
+  it('G-6 #59 숫자가 아니거나 음수인 값은 로그에 남기지 않고, 호출은 성공하며, 프롬프트 · 응답 글자는 로그에 없다', async () => {
+    const lines = captureLog();
+    const { fetch } = fakeFetch(() =>
+      reply({ usageMetadata: { promptTokenCount: 'abc', candidatesTokenCount: -3, thoughtsTokenCount: { n: 1 } } }),
+    );
+    const result = await generate(
+      { system: '비밀 시스템 문장 ZZZ-SYSTEM', user: '비밀 질문 문장 ZZZ-USER' },
+      deps({ env: geminiEnv(), fetch }),
+    );
+    expect(result.text).toBe('응답 글자 ZZZ-ANSWER');
+    const ok = okLine(lines);
+    expect(ok).not.toBeNull();
+    expect(Object.keys(ok ?? {}).filter((k) => /TokenCount$/.test(k))).toEqual([]);
+    const logged = lines.join('\n');
+    expect(logged).not.toContain('ZZZ-SYSTEM');
+    expect(logged).not.toContain('ZZZ-USER');
+    expect(logged).not.toContain('ZZZ-ANSWER');
   });
 });
 
