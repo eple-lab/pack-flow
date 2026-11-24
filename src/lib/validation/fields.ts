@@ -13,6 +13,7 @@
  *
  * 이력
  * 2026-11-23  eple  처음 작성 — 칸 단위 검증 부품 (WU-03)
+ * 2026-11-24  eple  text()에 trim 옵션 추가 — 일괄 미리보기 원문 보존 (#60)
  */
 import { z } from 'zod';
 import type { ValidationReason } from '@/types/erp';
@@ -50,6 +51,11 @@ export type TextOptions = {
   presence?: Presence;
   /** 형식 검사. 어긋나면 bad_format */
   pattern?: RegExp;
+  /**
+   * 앞뒤 공백을 지워 돌려줄지(기본 true). false면 원문을 그대로 돌려준다 —
+   * 붙여넣은 TSV · CSV처럼 끝의 탭이 데이터인 글자용. 빈 값 · 길이 검사는 지운 길이로 한다
+   */
+  trim?: boolean;
 };
 
 /**
@@ -57,7 +63,7 @@ export type TextOptions = {
  * @returns 필수는 문자열, 선택은 문자열 또는 null
  */
 export function text(options: TextOptions): z.ZodType {
-  const { max, min = 1, presence = 'required', pattern } = options;
+  const { max, min = 1, presence = 'required', pattern, trim = true } = options;
   return withPresence(
     (acceptMissing) =>
       (acceptMissing ? z.unknown().optional() : z.unknown()).transform((value, ctx) => {
@@ -71,7 +77,7 @@ export function text(options: TextOptions): z.ZodType {
         if (trimmed.length > max) return fail(ctx, value, 'too_long', { max });
         if (trimmed.length < min) return fail(ctx, value, 'bad_format');
         if (pattern && !pattern.test(trimmed)) return fail(ctx, value, 'bad_format');
-        return trimmed;
+        return trim ? trimmed : value;
       }),
     presence,
   );

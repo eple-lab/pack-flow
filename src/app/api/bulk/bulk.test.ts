@@ -19,6 +19,8 @@
  * - C-84 parse가 lines를 주면 오류 행도 원본 값 유지: 수량 0 행 → kind '입고' · sku_id 'PRD-001' · qty 0(lines 값 그대로), valid=false,
  *        errors ['수량이 0 이하'] / 메모 201자 행(lines의 errors는 빈 배열) → errors에 칸 문구 '200자 이하로 입력해 주세요'
  *        / 정상 행은 DB 비교를 거쳐 valid, 줄 순서 1 · 2 · 3
+ * - C-86 preview 마지막 줄이 빈 칸으로 끝나도(끝 탭 2개: 송장 · 비고 빈 값 / 1개: 비고만 빈 값) 열 개수 오류가 아니고
+ *        두 행 모두 valid=true, errors [] (붙여넣은 글자 끝 탭을 trim하지 않아야 통과)
  *
  * 근거: docs/04-api-contract.md 3.6 · 4절, docs/05-security.md 5절, WU-43
  * 구역: eple (docs/06-work-plan.md 1절)
@@ -26,6 +28,7 @@
  * 이력
  * 2026-11-23  eple  처음 작성 — 일괄 등록 라우트 단위 시험 C-71 ~ C-82 (WU-43)
  * 2026-11-24  eple  C-83 · C-84 추가 — WU-13 parse의 rejected · lines 받기 (WU-43)
+ * 2026-11-24  eple  C-86 추가 — 끝 탭 보존 시험 (#60)
  */
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
@@ -223,6 +226,18 @@ describe('POST /api/bulk/preview', () => {
     expect((await big.json()).error.detail).toMatchObject({ field: 'body' });
     expect(f.reads).toEqual([]);
     expect(f.rpcCalls).toEqual([]);
+  });
+
+  it('C-86 마지막 줄이 빈 칸(탭)으로 끝나도 열 개수 오류 없이 valid', async () => {
+    holder.client = fake(TABLES()).client;
+    const two = text(tsv('입고', 'PRD-001', 1), '입고\tPRD-001\t1\t거래처\t\t');
+    const r1 = (await (await call(preview, { format: 'tsv', text: two })).json()).data.rows;
+    expect(r1.map((r: PreviewRow) => r.valid)).toEqual([true, true]);
+    expect(r1.map((r: PreviewRow) => r.errors)).toEqual([[], []]);
+    const one = text(tsv('입고', 'PRD-001', 1), '입고\tPRD-001\t1\t거래처\tINV-9\t');
+    const r2 = (await (await call(preview, { format: 'tsv', text: one })).json()).data.rows;
+    expect(r2.map((r: PreviewRow) => r.valid)).toEqual([true, true]);
+    expect(r2.map((r: PreviewRow) => r.errors)).toEqual([[], []]);
   });
 
   it('C-80 X-PF 없음 → 403, 로그인 안 함 → 401 (DB 0회)', async () => {
