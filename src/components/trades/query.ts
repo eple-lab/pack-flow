@@ -1,5 +1,5 @@
 /**
- * 입출고 화면 주소(`?tab=purchase|sale&status=...`)를 읽고 만드는 순수 함수 모음.
+ * 입출고 화면 주소(`?tab=purchase|sale|bulk&status=...`)를 읽고 만드는 순수 함수 모음.
  *
  * 하는 일
  * 1. 쿼리에서 탭과 상태 필터를 고른다. 상태는 erp.ts 상수에 있는 값만 받고, 없는 값은 버린다.
@@ -11,15 +11,17 @@
  *
  * 이력
  * 2026-11-23  jkspawn  처음 작성 — 탭 · 상태 쿼리 읽기 · 만들기 (WU-12)
+ * 2026-11-24  jkspawn  일괄 등록 탭(`tab=bulk`, 상태 필터 없음) 추가 (WU-13)
  */
 import { PURCHASE_STATUSES, SALE_STATUSES, type PurchaseStatus, type SaleStatus } from '@/types/erp';
 
-export type TradesTab = 'purchase' | 'sale';
+export type TradesTab = 'purchase' | 'sale' | 'bulk';
 
 /** 화면이 쓰는 쿼리 값. 상태 필터는 고른 탭의 것만 남는다. */
 export type TradesQuery =
   | { tab: 'purchase'; status: PurchaseStatus | null }
-  | { tab: 'sale'; status: SaleStatus | null };
+  | { tab: 'sale'; status: SaleStatus | null }
+  | { tab: 'bulk'; status: null };
 
 type RawParam = string | string[] | undefined;
 
@@ -39,13 +41,18 @@ function isSaleStatus(value: string | null): value is SaleStatus {
 /**
  * 쿼리에서 탭 · 상태를 고른다.
  * - `tab`이 없으면 상태로 탭을 고른다(판매 상태면 sale, 그 밖은 purchase).
- * - 고른 탭에 맞지 않는 상태(예: `tab=sale&status=발주완료`)는 버린다.
+ * - 고른 탭에 맞지 않는 상태(예: `tab=sale&status=발주완료`)는 버린다. 일괄 등록 탭(`bulk`)은 상태 필터가 없다.
  */
 export function parseTradesQuery(params: { tab?: RawParam; status?: RawParam }): TradesQuery {
   const tabParam = first(params.tab);
   const status = first(params.status);
   const tab: TradesTab =
-    tabParam === 'sale' || tabParam === 'purchase' ? tabParam : isSaleStatus(status) ? 'sale' : 'purchase';
+    tabParam === 'sale' || tabParam === 'purchase' || tabParam === 'bulk'
+      ? tabParam
+      : isSaleStatus(status)
+        ? 'sale'
+        : 'purchase';
+  if (tab === 'bulk') return { tab, status: null };
   if (tab === 'sale') return { tab, status: isSaleStatus(status) ? status : null };
   return { tab, status: isPurchaseStatus(status) ? status : null };
 }
