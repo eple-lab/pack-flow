@@ -61,4 +61,4 @@ Step 5 "요청량 상한과 비용을 기록하고, AI가 하지 못하는 것�
   - 배포 503이 일시 과부하인지는 추측이다(응답 본문이 로그에 없음). 지연 12.6초 한 번의 원인도 모른다
   - 사례 3개가 "원인 · 수정 · 재검증"을 갖췄는지는 리뷰어(eple) 확인 항목이다
   - 결정 문서 D-06("개발은 Ollama")은 실제(개발도 Gemini)와 달라 eple에게 수정을 요청했다(11/24 전달 완료, eple 구역이라 이 PR에서는 고치지 않음). eple가 "Ollama로 진행이 어려우면 각자 본인 계정의 Gemini 개발용 키(로컬 `.env.local`에만)"로 D-06 · 계획서 9절을 고치겠다고 회신했고, 그 문구가 실제 운영과 맞는지 skygaul이 확인했다(`.env.local`은 `.gitignore`에 걸리고 저장소에는 `.env.example`만 올라가 있음). 수정 반영은 eple 몫
-- PR: (PR 생성 뒤 링크)
+- PR: https://github.com/eple-lab/pack-flow/pull/63
