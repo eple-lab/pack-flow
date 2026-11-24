@@ -1,6 +1,6 @@
 # eple 이어받기 노트
 
-마지막 갱신: 2026-11-23 저녁 · 쓴 세션: eple의 Wave 0 마무리 세션 → WU-41 세션(Claude, 11/23) · **다음 세션은 0절의 '최신' 블록부터 읽는다.**
+마지막 갱신: 2026-11-23 밤 · 쓴 세션: eple의 Wave 0 마무리 세션 → WU-41 세션(Claude, 11/23) · **다음 세션은 0절의 '최신' 블록부터 읽는다.**
 
 팀원이 여러 명이라 파일 이름 앞에 `eple-`을 붙였다. 이 노트는 **eple의 작업 흐름**을 이어받기 위한 것이다(팀원 각자의 진행은 work-units와 이슈로 본다).
 
@@ -16,21 +16,36 @@
 
 ## 0. 최신 상태 (2026-11-23 오후 — 다음 세션은 여기부터)
 
-### 최신 (11/23 18시 30분 무렵, WU-41 세션) — 아래 16시 스냅샷보다 이것이 우선
+### 최신 (11/23 20시 무렵, WU-41 세션 마감) — 아래 16시 스냅샷보다 이것이 우선
 
-- **병합 끝:** #28(WU-16) · #29(WU-21) · #31 · #32 · #34(WU-33) · #36 · #37 · **#38(WU-41 업무 API)** → main `5eb0dc8`, CI 통과. Render 두 서비스 `/api/health` 200
-- **WU-21 마이그레이션 `20261123120000_inventory.sql`: dev · demo 둘 다 적용 끝**(eple 승인, 둘 다 `migration list` 7개, 함수 권한 확인). 다시 적용하지 않는다. CLI link는 dev로 되돌려 둠
-- **WU-41 끝:** 목 없이 화면 입고 → 출고 → 대시보드 확인(로컬 → dev), T-S1-3(API) · T-S4-2 · T-VAL-2~4 통과. `vitest.config.mts` db 묶음에 `tests/api/**` 추가 — `test:db`가 `tests/api`도 돈다(계정 A · B 데이터를 demo 시드로 초기화)
-- **WU-42:** #39 T-AUTH-1~8 · Step 2 증거 — sorek-charlie가 새 계정으로 10건 독립 실행 후 승인, 병합(11/23 저녁)
-- **열린 PR:** #35 이 노트 / #40 WU-22 시드 3벌 · E2E(demo 8품목으로 바뀌어 eple 구역 시험 갱신 필요 — 고침 브랜치 `feat/WU-43-seed-loader` 작업 중)
-- **로컬에만 있는 것:** 브랜치 `feat/WU-43-bulk-seed-api`(WU-42 위에 쌓음) — `POST /api/seed` 연결 · T-AUTH-7을 라우트로 확인(커밋 `9206d38`, push 전). #39 병합 뒤 main 기준으로 PR
-- **다음 단계 (순서):**
-  1. #40 + 고침 PR 병합(로더 small · large 등록, S4-1 · 2 · 4, T-S1-3을 demo expected 기준으로) → WU-43 브랜치를 main에 맞춰 C-60 · T-AUTH-7 갱신
-  2. 배포 URL(`pack-flow`)에서 2일차 판정 1 · 4번(입고 → 출고 → 대시보드), sorek-charlie 배포 E2E Step 1 · 2
-  3. WU-43(11/24 오전): `pf_bulk_apply`(새 마이그레이션 → eple 확인 뒤 dev · demo 적용) · `/api/bulk/preview` · `/commit`, small · large 로더 등록과 S4-4 · C-62 시험 갱신(WU-22 json이 main에 들어온 뒤), 중간 점검 기록
-  4. `docs/daily/day-02.md` 저녁 판정 · 계획서 변경 이력
-- **WU-33 리뷰 후속(skygaul):** 여러 줄 확정 중 일부 저장 안내, `tests/api/agent.test.ts` 커밋, HTTP 경로 확인
-- **주의 추가:** 대시보드 주소는 `/`(`/dashboard` 아님). PowerShell 실행 정책으로 `npm.ps1`이 막히면 `npm.cmd`. 병합된 WU 이슈(#7 · #8 · #9 · #13 · #17 · #18 · #19 · #22)는 열린 채(Refs 규칙) — 닫을지 eple 결정
+- **2일차 완료 판정 1~4 모두 충족**(day-02 · 계획서 변경 이력 반영, #42). 배포 URL Playwright E2E Step 1 · 2 6건 통과(sorek-charlie)
+- **오늘 병합(merge commit):** #28 · #29 · #31 · #32 · #34 · #35 · #36 · #37 · #38(WU-41) · #39(WU-42) · #40(WU-22 시드 3벌, demo 8품목) · #41(WU-43 1/2 `/api/seed`) · #42 · #43(seed C-65) · #44(WU-23 취소 · 상태 전이) · #45(WU-33 후속) · #51(WU-34 챗봇, 밤) → main `02b8ce2`
+- **DB 마이그레이션 현황 — 다시 적용하지 않는다:**
+
+  | 파일 | dev | demo |
+  |---|---|---|
+  | `20261123120000_inventory.sql`(WU-21) | 적용 | 적용 |
+  | `20261123130000_inventory_cancel.sql`(WU-23) | 적용 | **미적용** |
+  | `20261124090000_bulk_apply.sql`(WU-43, #46) | 적용(병합 전, eple 승인) | **미적용** |
+
+  → **#46 병합 뒤 demo에 2개를 한 번에 적용**(eple 결정). 그 전까지 demo 서비스의 취소 · 상태 변경 · 일괄 반영은 501. CLI link는 dev
+- **열린 PR(밤):** #46 WU-43 (2/2) `pf_bulk_apply` · bulk 라우트(리뷰 sorek-charlie — dev에서 `test:db` 76건 통과, WU-23 시험 포함) / #47 04 계약 3.8 `saved_count` · `saved`(리뷰 skygaul) / #48 이 노트 / #49 WU-45 / #50 WU-41 · 42 · 43 · 45 결과 절 · `ai-cases-eple.md` / #52 WU 문서 8개 테스트 방법 절(**#50 다음 병합**) / #53 DevelopDoc 4개 · README 초안 — #47 말고는 모두 리뷰 sorek-charlie
+- **WU-45 회귀 실행기 · 측정:** PR 올림(`feat/WU-45-regression-runner`, 리뷰 sorek-charlie). `npm run test:regression` · `npm run measure` — E2E(Playwright) 경로는 브라우저 · 로컬 서버가 없어 미확인, 리뷰어 PC에서 첫 확인. tsconfig `allowImportingTsExtensions`를 켜고 우회 주석 4곳 제거(eple 결정, #49에 포함)
+- **다음 단계 (11/24, 14시 기능 동결):**
+  1. #46 리뷰 · 병합 → demo 마이그레이션 2개 적용(dry-run으로 2개만 확인) → demo 서비스 취소 · 일괄 반영 확인
+  2. WU-45 리뷰 · 병합 → sorek-charlie 첫 회귀(WU-24)
+  3. 중간 점검 기록(계획서 2절, 오후) — 완료 · 미완료 · 범위 조정(A/B안)
+  4. 팀원: jkspawn WU-13 일괄 등록 화면(`src/lib/bulk/parse.ts` 채우면 `/api/bulk/preview` 501 해소) · WU-14 이력 · 취소 화면, skygaul WU-34 챗봇, sorek-charlie WU-24
+- **위험(11/23 밤):** jkspawn의 WU-13(일괄 등록 화면) · WU-14(이력 · 취소 화면) · WU-15 브랜치가 아직 없다. API는 준비됨. 11/24 아침에 진행 확인 → 늦으면 줄일 순서 A/B안(일괄 등록은 미리보기까지 / 취소만) 팀 결정
+- **eple 결정 대기:** ① 병합된 WU 이슈 닫기 — 팀 규칙(docs/11-issues.md 96~102)은 '리뷰어가 실제 동작 확인 항목을 체크한 뒤 **담당자**가 닫는다' ② LICENSE(README '미정') — 나중에 다시 묻기로
+- **이력 비밀값 점검(11/23 밤, 읽기만):** 147커밋에서 실제 키 · 토큰 · 비밀번호 · 사용자 경로 · 프로젝트 ref 0건. 커밋 작성자 메타데이터에 개인 Gmail 2종(eple 공개 주소 — 레이어 2에서 허용 / 팀원 1명 — 본인에게 noreply 설정 안내 권장). 실명은 목록 없이 자동 판정 못 함 — 11/25 보안 점검 때 실명 목록으로 다시
+- **주의:**
+  - 대시보드 주소는 `/`. PowerShell 실행 정책으로 `npm.ps1`이 막히면 `npm.cmd`
+  - 마이그레이션 적용은 별도 임시 worktree에서(작업 폴더의 미검토 마이그레이션이 같이 올라가지 않게, 로컬에 원격 버전 파일이 모두 있어야 CLI가 받음) → dry-run → `--yes`
+  - 하위 에이전트 worktree에서 `npm ci`가 2분 제한에 걸리면 node_modules가 깨진다 — DB · 시험이 필요한 일은 원래 폴더에서
+  - 테스트 계정은 사람마다 A · B. 한 팀원 계정은 로그 노출로 11/23 재생성
+  - 병합된 WU 이슈(#7 · #8 · #9 · #13 · #14 · #15 · #17 · #18 · #19 · #22 · #23 · #24)는 열린 채(Refs 규칙) — 닫을지 eple 결정
+- **AI 사례 후보(eple, `docs/records/ai-cases-eple.md` 기록 여부 eple 판단):** 판매 시험 field 복제 실수 · `/api/seed` 시험에 가짜 클라이언트 대신 도우미 객체 전달 · 하위 에이전트 bulk 시험 tsv 끝 칸 문제 — 모두 시험이 잡음
 
 ### 끝난 것 (Wave 0)
 
