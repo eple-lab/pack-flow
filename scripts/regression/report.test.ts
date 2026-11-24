@@ -19,6 +19,8 @@
  * - (#68) C-27 redact ANSI: `ESC[31m…ESC[39m` → 색 코드만 사라지고 글은 그대로 / `ESC[2mexpect(ESC[22m` → ESC 문자 없음
  * - (#68) C-28 redact 경로: `file:///C:/work/me/git/pack-flow/src/…/demo.json` → `<repo>/src/lib/seed/demo.json`(`C:` · `work/me` 없음) /
  *   윈도 사용자 폴더 경로(가짜 이름 kim) → `kim` 없음 / `D:/other/place/file.ts`(저장소 아님) → `[경로]` / POSIX 홈 아래 pack-flow 경로 → `<repo>/tests/a.ts`
+ *   (#70 리뷰) 따옴표 안 공백 경로: `at open ("C:\Work Folder\pack-flow\src\demo.ts:8")` → `at open ("<repo>/src/demo.ts:8")`(`Work` · `Folder` 없음) /
+ *   `'D:\My Docs\x.txt'` → `'[경로]'` / 따옴표 안 윈도 사용자 경로(`Kim Lee`) → `Kim` · `Lee` 없음 / 따옴표 안 URL · 따옴표 없는 경로는 전과 같음
  *   (가짜 사용자 경로는 비밀값 검사 훅에 걸리지 않게 시험 안에서 이어 붙여 만든다)
  * - (#68) C-29 redact 경로 아님: `https://pack-flow.onrender.com/api/health` · `http://localhost:3000/` · `PRD-001 재고 10` · `T-S1-1 | 통과 | 0.8s` → 그대로
  *
@@ -29,6 +31,7 @@
  * 2026-11-23  eple  처음 작성 — 결과표 · p50 · 가리기 시험 (WU-45)
  * 2026-11-24  eple  헤더형 비밀 가리기 · 비정상 종료 코드 반영 시험 추가 (#49 리뷰)
  * 2026-11-24  eple  색 코드 제거 · 절대 경로 가리기 시험 추가 C-27~C-29 (WU-24 #68)
+ * 2026-11-24  eple  따옴표 안 공백 경로 시험을 C-28에 추가 (#70 리뷰)
  */
 import { describe, expect, it } from 'vitest';
 import {
@@ -308,6 +311,19 @@ describe('헤더형 비밀 가리기 · 종료 코드 (#49 리뷰)', () => {
     expect(redact('오류 D:/other/place/file.ts 에서')).toBe('오류 [경로] 에서');
     expect(redact(posixHome)).toBe('<repo>/tests/a.ts');
     expect(redact('E:\\dev\\pack-flow\\src\\a.ts:3')).toBe('<repo>/src/a.ts:3');
+    // [#70 리뷰] 따옴표 안 공백 경로 — 닫는 따옴표까지 가린다
+    const quotedRepo = redact('at open ("C:\\Work Folder\\pack-flow\\src\\demo.ts:8")');
+    expect(quotedRepo).toBe('at open ("<repo>/src/demo.ts:8")');
+    expect(quotedRepo).not.toContain('Work');
+    expect(quotedRepo).not.toContain('Folder');
+    const quotedOther = redact("'D:\\My Docs\\x.txt'");
+    expect(quotedOther).toBe("'[경로]'");
+    expect(quotedOther).not.toContain('My');
+    expect(quotedOther).not.toContain('Docs');
+    const quotedHome = redact('"' + ['C:', 'Users', 'Kim Lee', 'a b', 'f.txt'].join('\\') + '"');
+    expect(quotedHome).not.toContain('Kim');
+    expect(quotedHome).not.toContain('Lee');
+    expect(redact('"https://pack-flow.onrender.com/api"')).toBe('"https://pack-flow.onrender.com/api"');
   });
   it('C-29 경로가 아닌 글은 그대로 둔다', () => {
     for (const t of [

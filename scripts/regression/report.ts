@@ -16,6 +16,7 @@
  * 2026-11-23  eple  처음 작성 — 결과 묶기 · 결과표 · p50 · 가리기 (WU-45)
  * 2026-11-24  eple  헤더형 비밀(cookie · authorization · sb 세션 쿠키) 가리기 + 비정상 종료 코드 반영 withExitCode (#49 리뷰)
  * 2026-11-24  eple  redact에 터미널 색 코드 제거 · 절대 경로 가리기 — 회귀 결과표에 PC 경로가 남음 (WU-24 #68)
+ * 2026-11-24  eple  따옴표 안 공백 경로도 끝까지 가림 (#70 리뷰)
  */
 
 /** 한 테스트의 결과. */
@@ -382,6 +383,10 @@ const WIN_PATH_RE = /(?<![A-Za-z0-9])(?:file:\/\/\/)?[A-Za-z]:[\\/][^\s'"<>)]*/g
 // POSIX 절대 경로(`/home/` · `/Users/` · `/root/`). 주소 안의 `/home/`은 앞 글자 때문에 걸리지 않는다.
 const POSIX_PATH_RE = /(?<![A-Za-z0-9.:/_-])(?:file:\/\/)?\/(?:home|Users|root)\/[^\s'"<>)]*/g;
 
+// 따옴표(`"` · `'` · 백틱)로 연 절대 경로: 같은 따옴표로 닫힐 때까지(공백 포함, 줄바꿈 제외) 한 덩어리.
+const QUOTED_WIN_PATH_RE = /(["'`])((?:file:\/\/\/)?[A-Za-z]:[\\/][^\r\n]*?)\1/g;
+const QUOTED_POSIX_PATH_RE = /(["'`])((?:file:\/\/)?\/(?:home|Users|root)\/[^\r\n]*?)\1/g;
+
 /** 절대 경로 한 덩어리를 가린다. `pack-flow` 폴더가 있으면 `<repo>/뒷부분`, 없으면 `[경로]`. */
 function maskPath(match: string): string {
   const norm = match.replace(/\\/g, '/');
@@ -409,6 +414,9 @@ export function redact(text: string, secrets: string[] = []): string {
     // [#68 수정] 터미널 색 코드가 표 칸에 남음 → 맨 먼저 지움 (eple)
     .replace(/\x1b\[[0-?]*[ -/]*[@-~]/g, '')
     .replace(/\x1b/g, '')
+    // [#70 리뷰] 따옴표 안 경로가 공백에서 끊겨 일부가 남음 → 닫는 따옴표까지 가림 (eple)
+    .replace(QUOTED_WIN_PATH_RE, (_m, q: string, path: string) => `${q}${maskPath(path)}${q}`)
+    .replace(QUOTED_POSIX_PATH_RE, (_m, q: string, path: string) => `${q}${maskPath(path)}${q}`)
     // [#68 수정] PC 절대 경로가 남음 → 저장소 안 경로만 남기고 가림 (eple)
     .replace(WIN_PATH_RE, maskPath)
     .replace(POSIX_PATH_RE, maskPath)
