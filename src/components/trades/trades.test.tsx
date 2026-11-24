@@ -12,6 +12,7 @@
  *
  * 이력
  * 2026-11-23  jkspawn  처음 작성 — 입출고 화면 시험 (WU-12)
+ * 2026-11-24  jkspawn  새 표 props(onStatus · onCancelReceipt · onOrderCancel · onCancelShipment) 반영 (WU-14)
  */
 import { renderToString } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
@@ -157,7 +158,7 @@ describe('E: 서버 오류 → 칸 아래 / 배너 (04 4.4)', () => {
 
 describe('T: 표 · 폼 렌더 (testid · 버튼 · 배지)', () => {
   it('T-01 구매 표(목 P-101 이동·통관중): 행 · [입고 확정] 있음, 도착 수량 —, 부분 입고 배지 없음', () => {
-    const html = renderToString(<PurchaseTable purchases={mockPurchases} itemNames={names} onReceive={noop} />);
+    const html = renderToString(<PurchaseTable purchases={mockPurchases} itemNames={names} onReceive={noop} onStatus={noop} onCancelReceipt={noop} />);
     expect(html).toContain('data-testid="purchase-row-P-101"');
     expect(html).toContain('data-testid="btn-receive-P-101"');
     expect(html).toContain('PRD-001 무선 마우스');
@@ -166,17 +167,17 @@ describe('T: 표 · 폼 렌더 (testid · 버튼 · 배지)', () => {
   });
   it('T-02 8 / 10 입고완료 → 부분 입고 배지, [입고 확정] 없음(실패해야 함)', () => {
     const received = { ...P101, status: '입고완료' as const, received_qty: 8, received_at: '2026-11-23T02:00:00.000Z' };
-    const html = renderToString(<PurchaseTable purchases={[received]} itemNames={names} onReceive={noop} />);
+    const html = renderToString(<PurchaseTable purchases={[received]} itemNames={names} onReceive={noop} onStatus={noop} onCancelReceipt={noop} />);
     expect(html).toContain('data-testid="partial-badge-P-101"');
     expect(html).toContain('부분 입고');
     expect(html).not.toContain('btn-receive-P-101');
   });
   it('T-03 다 도착(10 / 10)이면 부분 입고 배지 없음', () => {
     const full = { ...P101, status: '입고완료' as const, received_qty: 10 };
-    expect(renderToString(<PurchaseTable purchases={[full]} itemNames={names} onReceive={noop} />)).not.toContain('partial-badge');
+    expect(renderToString(<PurchaseTable purchases={[full]} itemNames={names} onReceive={noop} onStatus={noop} onCancelReceipt={noop} />)).not.toContain('partial-badge');
   });
   it('T-04 판매 표: S-201(출고대기)은 [출고]만, S-202(주문접수)는 [출고대기로]만, 송장번호 —', () => {
-    const html = renderToString(<SaleTable sales={mockSales} itemNames={names} onReady={noopAsync} onShip={noopAsync} />);
+    const html = renderToString(<SaleTable sales={mockSales} itemNames={names} onReady={noopAsync} onShip={noopAsync} onOrderCancel={noop} onCancelShipment={noop} />);
     expect(html).toContain('data-testid="sale-row-S-201"');
     expect(html).toContain('data-testid="btn-ship-S-201"');
     expect(html).not.toContain('btn-ready-S-201');
@@ -186,7 +187,7 @@ describe('T: 표 · 폼 렌더 (testid · 버튼 · 배지)', () => {
   });
   it('T-05 (실패해야 함) 출고완료 판매에는 버튼이 없다', () => {
     const shipped = { ...mockSales[0]!, fulfillment_status: '출고완료' as const };
-    const html = renderToString(<SaleTable sales={[shipped]} itemNames={names} onReady={noopAsync} onShip={noopAsync} />);
+    const html = renderToString(<SaleTable sales={[shipped]} itemNames={names} onReady={noopAsync} onShip={noopAsync} onOrderCancel={noop} onCancelShipment={noop} />);
     expect(html).not.toContain('btn-ship-');
     expect(html).not.toContain('btn-ready-');
   });
