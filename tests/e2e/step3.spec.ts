@@ -6,6 +6,7 @@
  *
  * 이력
  * 2026-11-24  sorek-charlie  처음 작성 — Step 3 화면 시나리오 (WU-24)
+ * 2026-11-24  sorek-charlie  출고 취소·이력 응답과 화면 갱신을 순서대로 확인 (WU-24)
  */
 import { expect, test } from '@playwright/test';
 import type { Sale } from '@/types/erp';
@@ -27,15 +28,23 @@ test('T-S3-1 출고를 취소하면 재고 10과 출고·취소 이력이 남는
   await page.getByTestId('btn-ship-S-201').click();
   await expect(sale).toContainText('출고완료', { timeout: 15_000 });
   await page.getByTestId('btn-cancel-shipment-S-201').click();
+  const cancellation = page.waitForResponse((response) =>
+    new URL(response.url()).pathname.endsWith('/cancel-shipment') && response.request().method() === 'POST',
+  );
   await page.getByTestId('confirm-ok').click();
-  await expect(sale).toContainText('출고취소');
+  expect((await cancellation).ok()).toBe(true);
+  await expect(sale).toContainText('출고취소', { timeout: 15_000 });
 
-  await page.goto('/history?sku_id=PRD-001');
+  const history = page.waitForResponse((response) => {
+    const url = new URL(response.url());
+    return url.pathname === '/api/stock-logs' && url.searchParams.get('sku_id') === 'PRD-001';
+  }, { timeout: 45_000 });
+  await page.goto('/history?sku_id=PRD-001', { waitUntil: 'domcontentloaded' });
+  expect((await history).ok()).toBe(true);
   const logs = page.getByTestId(/^log-row-/).filter({ hasText: 'S-201' });
   await expect(logs.filter({ hasText: '실판매출고' })).toContainText(/[−-]\s*6/);
   await expect(logs.filter({ hasText: '출고취소' })).toContainText(/\+\s*6/);
-  await page.goto('/');
-  await expect(page.getByTestId('stock-qty-PRD-001')).toHaveText('10');
+  await expect(page.getByTestId('history-check')).toHaveText(/^현재 재고 10 = 이력 합계 10\s*일치$/);
 });
 
 test('T-S3-2 재고 4에서 50개 출고를 거부하고 재고를 유지한다', async ({ page }) => {
