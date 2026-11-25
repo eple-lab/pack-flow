@@ -35,7 +35,9 @@
 
 ## 다 됐다의 기준
 
-- [ ] `npm run test:db` 통과
+> 11/26 eple 사후 확인: 개발 종료 뒤 소스 · 시험 · 기록으로 확인한 칸만 체크
+
+- [x] `npm run test:db` 통과 — (11/26 eple 사후 확인: 회귀 11/25 통과: T-S3-1(tests/db/cancel.test.ts:23) · T-S3-3(transition.test.ts) · C-02 입고 취소 재고 부족(cancel.test.ts:45) · 두 번 취소 · 출고취소→출고완료 INVALID(cancel.test.ts:28-29) · T-S3-5 · T-S4-4(bulk.test.ts) · afterEach assertInvariants)
   - T-S3-1: 6개 출고 → 출고 취소 → 재고 10, 이력 −6 · +6 둘 다 존재
   - T-S3-3: `입고완료→발주완료`, `취소→입고완료`, `출고취소→출고완료` 요청 → `PF_INVALID_TRANSITION`
   - 입고 확정 8 → 6개 출고 → 입고 취소 → 재고 부족 거부
@@ -43,7 +45,7 @@
   - T-S3-5(DB 쪽): 10행 중 3행 오류(미등록 품목 · 재고 초과 출고 · 중복 송장) → 7행 반영
   - T-S4-4: 같은 rows 두 번 → 두 번째 `applied 0`, 송장 중복 사유
   - 매 테스트 끝 T-INV-1 ~ T-INV-4 0행
-- [ ] 남의 id로 취소 → `PF_NOT_FOUND`
+- [x] 남의 id로 취소 → `PF_NOT_FOUND` — (11/26 eple 사후 확인: tests/db/cancel.test.ts:26 · :38(PF_NOT_FOUND) · T-INV-1 · T-AUTH-2 · T-AUTH-3(회귀 통과))
 
 ## 테스트 방법
 

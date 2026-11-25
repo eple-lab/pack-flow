@@ -54,13 +54,15 @@
 
 ## 다 됐다의 기준
 
-- [ ] lint · typecheck · test:unit 통과
-- [ ] 실제 API(dev, `demo` 시드): S-201 출고 → 재고 10 → 4 알림, P-101 8개 입고 확정 → '부분 입고' 배지 (완료 판정 1 · 2를 화면으로)
-- [ ] 재고보다 많은 출고 시 `error-banner`에 남은 수량 안내, 목록 변화 없음
-- [ ] 위 testid 전부 있음
-- [ ] 수량 0 · 소수 · 10만 초과 입력 → 칸 아래 범위 · 정수 문구, 요청 안 나감
-- [ ] 송장번호를 비운 판매 두 건이 모두 등록됨 (T-VAL-1 화면 쪽)
-- [ ] testid `field-error-<필드>`가 칸 아래 오류에 있음
+> 11/26 eple 사후 확인: 개발 종료 뒤 소스 · 시험 · 기록으로 확인한 칸만 체크
+
+- [x] lint · typecheck · test:unit 통과 — (11/26 eple 사후 확인: 11/26 `npm run lint` · `typecheck` · `test:unit` 직접 재실행 — 오류 0, unit 49파일 869개 통과)
+- [x] 실제 API(dev, `demo` 시드): S-201 출고 → 재고 10 → 4 알림, P-101 8개 입고 확정 → '부분 입고' 배지 (완료 판정 1 · 2를 화면으로) — (11/26 eple 사후 확인: tests/e2e/step1.spec.ts T-S1-1 · T-S1-2(회귀 11/25 배포 dev 통과) · review-skygaul.md Step 1(알림 재고 10 → 4, 입고 뒤 4 → 12). '부분 입고' 배지는 PurchaseTable.tsx:139 · trades.test.tsx T-02로 확인(배포 화면 기록에는 배지 문구가 없음))
+- [x] 재고보다 많은 출고 시 `error-banner`에 남은 수량 안내, 목록 변화 없음 — (11/26 eple 사후 확인: T-S3-2(회귀 통과, 재고 · 이력 변화 없음) · trades.test.tsx E-04 · review-skygaul.md · review-eple.md Step 3(demo 배포 화면 거부 배너 "남은 수량 12개"))
+- [x] 위 testid 전부 있음 — (11/26 eple 사후 확인: trades.test.tsx T-01 · T-04 · T-06 · T-07 · 11/26 소스 grep으로 14종 모두 있음 · step1.spec.ts가 이 testid로 배포에서 통과)
+- [x] 수량 0 · 소수 · 10만 초과 입력 → 칸 아래 범위 · 정수 문구, 요청 안 나감 — (11/26 eple 사후 확인: trades.test.tsx F-01~F-03 · B-02(요청 안 나감) · T-VAL-5(회귀 통과) — 11/26 재실행 통과)
+- [x] 송장번호를 비운 판매 두 건이 모두 등록됨 (T-VAL-1 화면 쪽) — (11/26 eple 사후 확인: trades.test.tsx F-06(화면 쪽) · T-VAL-1(회귀 통과, tests/db/validation.test.ts:18))
+- [x] testid `field-error-<필드>`가 칸 아래 오류에 있음 — (11/26 eple 사후 확인: trades.test.tsx F-01 · B-02 · src/components/common/FieldError.tsx)
 
 ## 테스트 방법
 
@@ -99,11 +101,11 @@
 - [x] npm run lint / typecheck / test:unit 통과 (unit 19파일 467개)
 - [x] 다 됐다의 기준
   - [x] lint · typecheck · test:unit 통과
-  - [ ] 실제 API(dev, `demo` 시드): S-201 출고 → 재고 10 → 4 알림, P-101 8개 입고 확정 → '부분 입고' 배지 — **WU-41 병합 뒤 확인** (목으로는 같은 알림 · 배지 확인: B-04 · B-05 · T-02)
-  - [ ] 재고보다 많은 출고 시 `error-banner`에 남은 수량 안내, 목록 변화 없음 — **WU-41 병합 뒤 확인** (문구는 E-04, 목록 유지 처리는 코드)
+  - [x] 실제 API(dev, `demo` 시드): S-201 출고 → 재고 10 → 4 알림, P-101 8개 입고 확정 → '부분 입고' 배지 — **WU-41 병합 뒤 확인** (목으로는 같은 알림 · 배지 확인: B-04 · B-05 · T-02) — (11/26 eple 사후 확인: tests/e2e/step1.spec.ts T-S1-1 · T-S1-2(회귀 11/25 배포 dev 통과) · review-skygaul.md Step 1(알림 재고 10 → 4, 입고 뒤 4 → 12). '부분 입고' 배지는 PurchaseTable.tsx:139 · trades.test.tsx T-02로 확인(배포 화면 기록에는 배지 문구가 없음))
+  - [x] 재고보다 많은 출고 시 `error-banner`에 남은 수량 안내, 목록 변화 없음 — **WU-41 병합 뒤 확인** (문구는 E-04, 목록 유지 처리는 코드) — (11/26 eple 사후 확인: T-S3-2(회귀 통과, 재고 · 이력 변화 없음) · trades.test.tsx E-04 · review-skygaul.md · review-eple.md Step 3(demo 배포 화면 거부 배너 "남은 수량 12개"))
   - [x] testid 전부 있음 (T-01 · T-04 · T-06 · T-07)
   - [x] 수량 0 · 소수 · 10만 초과 입력 → 칸 아래 범위 · 정수 문구, 요청 안 나감 (F-01~F-03, B-02)
-  - [ ] 송장번호를 비운 판매 두 건이 모두 등록됨 (T-VAL-1 화면 쪽) — 화면 쪽은 통과(F-06, B-06), DB 등록은 **WU-41 병합 뒤 확인**
+  - [x] 송장번호를 비운 판매 두 건이 모두 등록됨 (T-VAL-1 화면 쪽) — 화면 쪽은 통과(F-06, B-06), DB 등록은 **WU-41 병합 뒤 확인** — (11/26 eple 사후 확인: trades.test.tsx F-06(화면 쪽) · T-VAL-1(회귀 통과, tests/db/validation.test.ts:18))
   - [x] testid `field-error-<필드>`가 칸 아래 오류에 있음 (F-01, B-02)
 - [x] 실제 동작 확인: `NEXT_PUBLIC_USE_MOCK=1`로 `npm run dev`, 로그인 뒤 `/trades`에서 확인 (아래 B-01~B-07)
 

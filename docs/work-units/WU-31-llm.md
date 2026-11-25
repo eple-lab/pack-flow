@@ -39,10 +39,12 @@ D-06 "LLM 호출은 `lib/llm.ts` 한곳, 설정값으로 Ollama ↔ Gemini 전�
 
 ## 다 됐다의 기준
 
-- [ ] `llm.test.ts`(fake): 정상 응답 / 시간 초과 → `PF_LLM_UNAVAILABLE` / 상한 1로 두고 두 번째 호출 → `PF_QUOTA_EXCEEDED` (T-AI-7)
-- [ ] 로컬 Ollama로 `generate` 한 번 성공, `LLM_PROVIDER`만 바꿔 Gemini(본인 키, `.env.local`) 한 번 성공
-- [ ] 공통 모델 결정 · 공지, `skygaul-llm-poc.md` 작성
-- [ ] diff에 키 없음(비밀값 검사 통과)
+> 11/26 eple 사후 확인: 개발 종료 뒤 소스 · 시험 · 기록으로 확인한 칸만 체크
+
+- [x] `llm.test.ts`(fake): 정상 응답 / 시간 초과 → `PF_LLM_UNAVAILABLE` / 상한 1로 두고 두 번째 호출 → `PF_QUOTA_EXCEEDED` (T-AI-7) — (11/26 eple 사후 확인: src/lib/llm.test.ts L-1 · L-3 · L-4(T-AI-7) 11/26 재실행 통과(unit 869개 전체 통과))
+- [x] 로컬 Ollama로 `generate` 한 번 성공, `LLM_PROVIDER`만 바꿔 Gemini(본인 키, `.env.local`) 한 번 성공 — (11/26 eple 사후 확인: WU-31 결과 절(실제 Ollama 281ms · 실제 Gemini 3회) · skygaul-llm-poc.md 1절 · review-eple.md(배포 Gemini 4회 성공))
+- [ ] 공통 모델 결정 · 공지, `skygaul-llm-poc.md` 작성 — (11/26 사후 확인 못 함: skygaul-llm-poc.md는 있으나 '진행 중' 상태이고 2절 시험 표가 비어 있음. 공통 모델로 같은 문장 3개 시험 · 공지 기록이 없음(WU-31 결과 절 '확인 못 한 것' ③))
+- [x] diff에 키 없음(비밀값 검사 통과) — (11/26 eple 사후 확인: security-check-1125.md(키 0건) · pre-commit · CI secret-check 통과(#6 병합))
 
 ## 테스트 방법
 

@@ -48,16 +48,18 @@ D-10: 재고 증감 · 전이 검사 · 이력 기록은 Postgres 함수 하나�
 
 ## 다 됐다의 기준
 
-- [ ] `npm run test:db` 통과 (dev, 본인 테스트 계정)
+> 11/26 eple 사후 확인: 개발 종료 뒤 소스 · 시험 · 기록으로 확인한 칸만 체크
+
+- [x] `npm run test:db` 통과 (dev, 본인 테스트 계정) — (11/26 eple 사후 확인: 회귀 11/25 배포 dev DB 통과: T-S1-1 · T-S1-2 · T-S3-2 · T-INV-1(남의 id PF_NOT_FOUND) · T-VAL-1 · T-AUTH-2 · T-AUTH-3, tests/db/ship · receive · invariants.test.ts(매 테스트 afterEach assertInvariants))
   - T-S1-1: 재고 10 · 안전 5 → 6개 출고 → 재고 4, 이력 −6 1건
   - T-S1-2: 10개 주문 · 8개 입고 → 재고 +8, `received_qty` 8
   - T-S3-2: 재고 4에 50개 출고 → `PF_INSUFFICIENT_STOCK`, 재고 · 이력 그대로
   - 남의 구매 · 판매 id(두 번째 테스트 계정)로 호출 → `PF_NOT_FOUND`, 변화 없음
   - `received_qty` 0 · 주문 초과 → `PF_VALIDATION`
   - 매 테스트 끝 T-INV-1(이력 합계 = 재고) 0행
-- [ ] eple이 dev에 마이그레이션 적용 후 다시 통과
-- [ ] T-VAL-1: 송장번호 `null` 판매 두 건 → 둘 다 성공, `''`로 보내도 `null` 저장
-- [ ] 수량 0 · 100,001로 함수 직접 호출 → `PF_VALIDATION` (`out_of_range`)
+- [x] eple이 dev에 마이그레이션 적용 후 다시 통과 — (11/26 eple 사후 확인: day-02.md:90(dev에 11/23 17시 무렵 적용) 이후 회귀 11/25 통과)
+- [x] T-VAL-1: 송장번호 `null` 판매 두 건 → 둘 다 성공, `''`로 보내도 `null` 저장 — (11/26 eple 사후 확인: tests/db/validation.test.ts:18 · 회귀 11/25 T-VAL-1 통과(테스트 5개))
+- [x] 수량 0 · 100,001로 함수 직접 호출 → `PF_VALIDATION` (`out_of_range`) — (11/26 eple 사후 확인: tests/db/validation.test.ts:28(0 · 100001 → PF_VALIDATION out_of_range) · 회귀 T-VAL-1 통과)
 
 ## 테스트 방법
 
