@@ -8,12 +8,14 @@
  * 2. 불러오는 동안 Loading, 실패하면 ErrorBanner(error.message 그대로, 연결 실패 · 시간 초과면 [다시 시도]).
  * 3. 성공하면 KPI · 품절 임박 · 파이프라인 · 재고 표 · 최근 변경을 API 값 그대로 그린다(T-S1-3).
  * 4. page.tsx가 metadata를 내보내는 서버 컴포넌트라서, 상태가 있는 부분을 이 파일로 나눴다.
+ * 5. 같은 화면의 다른 곳이 데이터를 바꿨다는 알림(data-changed.ts)을 받으면 다시 불러온다(#77).
  *
  * 근거: docs/04-api-contract.md 3.5 · 4.4 · 4.6 · WU-11 7번
  * 구역: jkspawn (docs/06-work-plan.md 1절)
  *
  * 이력
  * 2026-11-23  jkspawn  처음 작성 — 대시보드 불러오기 · 로딩 · 오류 상태 (WU-11)
+ * 2026-11-25  jkspawn  데이터 변경 알림을 받으면 다시 불러오기 (#77)
  */
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -22,6 +24,7 @@ import { Loading } from '@/components/common/Loading';
 import { api, ApiError } from '@/lib/api-client';
 import type { Dashboard } from '@/types/erp';
 import { AlertCards } from './AlertCards';
+import { onDataChanged } from './data-changed';
 import { KpiCards } from './KpiCards';
 import { Pipeline } from './Pipeline';
 import { RecentChanges } from './RecentChanges';
@@ -86,6 +89,10 @@ export function DashboardView() {
       current = false;
     };
   }, [attempt]);
+
+  // [#77 bug] 에이전트 패널에서 발주 확정 · [실행]을 해도 처음 불러온 값을 그대로 보임 → 데이터 변경 알림을 받으면 다시 불러온다 (jkspawn)
+  // 보던 내용은 그대로 두고(loading으로 바꾸지 않음) 새 응답이 오면 바꾼다. setAttempt는 이벤트 콜백 안에서만 부른다.
+  useEffect(() => onDataChanged(() => setAttempt((n) => n + 1)), []);
 
   /** [다시 시도] — 이벤트 처리기라 loading으로 바로 바꾸고 effect를 다시 돌린다. */
   const retry = () => {
