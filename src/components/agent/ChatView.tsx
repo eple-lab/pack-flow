@@ -16,14 +16,17 @@
  * 이력
  * 2026-11-20  eple     자리 생성 (WU-01) — 구현은 skygaul WU-34
  * 2026-11-23  skygaul  챗봇 화면 구현 — 대화 · 입력 · 제안 카드 (WU-34)
+ * 2026-11-25  skygaul  [실행]이 성공하면 대시보드에 데이터 변경 알림 (#77)
  */
 import { useState } from 'react';
 import { ErrorBanner } from '@/components/common/ErrorBanner';
 import { SubmitButton } from '@/components/common/SubmitButton';
+import { notifyDataChanged } from '@/components/dashboard/data-changed';
 import { api, ApiError } from '@/lib/api-client';
 import type { AgentAction, ChatReply } from '@/types/agent';
 import styles from './agent.module.css';
 import { canSend, resultMessage } from './chat-form';
+import { thenNotify } from './notify-after';
 
 /** 대화 한 줄. 답의 `card`는 제안 카드 상태(none: 제안 없음, open: [실행] · [취소] 보임). */
 export type ChatEntry =
@@ -184,7 +187,8 @@ export function ChatView() {
     setBusy(true);
     setError(null);
     try {
-      const { result } = await api.executeAction(action);
+      // [#77 bug] 챗봇 [실행]이 성공해도 대시보드 재고 · 숫자가 새로고침 전까지 그대로였다 → 성공한 뒤 데이터 변경 알림을 보낸다 (skygaul)
+      const { result } = await thenNotify(() => api.executeAction(action), notifyDataChanged);
       setCard(index, 'done');
       setEntries((prev) => [...prev, { kind: 'note', text: resultMessage(result) }]);
     } catch (caught) {

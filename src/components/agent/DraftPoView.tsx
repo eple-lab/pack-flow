@@ -17,6 +17,7 @@
  * 2026-11-20  eple     자리 생성 (WU-01) — 구현은 skygaul WU-33
  * 2026-11-23  skygaul  발주서 초안 패널 구현 — 불러오기 · 표 수정 · 확정 · 취소 (WU-33)
  * 2026-11-23  skygaul  확정 중간 실패 시 저장된 줄을 표에서 빼고 안내 — 중복 발주 방지, 리뷰 후속 (WU-33)
+ * 2026-11-25  skygaul  확정이 성공(일부 줄만 저장 포함)하면 대시보드에 데이터 변경 알림 (#77)
  */
 import { useEffect, useState } from 'react';
 import { EmptyState } from '@/components/common/EmptyState';
@@ -25,6 +26,7 @@ import { FieldError } from '@/components/common/FieldError';
 import { Loading } from '@/components/common/Loading';
 import { SubmitButton } from '@/components/common/SubmitButton';
 import { useToast } from '@/components/common/Toast';
+import { notifyDataChanged } from '@/components/dashboard/data-changed';
 import { api, ApiError } from '@/lib/api-client';
 import { formatNumber } from '@/lib/format';
 import type { PoDraft } from '@/types/agent';
@@ -42,6 +44,7 @@ import {
   type PartialSave,
   type RowError,
 } from './draft-po-form';
+import { thenNotify } from './notify-after';
 
 type View =
   | { status: 'loading' }
@@ -263,7 +266,8 @@ export function DraftPoView({ skuIds }: { skuIds?: string[] }) {
     }
     setErrors({});
     try {
-      const result = await api.confirmPo(built.lines);
+      // [#77 bug] 발주 확정이 성공해도 대시보드 '진행 단계'가 새로고침 전까지 그대로였다 → 성공한 뒤 데이터 변경 알림을 보낸다 (skygaul)
+      const result = await thenNotify(() => api.confirmPo(built.lines), notifyDataChanged);
       const message = doneMessage(result.purchases, partial);
       toast.show(message);
       setBanner(null);
@@ -274,6 +278,7 @@ export function DraftPoView({ skuIds }: { skuIds?: string[] }) {
       // 중간 줄이 거부돼 앞 줄이 이미 저장됐다면 그 줄을 표에서 뺀다(같은 줄을 다시 보내면 중복 발주). 나머지 입력값은 그대로 둔다.
       const saved = partialSaveOf(apiError.detail);
       if (saved) {
+        notifyDataChanged(); // [#77] 일부 줄은 이미 저장돼 구매 건수가 바뀌었으므로 이 경우에도 대시보드에 알린다 (skygaul)
         setPartial((prev) => mergePartial(prev, saved));
         setView((prev) => (prev.status === 'ready' ? { ...prev, rows: remainingRows(prev.rows, saved.count) } : prev));
       }
