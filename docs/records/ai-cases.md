@@ -2,6 +2,8 @@
 
 정리: skygaul · 2026-11-23 · WU-35 · 근거: [07 테스트 전략](../07-test-strategy.md) 5절, 피드백 기준 4("실패 원인 · 수정 · 재검증")
 
+> 11/26 eple 취합: 사람별 원본 전체 목록 · AI 활용 현황 4명 요약을 맨 아래에 추가(원본은 고치지 않음).
+
 > 사람별 원본 파일에서 **실패 → 원인 → 수정 → 재검증**이 모두 갖춰진 사례 3개를 골라 줄였다. 원본은 그대로 두었고 상세(명령 · 커밋 · 한계)는 원본에 있다. 입력은 모두 가상 데이터이고 키 · 개인 정보는 없다.
 
 ## 한눈에
@@ -51,3 +53,33 @@
 ## 갱신
 
 - 11/23 기준 사람별 파일은 skygaul(4건) · jkspawn(1건)이다. sorek-charlie · eple 파일이 생기면 사례를 다시 고른다. 원본은 고치지 않는다.
+
+## 전체 사례 목록 (11/26 취합)
+
+> 사람별 원본의 `## 사례 N` 제목에서 뽑았다. 제목이 긴 것은 뜻을 유지해 줄였다.
+
+| # | 한 줄 | 작성 | 날짜 | WU | 원본 |
+|---|---|---|---|---|---|
+| 1 | 시험을 복제하다 기대값까지 바꿔 버렸다 (sed 치환이 기대 field 값에도 적용) | eple | 11/23 | WU-41 | [ai-cases-eple.md](ai-cases-eple.md) 사례 1 |
+| 2 | 가짜 클라이언트 대신 도우미 객체를 넘겨 모든 시험이 500이었다 | eple | 11/23 | WU-43 | [ai-cases-eple.md](ai-cases-eple.md) 사례 2 |
+| 3 | 테스트 ID 정규식이 접미사를 못 잡아 기타 항목이 24줄 나왔다 | eple | 11/23 | WU-45 | [ai-cases-eple.md](ai-cases-eple.md) 사례 3 |
+| 4 | 단위 시험은 모두 통과했는데 실제 Ollama 호출이 빈 응답이었다 (발표용 1) | skygaul | 11/23 | WU-31 | [ai-cases-skygaul.md](ai-cases-skygaul.md) 사례 1 |
+| 5 | 화면 시험은 모두 통과했는데 좁은 패널에서 표 칸이 한 글자 폭으로 깨졌다 | skygaul | 11/23 | WU-33 | [ai-cases-skygaul.md](ai-cases-skygaul.md) 사례 2 |
+| 6 | 가짜 LLM 시험은 통과했는데 실제 Ollama가 인젝션 문장에서 없는 구매 번호를 지어냈다 (발표용 2) | skygaul | 11/23 | WU-34 | [ai-cases-skygaul.md](ai-cases-skygaul.md) 사례 3 |
+| 7 | 시험은 통과했는데 화면에서 챗봇을 여는 길이 없었고, AI는 그 책임을 다른 사람 구역으로 돌렸다 | skygaul | 11/23 | WU-34 | [ai-cases-skygaul.md](ai-cases-skygaul.md) 사례 4 |
+| 8 | 단위 시험은 통과했는데 실제 구글 시트 붙여넣기에서 마지막 줄이 `열 개수 오류`가 됐다 | skygaul | 11/24 | WU-13 리뷰 | [ai-cases-skygaul.md](ai-cases-skygaul.md) 사례 5 |
+| 9 | AI의 개인 경로 · 키 없음 검사 결과가 지워진 옛 임시 파일을 읽은 거짓 통과였다 | skygaul | 11/24 | WU-24 · PR #68 리뷰 | [ai-cases-skygaul.md](ai-cases-skygaul.md) 사례 6 |
+| 10 | 대시보드 불러오기가 effect 안에서 setState를 불러 lint에 두 번 걸림 (발표용 3) | jkspawn | 11/23 | WU-11 | [ai-cases-jkspawn.md](ai-cases-jkspawn.md) 사례 1 |
+
+합계 10건 — eple 3 · skygaul 6 · jkspawn 1. sorek-charlie는 사례 파일이 없고, [ai-usage-sorek-charlie.md](ai-usage-sorek-charlie.md)의 'AI가 틀린 것을 잡은 순간' 2개가 참고 자료다.
+
+## AI 활용 현황 4명 요약 (11/26 취합)
+
+> 각 `ai-usage-*.md`의 문장을 줄인 것이다. 관찰 도구가 사람마다 달라 수준을 서로 비교하지 않는다.
+
+| 사람 | 관찰 도구 · 기간 | 현황(수준) | 잘하는 것(한 줄) | 다음에 해 볼 것(한 줄, 원본에 있으면) | 원본 |
+|---|---|---|---|---|---|
+| eple | Claude Code(eple 관리 세션), 11/24 저녁 ~ 11/25 오전 대화 + 11/19~25 저장소 기록 | 고급 — 일을 맡기기 전에 범위 · 기준 · 확인 방법을 정하고 결과를 직접 검증한다 | 결과를 보고 눈으로 확인할 수 있는 기준으로 다시 요청("글은 30% 정도, 카드 스타일") | 큰 결과물은 완성 모양을 먼저 말하기, 헷갈리는 말("리허설")은 먼저 정의하기 | [ai-usage-eple.md](ai-usage-eple.md) |
+| skygaul | Claude Code(데스크톱 앱), 11/19 ~ 11/25 | 중급 — 눈으로 확인할 기준으로 다시 요청하고 AI의 "됐다"를 되묻는다 | AI의 확인 범위를 숨기지 않게 요구("이건 왜 확인 못했지") | 맡길 때 "다 됐다"의 기준을 한 줄 먼저 말하기 | [ai-usage-skygaul.md](ai-usage-skygaul.md) |
+| jkspawn | Claude Code(데스크톱 앱), 11/23 ~ 11/25 | 중급 — 범위와 "다 됐다"의 기준을 먼저 정해 맡기는 모습이 자리 잡았고, 결과 검증을 스스로 하는 쪽으로 넘어가는 단계 | 시작 전에 범위 · 완료 기준 · 보고 형식을 정해 맡기기 | 헷갈릴 수 있는 말을 정확히 쓰기, 짧은 요청에 대상 한 단어 더하기 | [ai-usage-jkspawn.md](ai-usage-jkspawn.md) |
+| sorek-charlie | Codex, PackFlow 작업 중 이 대화에서 관찰한 11/25 | 중급 — 결과를 보고 작업 경로 · 발표 버전 · 담당 슬라이드처럼 확인 가능한 범위를 지정해 바로잡는다 | 작업할 위치를 정확히 지정한다(저장소 경로) | 발표 대본 요청 때 버전 · 슬라이드 번호 · 영상 포함 여부를 함께 적기 | [ai-usage-sorek-charlie.md](ai-usage-sorek-charlie.md) |
