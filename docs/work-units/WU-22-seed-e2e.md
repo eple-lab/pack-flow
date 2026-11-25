@@ -41,10 +41,12 @@
 
 ## 다 됐다의 기준
 
-- [ ] 세 벌 각각 초기화 직후 T-INV-1 0행, 대시보드 API 값 = `expected` (T-S4-1 정답 부분)
-- [ ] `npm run test:e2e -- step1 step2` 통과 (로컬)
-- [ ] 시드 파일에 실제 이름 · 이메일 없음
-- [ ] T-VAL-6 통과
+> 11/26 eple 사후 확인: 개발 종료 뒤 소스 · 시험 · 기록으로 확인한 칸만 체크
+
+- [x] 세 벌 각각 초기화 직후 T-INV-1 0행, 대시보드 API 값 = `expected` (T-S4-1 정답 부분) — (11/26 eple 사후 확인: T-S4-1(회귀 11/25 통과, 테스트 9개) · tests/db/seed.test.ts · T-INV-1 통과 · 결과 C-06 · 리뷰어 칸(eple LRG-003 손계산 14))
+- [x] `npm run test:e2e -- step1 step2` 통과 (로컬) — (11/26 eple 사후 확인: step1 · step2 E2E: 회귀 11/25 배포 dev(T-S1-1 · T-S1-2 · T-VAL-6) · 11/24 14:15 로컬(T-S1-1 · T-S1-2) 통과. 로컬에서 step2까지 한 번에 돌린 기록은 없음)
+- [x] 시드 파일에 실제 이름 · 이메일 없음 — (11/26 eple 사후 확인: 11/26 이메일 패턴 grep 0건(src/lib/seed/*.json) · security-check-1125.md(실명 0건 · 가짜 이메일만))
+- [x] T-VAL-6 통과 — (11/26 eple 사후 확인: T-VAL-6(회귀 11/25 통과 8.3s, tests/e2e/step2.spec.ts))
 
 ## 테스트 방법
 

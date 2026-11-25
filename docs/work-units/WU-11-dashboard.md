@@ -55,12 +55,14 @@
 
 ## 다 됐다의 기준
 
-- [ ] lint · typecheck · test:unit 통과
-- [ ] 목 데이터: PRD-003(재고 3 / 안전 4)이 품절 임박 카드와 빨간 배지로 보임
-- [ ] 실제 API(dev, 본인 테스트 계정, `demo` 시드): 화면 숫자 = `GET /api/dashboard` 응답 숫자
-- [ ] [발주서 초안 보기]가 `openAgentPanel`을 부름 (패널이 아직 비어 있어도 됨)
-- [ ] 위 testid 전부 있음
-- [ ] 금액 · 수량이 쉼표로, 시각이 한국 시간으로 보임
+> 11/26 eple 사후 확인: 개발 종료 뒤 소스 · 시험 · 기록으로 확인한 칸만 체크
+
+- [x] lint · typecheck · test:unit 통과 — (11/26 eple 사후 확인: 11/26 `npm run lint` · `typecheck` · `test:unit` 직접 재실행 — 오류 0, unit 49파일 869개 통과)
+- [x] 목 데이터: PRD-003(재고 3 / 안전 4)이 품절 임박 카드와 빨간 배지로 보임 — (11/26 eple 사후 확인: src/components/dashboard/dashboard.test.tsx C-04 · C-09 (11/26 재실행 통과))
+- [x] 실제 API(dev, 본인 테스트 계정, `demo` 시드): 화면 숫자 = `GET /api/dashboard` 응답 숫자 — (11/26 eple 사후 확인: T-S1-3a(회귀 11/25 10:56 통과, 대시보드 값 = DB 직접 조회) · review-skygaul.md Step 1(demo 배포 화면 118 → 112 · 입고 뒤 120이 순서표와 일치) · review-eple.md Step 1)
+- [x] [발주서 초안 보기]가 `openAgentPanel`을 부름 (패널이 아직 비어 있어도 됨) — (11/26 eple 사후 확인: dashboard.test.tsx C-07 · C-08(openAgentPanel 호출) · review-eple.md Step 5(demo 배포에서 노트북 거치대 초안 → [확인]))
+- [x] 위 testid 전부 있음 — (11/26 eple 사후 확인: dashboard.test.tsx C-14 · 11/26 소스 grep으로 WU 표의 testid 10종이 src/components/dashboard에 모두 있음)
+- [x] 금액 · 수량이 쉼표로, 시각이 한국 시간으로 보임 — (11/26 eple 사후 확인: dashboard.test.tsx C-03(12,345) · C-12(한국 시간 · 부호) 11/26 재실행 통과. 이 화면에는 금액 표시가 없다)
 
 ## 테스트 방법
 
@@ -93,7 +95,7 @@
 - [x] 다 됐다의 기준
   - [x] lint · typecheck · test:unit 통과
   - [x] 목 데이터: PRD-003(재고 3 / 안전 4)이 품절 임박 카드와 빨간 배지로 보임
-  - [ ] 실제 API(dev, 본인 테스트 계정, `demo` 시드): 화면 숫자 = `GET /api/dashboard` 응답 숫자 — **WU-41 병합 뒤 확인**
+  - [x] 실제 API(dev, 본인 테스트 계정, `demo` 시드): 화면 숫자 = `GET /api/dashboard` 응답 숫자 — **WU-41 병합 뒤 확인** — (11/26 eple 사후 확인: T-S1-3a(회귀 11/25 10:56 통과, 대시보드 값 = DB 직접 조회) · review-skygaul.md Step 1(demo 배포 화면 118 → 112 · 입고 뒤 120이 순서표와 일치) · review-eple.md Step 1)
   - [x] [발주서 초안 보기]가 `openAgentPanel`을 부름 (패널 자리 "발주서 초안 — 준비 중"이 열림)
   - [x] WU 문서의 testid 전부 있음
   - [x] 수량이 쉼표로, 시각이 한국 시간으로 보임
