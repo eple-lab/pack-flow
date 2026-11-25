@@ -43,10 +43,10 @@ bug · 11/25 · 고친 사람 eple · 발견한 사람 skygaul(11/24 17:07 시�
 
 bug · 11/24 · 고친 사람 eple · 발견한 사람 eple(첫 회귀 실행, 테스트 ID T-S4-1)
 
-- **무엇이**: 11/24 첫 회귀(`npm run test:regression`, dev 배포 대상, small 시드)에서 통과 65 · 실패 1. 실패는 E2E T-S4-1(demo · small · large 정답표 비교) 3건이고, 오류는 `demo.json`에 import attribute `type: json`이 필요하다는 TypeError.
+- **무엇이**: 11/24 첫 회귀(`npm run test:regression`, dev 배포 대상, small 시드)에서 **통과 65 · 실패 1**(결과표는 테스트 ID 한 줄을 한 건으로 센다). 실패한 줄은 T-S4-1이고, 이 줄에는 시드 3벌(demo · small · large)을 DB · 정답표 · E2E 세 층에서 검사하는 테스트 9개가 들어 있다. 그중 **E2E(Playwright) 3건만 실패**했고, 오류는 `demo.json`에 import attribute `type: json`이 필요하다는 TypeError.
 - **왜**: `src/lib/seed/index.ts`의 `import('./demo.json')`. Next · Vitest는 받아들이지만 Playwright는 Node ESM이라 JSON import에 `type` 표시가 필요하다(PR 본문). 줄 번호는 기록 없음.
 - **어떻게 고쳤나**: `src/lib/seed/index.ts`의 세 import에 `{ with: { type: 'json' } }` 추가. 경로는 글자 그대로 두었다(Next 번들러가 파일을 포함하려면 필요). 주석 · 이력 한 줄. tsconfig · package.json · next.config 변경 없음.
-- **확인한 것**: seed 단위 시험 23 통과, lint · typecheck · test:unit(856) 통과, `npm run build` 성공, Playwright(Node ESM)에서 `loadSeed('demo' · 'small' · 'large')` 임시 시험 — 고친 뒤 통과, 고치기 전 같은 오류로 실패, `check-secrets.sh --staged` 통과. 이후 배포 dev 회귀에서 T-S4-1 E2E 3건 통과(PR #68 본문).
+- **확인한 것**: seed 단위 시험 23 통과, lint · typecheck · test:unit(856) 통과, `npm run build` 성공, Playwright(Node ESM)에서 `loadSeed('demo' · 'small' · 'large')` 임시 시험 — 고친 뒤 통과, 고치기 전 같은 오류로 실패, `check-secrets.sh --staged` 통과. 이후 배포 dev 회귀에서 T-S4-1 E2E 3건 통과(PR #68 본문). 고친 뒤 16:00 회귀 재실행에서 T-S4-1 줄(테스트 9개)이 통과했다(`regression-20261124-1600.md`).
 - **확인 못 한 것**: PR 시점에는 로그인이 필요한 실제 T-S4-1 재실행을 못 했다(병합 뒤 #68 회귀에서 확인됨). jkspawn 재실행 결과는 기록 없음.
 - 커밋: `daf7a54` (병합 `328d758`) · PR: #69
 
