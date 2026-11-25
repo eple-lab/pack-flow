@@ -1,7 +1,7 @@
 # 13. 고친 기록
 
 작성 시작: 2026-11-20 · **eple이 매일 마감 때 GitHub 이슈에서 모아 적는다.** 팀원은 이 파일을 직접 고치지 않고 이슈 본문(원인 · 수정 · 확인)을 채운다([12 코드 작성 가이드](12-coding-guide.md) ④, [11 이슈 운영](11-issues.md)).
-- 11/24 밤 eple 세션의 Claude가 이슈 · PR에서 모아 첫 정리(하위 에이전트 초안, eple 확인 전). 11/20~11/24 병합분만 넣었고, 열린 이슈는 넣지 않았다.
+- 11/24 밤 eple 세션의 Claude가 이슈 · PR에서 모아 첫 정리(하위 에이전트 초안, eple 확인 전). 11/20~11/24 병합분만 넣었고, 열린 이슈는 넣지 않았다. 11/25부터는 고친 PR이 병합될 때마다 위에 더한다.
 
 새 항목은 위에 더한다. 각 항목은 "무엇이 / 왜(원인) / 어떻게 고쳤나 / 확인한 것 / 확인 못 한 것"을 적는다.
 
@@ -15,6 +15,7 @@
 
 | 이슈 | 날짜 | 종류 | 곳 (WU · 파일) | 고친 사람 | 한 줄 요약 | 커밋 |
 |---|---|---|---|---|---|---|
+| #83 | 11/25 | bug | WU-03 · `src/lib/api/errors.ts` · `docs/04-api-contract.md` 4.4 | eple | AI 한도 초과 안내가 "오후 5시"였지만 실제로는 한국 시간 자정에 풀림 → 문구를 자정으로 | `6477937` (PR #84) |
 | — | 11/24 | bug | WU-24 · `src/lib/seed/index.ts` | eple | 시드 로더 JSON import에 `type: json` 표시 — Playwright E2E T-S4-1 실패 해결 | `daf7a54` (PR #69) |
 | — | 11/24 | 결정 변경 | WU-44 · `docs/02-decisions.md` D-40 · `docs/06-work-plan.md` 4절 | eple | 지난 커밋에 PC 경로 · 색 코드가 남은 PR은 squash 병합(D-14 예외) | `e9212d9` (PR #68) |
 | — | 11/24 | bug | WU-24 · `scripts/regression/report.ts` | eple | 회귀 결과표의 색 코드 · PC 절대 경로를 가림 | `6ef6c24` `4f0c8d5` (PR #70) |
@@ -26,6 +27,17 @@
 | — | 11/23 | bug | WU-33 · `src/lib/agent/draft-po.ts` · `src/components/agent/` | skygaul | 발주 확정 중간 실패 시 저장된 줄을 표에서 빼 중복 발주 방지 | `559b51c` (PR #45) |
 | — | 11/23 | bug | WU-12 · `src/components/trades/form-utils.ts` | jkspawn | 숫자 칸 `8,5`가 85로 통과하던 문제 | `08ccd86` (PR #5) |
 
+
+## #83 AI 한도 초과 안내 시각이 실제와 다름 — "오후 5시" → 자정
+
+bug · 11/25 · 고친 사람 eple · 발견한 사람 skygaul(11/24 17:07 시연 계정이 한도에 걸렸을 때 문구 확인)
+
+- **무엇이**: `PF_QUOTA_EXCEEDED`(429) 안내가 "오늘 AI 사용 한도를 다 썼어요. 한국 시간 오후 5시 이후 다시 쓸 수 있어요"였다. 11/24 17:07에 한도에 걸렸을 때 이미 오후 5시가 지났는데도 자정까지 풀리지 않았다
+- **왜**: 이 오류는 우리 앱의 상한(`pf_llm_take`, 사용자 30 · 전체 300, **한국 시간 날짜 기준**)에서 나와 한국 시간 자정에 풀린다. "오후 5시"는 Gemini 무료 할당량이 새로 시작하는 시각(태평양 시간 자정)에 맞춘 문구였다(이슈 #83, `docs/records/llm-usage.md` 25줄에도 지적). 위치: `docs/04-api-contract.md` 4.4 표(문구 원본) · `src/lib/api/errors.ts` 51행 · 시험 `src/lib/api/errors.test.ts` 36행
+- **어떻게 고쳤나**: 계약 → 코드 → 시험 순서로 "한국 시간 자정 이후"로 바꿨다. 04 4.4 표 아래에 바꾼 이유 한 줄, `errors.ts` 바뀐 줄 위에 `// [#83 bug]` 주석과 이력 한 줄. `DevelopDoc/TECH_SPEC.md` 8절의 "팀 결정 대기" 문장도 정리
+- **확인한 것**: 시험 기대값만 먼저 "자정"으로 바꿔 `E-1 PF_QUOTA_EXCEEDED`가 **실패하는 것을 확인**(1 failed) → 코드 수정 뒤 28개 통과. `npm run lint` · `typecheck` · `test:unit` 862개 통과, CI `secret-check` · `check` 통과. 리뷰 sorek-charlie(`pf_llm_take`가 Asia/Seoul 날짜로 집계하는 것과 문구 · 시험 · 문서가 일치함을 확인)
+- **확인 못 한 것**: 배포 화면에서 실제로 하루 30회를 넘겨 새 문구를 보지는 않았다(단위 시험으로만 확인). `llm-usage.md` 25줄(skygaul 파일)의 지적 문장은 그대로
+- 커밋: `6477937` (병합 `a216a5a`) · PR: #84
 
 ## PR #69 시드 로더 JSON import가 Playwright에서 실패
 
