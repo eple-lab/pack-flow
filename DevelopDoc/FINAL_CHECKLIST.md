@@ -2,7 +2,7 @@
 
 작성일: 2026-11-23 · 근거: [계획서](../docs/pack-flow-plan.md) 13 · 14절, [07 테스트 전략](../docs/07-test-strategy.md) 6절, [WU-44](../docs/work-units/WU-44-final.md) · 상태: **초안 — 11/25 최종 점검에서 갱신** · 11/24 밤 사실 대조 반영
 
-사용법: 11/25 최종 점검 때 eple이 증거를 직접 열어 확인한 뒤 `[ ]`를 `[x]`로 바꾼다. 11/24 밤에 근거 파일을 열어 확인한 일부 칸(GitHub 저장소 · 팀 목표 합의서 · Step 2 · 3 · 5 증거)만 `[x]`로 바꿨고, 나머지는 **아직 체크하지 않은 상태**다. 이미 증거가 있는 항목은 링크만 달아 두었다(링크가 있어도 최종 확인 전에는 체크하지 않는다). 증거가 없는 칸은 "(11/25 확인)". 제출 마감은 11/26(목) 10:00.
+사용법: 11/25 최종 점검 때 eple이 증거를 직접 열어 확인한 뒤 `[ ]`를 `[x]`로 바꾼다. 11/24 밤에 근거 파일을 열어 확인한 일부 칸(GitHub 저장소 · 팀 목표 합의서 · Step 2 · 3 · 5 증거)과 11/25 아침에 근거를 열어 본 칸(AI 사례 · 라이선스 · Step 4)만 `[x]`로 바꿨고, 나머지는 **아직 체크하지 않은 상태**다. 이미 증거가 있는 항목은 링크만 달아 두었다(링크가 있어도 최종 확인 전에는 체크하지 않는다). 증거가 없는 칸은 "(11/25 확인)". 제출 마감은 11/26(목) 10:00.
 
 ## 1. 필수 제출물 (상위 페이지 4절)
 
@@ -19,10 +19,10 @@
 
 - [x] 팀 목표 합의서와 변경 이력 — [계획서 2절](../docs/pack-flow-plan.md), 일자별 기록 [day-01](../docs/daily/day-01.md) · [day-02](../docs/daily/day-02.md) · [day-03](../docs/daily/day-03.md) · [day-04](../docs/daily/day-04.md)(4일차는 11/24 밤에 만든 뼈대, 11/25에 채움)
 - [ ] 테스트 결과표(완료 판정 테스트 + 실패 사례: 빈 입력 · 재고 초과 · 권한 없음 각 1개 이상) — `docs/records/regression-<날짜>.md`, 양식 [07 5절](../docs/07-test-strategy.md). 11/24 결과: [14:15 로컬](../docs/records/regression-20261124-1415.md) · [16:00 배포 dev, 커밋 2e5ef63, 통과 66 / 실패 0 / 건너뜀 0](../docs/records/regression-20261124-1600.md). 최종 결과표는 11/25 확인
-- [ ] AI 활용 · 디버깅 사례 3개 — 계정별 [jkspawn](../docs/records/ai-cases-jkspawn.md) · [skygaul](../docs/records/ai-cases-skygaul.md), eple 사례(문서 PR 병합 후 `docs/records/ai-cases-eple.md`), 모음 `docs/records/ai-cases.md` (11/25 확인)
+- [x] AI 활용 · 디버깅 사례 3개 — 발표용 모음 [ai-cases.md](../docs/records/ai-cases.md)(사례 3개, 원인 · 수정 · 재검증), 계정별 [eple](../docs/records/ai-cases-eple.md) · [jkspawn](../docs/records/ai-cases-jkspawn.md) · [skygaul](../docs/records/ai-cases-skygaul.md) (11/25 skygaul 최종 취합 뒤 링크만 다시 확인)
 - [ ] 팀원별 기여 · 회고 — (11/25 확인)
 - [ ] 짧은 시연 영상(백업용 2분 영상 겸용) — (11/25 확인)
-- [ ] 외부 코드 · 데이터 · 모델의 출처와 라이선스 — [README.md](../README.md) 해당 절 · 저장소 자체의 이용 범위: 루트 [LICENSE](../LICENSE), 의존 패키지 라이선스 정리 [docs/LICENSES.md](../docs/LICENSES.md) (최종 확인은 11/25)
+- [x] 외부 코드 · 데이터 · 모델의 출처와 라이선스 — [README.md](../README.md)의 '외부 코드 · 데이터 · 모델의 출처와 라이선스' 항목 · 저장소 자체의 이용 범위: 루트 [LICENSE](../LICENSE), 의존 패키지 라이선스 정리 [docs/LICENSES.md](../docs/LICENSES.md)
 - [ ] 시연 계정 비밀번호 · API 키가 공개 문서 · 저장소 이력에 없음 — 점검 기록 `docs/records/security-check-1125.md` (11/25 작성)
 
 ## 3. 피드백 기준 5개 — 증거 위치
@@ -42,7 +42,7 @@
 - [ ] Step 1 — 입고 → 출고 → 대시보드 갱신 시연, 테스트 전후 DB 값 캡처 — [day-02](../docs/daily/day-02.md) 저녁 판정, [WU-22](../docs/work-units/WU-22-seed-e2e.md) 결과 (캡처: 11/25 확인)
 - [x] Step 2 — 데이터 구조도, RLS 정책 설명 — [03 데이터 모델](../docs/03-data-model.md) 1 · 5절, [TECH_SPEC.md](TECH_SPEC.md) 3 · 7절, 권한 테스트 [eple-step2-evidence](../docs/records/eple-step2-evidence.md)
 - [x] Step 3 — 상태 전이표 — [03 3절](../docs/03-data-model.md), [TECH_SPEC.md](TECH_SPEC.md) 4절
-- [ ] Step 4 — 대량 데이터 측정 결과, 회귀 테스트 결과표 — `docs/records/regression-*.md` (11/25 확인)
+- [x] Step 4 — 대량 데이터 측정 결과, 회귀 테스트 결과표 — 측정 [performance.md](../docs/records/performance.md)(로컬 서버 측정), 회귀 [regression-20261124-1600.md](../docs/records/regression-20261124-1600.md)(배포 dev, 통과 66 · 실패 0). 11/25 최종 회귀 결과표는 나오면 링크 추가
 - [x] Step 5 — AI 에이전트 허용 액션 목록 — [04 3.8절](../docs/04-api-contract.md), [TECH_SPEC.md](TECH_SPEC.md) 6절
 
 ## 5. 완료 판정 테스트 (계획서 2절)
