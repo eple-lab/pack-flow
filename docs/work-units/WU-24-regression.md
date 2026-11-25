@@ -40,7 +40,7 @@
 ## 다 됐다의 기준
 
 - [ ] [07](../07-test-strategy.md) 2절 표의 모든 ID가 결과표에 한 줄씩 (통과 · 실패 · 건너뜀 중 하나) — [16:00 결과표](../records/regression-20261124-1600.md)에 T-S2-1 · T-S2-2 등의 개별 행은 없다
-- [ ] 11/25 기능 고정 시점 결과표 **전부 통과**, 배포 URL 대상 E2E 1회 통과 — 11/24 16:00 배포 dev E2E 11건 통과. 11/25 기능 고정 시점 결과는 아직 미확인
+- [x] 11/25 기능 고정 시점 결과표 **전부 통과**, 배포 URL 대상 E2E 1회 통과 — [11/25 10:56 배포 dev 최종 회귀](../records/regression-20261125-1056.md) 통과 66 · 실패 0 · 건너뜀 0(커밋 `45c4763`, small 시드). 11/24 16:00 배포 dev E2E 11건 통과.
 - [x] [`performance.md`](../records/performance.md)에 측정 환경 · 행 수 · p50 · 최대 · 첫 호출
 - [x] 회귀 결과표가 병합 전 결과로 2개 이상 남아 있음 (T-S4-3) — [14:15](../records/regression-20261124-1415.md) · [16:00](../records/regression-20261124-1600.md)
 - [x] T-VAL-5 통과 — [16:00 결과표](../records/regression-20261124-1600.md) 7.5초
@@ -55,7 +55,7 @@
 
 ## 결과 (담당자가 채움)
 
-- 한 것: 출고 취소 · 초과 출고 거부 · 일괄 등록 · 필수 입력 검증을 Step 3 E2E에 추가하고, small 시드 회귀 결과표 2건과 로컬 dev의 small · large 응답 시간을 기록했다.
-- 직접 확인한 것: [14:15 로컬 회귀](../records/regression-20261124-1415.md)는 63통과 · 0실패 · E2E 미실행 1건이었다. [16:00 배포 dev 회귀](../records/regression-20261124-1600.md)는 66통과 · 0실패 · 0건너뜀, Playwright 11건 통과였다. T-S4-1은 결과표 합계 17.7초로, demo · small · large의 대시보드 API 값이 정답표와 일치했다. [로컬 dev 측정](../records/performance.md)의 p50 · 최대는 small 대시보드 691 · 762ms, 이력 257 · 270ms, large 대시보드 665 · 710ms, 이력 236 · 243ms였다. 환경 · 행 수 · 첫 호출 시간도 같은 표에 남겼다.
-- 확인 못 한 것: 11/25 기능 고정 시점의 회귀 결과, 07 2절 전체 ID의 독립 행, demo 배포 대상 응답 시간, jkspawn의 자기 PC 회귀 재실행 결과.
+- 한 것: 출고 취소 · 초과 출고 거부 · 일괄 등록 · 필수 입력 검증을 Step 3 E2E에 추가하고, small 시드 회귀 결과표 3건과 로컬 dev의 small · large 응답 시간을 기록했다.
+- 직접 확인한 것: [14:15 로컬 회귀](../records/regression-20261124-1415.md)는 63통과 · 0실패 · E2E 미실행 1건이었다. [16:00 배포 dev 회귀](../records/regression-20261124-1600.md)는 66통과 · 0실패 · 0건너뜀, Playwright 11건 통과였다. [11/25 10:56 배포 dev 최종 회귀](../records/regression-20261125-1056.md)는 시험 묶음 66통과 · 0실패 · 0건너뜀이었다. 11/24 16:00 회차의 T-S4-1은 결과표 합계 17.7초로, demo · small · large의 대시보드 API 값이 정답표와 일치했다. [로컬 dev 측정](../records/performance.md)의 p50 · 최대는 small 대시보드 691 · 762ms, 이력 257 · 270ms, large 대시보드 665 · 710ms, 이력 236 · 243ms였다. 환경 · 행 수 · 첫 호출 시간도 같은 표에 남겼다.
+- 확인 못 한 것: 07 2절 전체 ID의 독립 행(제출용 결과서 [PR #92](https://github.com/eple-lab/pack-flow/pull/92)에서 별도 근거와 함께 대조 중), demo 배포 대상 응답 시간, jkspawn의 자기 PC 회귀 재실행 결과.
 - PR: [#64](https://github.com/eple-lab/pack-flow/pull/64) (`ba61339`, Step 3 E2E), [#68](https://github.com/eple-lab/pack-flow/pull/68) (`e9212d9`, 회귀 결과표 · 응답 시간, 스쿼시 병합).
