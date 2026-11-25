@@ -8,6 +8,7 @@
  *
  * 이력
  * 2026-11-23  eple  처음 작성 — 코드 매핑 · Supabase 오류 변환 시험 (WU-03)
+ * 2026-11-25  eple  한도 초과 문구 기대값을 자정으로 (#83)
  */
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { CLIENT_ERROR_CODES, SERVER_ERROR_CODES } from '@/types/erp';
@@ -33,7 +34,7 @@ const EXPECTED: Array<[string, number, string, Record<string, unknown> | undefin
   ['PF_INSUFFICIENT_STOCK', 409, '재고가 부족해요. PRD-001 남은 수량 4개', { sku_id: 'PRD-001', stock_qty: 4, requested: 9 }],
   ['PF_DUPLICATE_INVOICE', 409, '이미 등록된 송장번호예요 (INV-1)', { invoice_no: 'INV-1' }],
   ['PF_DUPLICATE_SKU', 409, '이미 있는 품목코드예요 (PRD-001)', { sku_id: 'PRD-001' }],
-  ['PF_QUOTA_EXCEEDED', 429, '오늘 AI 사용 한도를 다 썼어요. 한국 시간 오후 5시 이후 다시 쓸 수 있어요', { scope: 'user' }],
+  ['PF_QUOTA_EXCEEDED', 429, '오늘 AI 사용 한도를 다 썼어요. 한국 시간 자정 이후 다시 쓸 수 있어요', { scope: 'user' }],
   ['PF_LLM_UNAVAILABLE', 503, 'AI가 지금 응답하지 않아요. 잠시 뒤 다시 시도해 주세요 (입출고는 그대로 쓸 수 있어요)', { provider: 'ollama' }],
   ['PF_NOT_IMPLEMENTED', 501, '아직 준비 중인 기능이에요', undefined],
   ['PF_INTERNAL', 500, '잠시 문제가 생겼어요. 다시 시도해 주세요', undefined],
