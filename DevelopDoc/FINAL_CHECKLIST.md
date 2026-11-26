@@ -31,11 +31,11 @@
 
 | 기준 | 증거 | 위치 | 체크 | 판정 |
 |---|---|---|---|---|
-| 1 명확성 | 한 문장 · 대표 시나리오, 팀원 모두 같게 설명 | [PRD.md](PRD.md), [00 개요](../docs/00-overview.md), 발표 v3 3 · 4번 | [x] | 달성 |
-| 2 실제 동작 | 배포 URL에서 시나리오 재현, `E2E_BASE_URL` 실행 결과, 시연 영상 | 최종 회귀(배포 dev) [test-report.md](../docs/records/test-report.md), 화면 직접 확인 [review-eple](../docs/records/review-eple.md) · [review-skygaul](../docs/records/review-skygaul.md), 시연 영상(발표 v3 11번) | [x] | 달성 |
+| 1 명확성 | 한 문장 · 대표 시나리오, 팀원 모두 같게 설명 | [PRD.md](PRD.md), [00 개요](../docs/00-overview.md), 발표 v4 4 · 5번 | [x] | 달성 |
+| 2 실제 동작 | 배포 URL에서 시나리오 재현, `E2E_BASE_URL` 실행 결과, 시연 영상 | 최종 회귀(배포 dev) [test-report.md](../docs/records/test-report.md), 화면 직접 확인 [review-eple](../docs/records/review-eple.md) · [review-skygaul](../docs/records/review-skygaul.md), 시연 영상(발표 v4 15번) | [x] | 달성 |
 | 3 테스트 · 권한 | T-AUTH · 실패 사례 결과표 | [test-report.md](../docs/records/test-report.md)(T-AUTH-1~8 · 실패 사례), [eple-step2-evidence](../docs/records/eple-step2-evidence.md), [security-check-1125](../docs/records/security-check-1125.md) | [x] | 달성 |
 | 4 AI 검토 | AI 사례 3개(실패 원인 · 수정 · 재검증), 모의 · 실제 비교 | [ai-cases.md](../docs/records/ai-cases.md), `ai-cases-<계정>.md`, [ai-limits.md](../docs/records/ai-limits.md), `ai-usage-<아이디>.md` 4명 | [x] | 달성 |
-| 5 협업 · 전달 | 리뷰가 남은 PR, README만으로 재현, 기여 분산 | GitHub PR 목록(승인 리뷰 뒤 병합), [README.md](../README.md), 회고 · 리뷰 4명, [13 고친 기록](../docs/13-fixes.md) | [x] | 부분 달성 — 다른 PC에서 README만으로 실행은 확인 기록 없음 |
+| 5 협업 · 전달 | 리뷰가 남은 PR, README만으로 재현, 기여 분산 | GitHub PR 목록(승인 리뷰 뒤 병합), [README.md](../README.md), 회고 · 리뷰 4명, [13 고친 기록](../docs/13-fixes.md), README 새 설치 확인([6절](#6-wu-44-완료-기준-1125--1126)) | [x] | 달성 — README만으로 새 설치: 팀원 1명 본인 PC(로그인 · 시연 데이터 초기화까지), eple 새 폴더, 처음 보는 사람 점검(키 없는 단계 통과) (11/26 제출 뒤) |
 
 ## 4. Step별 증거
 
