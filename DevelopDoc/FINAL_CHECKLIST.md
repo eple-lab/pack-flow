@@ -31,11 +31,11 @@
 
 | 기준 | 증거 | 위치 | 체크 | 판정 |
 |---|---|---|---|---|
-| 1 명확성 | 한 문장 · 대표 시나리오, 팀원 모두 같게 설명 | [PRD.md](PRD.md), [00 개요](../docs/00-overview.md), 발표 v3 3 · 4번 | [x] | 달성 |
-| 2 실제 동작 | 배포 URL에서 시나리오 재현, `E2E_BASE_URL` 실행 결과, 시연 영상 | 최종 회귀(배포 dev) [test-report.md](../docs/records/test-report.md), 화면 직접 확인 [review-eple](../docs/records/review-eple.md) · [review-skygaul](../docs/records/review-skygaul.md), 시연 영상(발표 v3 11번) | [x] | 달성 |
+| 1 명확성 | 한 문장 · 대표 시나리오, 팀원 모두 같게 설명 | [PRD.md](PRD.md), [00 개요](../docs/00-overview.md), 발표 v4 4 · 5번 | [x] | 달성 |
+| 2 실제 동작 | 배포 URL에서 시나리오 재현, `E2E_BASE_URL` 실행 결과, 시연 영상 | 최종 회귀(배포 dev) [test-report.md](../docs/records/test-report.md), 화면 직접 확인 [review-eple](../docs/records/review-eple.md) · [review-skygaul](../docs/records/review-skygaul.md), 시연 영상(발표 v4 15번) | [x] | 달성 |
 | 3 테스트 · 권한 | T-AUTH · 실패 사례 결과표 | [test-report.md](../docs/records/test-report.md)(T-AUTH-1~8 · 실패 사례), [eple-step2-evidence](../docs/records/eple-step2-evidence.md), [security-check-1125](../docs/records/security-check-1125.md) | [x] | 달성 |
 | 4 AI 검토 | AI 사례 3개(실패 원인 · 수정 · 재검증), 모의 · 실제 비교 | [ai-cases.md](../docs/records/ai-cases.md), `ai-cases-<계정>.md`, [ai-limits.md](../docs/records/ai-limits.md), `ai-usage-<아이디>.md` 4명 | [x] | 달성 |
-| 5 협업 · 전달 | 리뷰가 남은 PR, README만으로 재현, 기여 분산 | GitHub PR 목록(승인 리뷰 뒤 병합), [README.md](../README.md), 회고 · 리뷰 4명, [13 고친 기록](../docs/13-fixes.md) | [x] | 부분 달성 — 다른 PC에서 README만으로 실행은 확인 기록 없음 |
+| 5 협업 · 전달 | 리뷰가 남은 PR, README만으로 재현, 기여 분산 | GitHub PR 목록(승인 리뷰 뒤 병합), [README.md](../README.md), 회고 · 리뷰 4명, [13 고친 기록](../docs/13-fixes.md), README 새 설치 확인([6절](#6-wu-44-완료-기준-1125--1126)) | [x] | 달성 — README만으로 새 설치: 팀원 1명(skygaul) 본인 PC(로그인 · 시연 데이터 초기화까지), eple 새 폴더, 처음 보는 사람 점검(키 없는 단계 통과) (11/26 제출 뒤) |
 
 ## 4. Step별 증거
 
@@ -59,7 +59,7 @@
 ## 6. WU-44 완료 기준 (11/25 ~ 11/26)
 
 - [x] 이 문서의 전 항목 체크 — 11/26 README 새 설치 확인 뒤 전 항목 체크(제출 뒤)
-- [x] 다른 PC(팀원)에서 README만 보고 실행 성공(피드백 기준 5) — 팀원 4명이 각자 PC에서 로컬 실행 · 개발함([day-02](../docs/daily/day-02.md)). 11/26 새 설치 확인 — ① eple(README 작성자)이 같은 PC의 새 폴더에 새로 clone해 README 순서대로 실행 성공: `npm ci`(4분) · 훅 자동 설치 · `npm run dev` · `/api/health` 200 · `/login` 이동 · 로그인 뒤 대시보드(품목 8 · 재고 합계 118) 확인. `.env.local`은 기존 값을 복사함(값은 원래 전달받는 단계, `.env.example` 16개 키에 설명 있음) ② 처음 보는 사람 관점 점검(eple 세션의 하위 에이전트, 새 clone · README와 `.env.example`만 읽음): 키 없이 `npm ci` · `lint` · `typecheck` · `test:unit`(49파일 · 869개) 통과, 키가 필요한 단계는 하지 않음. README에서 보완할 곳 12개 · `.env.example` 애매한 키 8개를 찾음(README 보완은 제출 뒤 별도) ③ 팀원 1명이 본인 PC의 새 폴더에 새로 clone해 README 순서대로 `npm ci`(385개 · 취약점 0) · 훅 · `.env.local` · `npm run dev` · 로그인 · 대시보드 · [시연 데이터 초기화](재고 합계 115 → 118 복원)까지 성공. Node 26이라 `EBADENGINE` 경고만 남, 첫 `npm ci`에서 일시적 다운로드 재시도 1회, README 2단계 `cd` 순서 혼동 1회 — README 보완 목록에 더함. Node 24 다른 PC 확인은 없음
+- [x] 다른 PC(팀원)에서 README만 보고 실행 성공(피드백 기준 5) — 팀원 4명이 각자 PC에서 로컬 실행 · 개발함([day-02](../docs/daily/day-02.md)). 11/26 새 설치 확인 — ① eple(README 작성자)이 같은 PC의 새 폴더에 새로 clone해 README 순서대로 실행 성공: `npm ci`(4분) · 훅 자동 설치 · `npm run dev` · `/api/health` 200 · `/login` 이동 · 로그인 뒤 대시보드(품목 8 · 재고 합계 118) 확인. `.env.local`은 기존 값을 복사함(값은 원래 전달받는 단계, `.env.example` 16개 키에 설명 있음) ② 처음 보는 사람 관점 점검(eple 세션의 하위 에이전트, 새 clone · README와 `.env.example`만 읽음): 키 없이 `npm ci` · `lint` · `typecheck` · `test:unit`(49파일 · 869개) 통과, 키가 필요한 단계는 하지 않음. README에서 보완할 곳 12개 · `.env.example` 애매한 키 8개를 찾음(README 보완은 제출 뒤 별도) ③ 팀원 1명(skygaul)이 본인 PC의 새 폴더에 새로 clone해 README 순서대로 `npm ci`(385개 · 취약점 0) · 훅 · `.env.local` · `npm run dev` · 로그인 · 대시보드 · [시연 데이터 초기화](재고 합계 115 → 118 복원)까지 성공. Node 26이라 `EBADENGINE` 경고만 남, 첫 `npm ci`에서 일시적 다운로드 재시도 1회, README 2단계 `cd` 순서 혼동 1회 — README 보완 목록에 더함. Node 24 다른 PC 확인은 없음
 - [x] 저장소 전체(커밋 이력 포함)에 키 · 비밀번호 · 실제 이메일 · 실명 없음 — 보안 점검 기록 참고(커밋 작성자 메일 3건은 알고 둠)
 - [x] 11/25 오전: 열린 PR 정리 · 병합 → 기능 고정 선언 — 기능 동결은 11/24 14:00, 이후 버그 수정(#84 · #90 · #94) · 문서만 병합
 - [x] 회귀 테스트 전부 통과 + 배포 URL E2E 1회 — 11/25 10:56 배포 dev 통과 66 · 실패 0
