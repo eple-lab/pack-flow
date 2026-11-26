@@ -97,7 +97,7 @@ Render 무료 플랜이라 접속이 없으면 잠들어 첫 응답이 느립니
 | [AGENTS.md](AGENTS.md) | AI 에이전트 공통 규칙 |
 | [docs/records/presentation-20261126.md](docs/records/presentation-20261126.md) | 발표 기록: 예행연습 · 본발표 시간, 질의응답 |
 
-> **작업 공간(비공개):** 프로젝트 문서용 작업 공간(배포 코드와 분리)을 따로 만들어 발표 자료 · 관리 문서를 저장했습니다. 문서 위주라 비공개 저장소로 두었고, 열람을 원하시면 팀원과 협의해 열어 드리겠습니다. 발표 원고 · 자료는 [pack-flow-workspace/presentation](https://github.com/eple-lab/pack-flow-workspace/tree/main/presentation)에 있습니다.
+> **작업 공간(비공개):** 프로젝트 문서용 작업 공간(배포 코드와 분리)을 따로 만들어 발표 자료 · 관리 문서를 저장했습니다. 문서 위주라 비공개 저장소로 두었고, 열람을 원하시면 팀원과 협의해 열어 드리겠습니다. 발표 원고 · 자료는 [pack-flow-workspace/presentation](https://github.com/eple-lab/pack-flow-workspace/tree/main/presentation)에 있습니다. 화면은 [발표 기록](docs/records/presentation-20261126.md) 참고.
 
 ## 팀
 
