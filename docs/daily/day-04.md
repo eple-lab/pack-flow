@@ -40,7 +40,7 @@
 - [x] 제출용 테스트 결과서 `docs/records/test-report.md` — [07](../07-test-strategy.md) 5절 양식, 최종 회귀 결과표와 테스트 ID로 합침 — #92 병합([test-report.md](../records/test-report.md), 68줄 · 통과 65 · 해당 없음 3)
 - [x] 발표자 배정 확정(Q-13) · 발표 원고 `[11/25]` 숫자(병합 PR 수 · 리뷰 수 · 회귀 결과 · 측정값) — 발표자 배정은 v3 원고로 확정(여는 말 · 발표 2 · 마무리 eple, 발표 1 sorek-charlie, 발표 3 skygaul, 발표 4 jkspawn), 원고 숫자는 11/26 오전 결과표 · 병합 기록과 대조해 고침(판정 ⑤)
 - [x] 회고 · 리뷰 개별 파일(4명) — 제출물 '팀원별 기여 · 회고' — #79 · #80 · #86 · #87 병합, `retrospective-*` · `review-*` · `ai-usage-*` 4명분 파일 있음
-- [ ] [09 상태 칸](../09-features.md) 마감 갱신, `DevelopDoc/` 4개 최종 · [FINAL_CHECKLIST](../../DevelopDoc/FINAL_CHECKLIST.md) 체크, README · LICENSE · 영상 위치 — 미체크: 11/25에는 끝나지 않고 11/26 오전 #98(제출본 정리)에서 정리, FINAL_CHECKLIST는 4칸 남음(전 항목 체크 · 다른 PC 재현 · 11/26 demo 초기화 · 제출 해시)
+- [ ] [09 상태 칸](../09-features.md) 마감 갱신, `DevelopDoc/` 4개 최종 · [FINAL_CHECKLIST](../../DevelopDoc/FINAL_CHECKLIST.md) 체크, README · LICENSE · 영상 위치 — 미체크: 11/25에는 끝나지 않고 11/26 오전 #98(제출본 정리)에서 정리, FINAL_CHECKLIST는 4칸 남음(전 항목 체크 · 다른 PC 재현 · 11/26 demo 초기화 · 제출 해시) → 11/26 #98 · #101 · #103에서 처리, 남은 칸은 README 재현(부분) 1개와 그에 걸린 '전 항목 체크'
 - [x] 보안 점검 — 실명 목록 대조, 커밋 작성자 개인 메일(팀원 1명 noreply 안내), 시연 계정 · 키가 공개 문서에 없는지 — [security-check-1125.md](../records/security-check-1125.md) (작성 11/25, 병합 #97은 11/26 오전)
 - [x] #76 병합, 버그 후보 3개 처리 결정(아래) — #76 병합 · ① #83/#84로 수정 · ② #77은 #90 · #94로 수정 · ③ 이슈 #96으로 열려 있음(제출 뒤 처리로 결정)
 
@@ -57,7 +57,7 @@
 - [x] ③ 발표 리허설 1회 이상 — 시연 영상이 끝까지 재생되고, demo에서 라이브 대비 동선을 처음부터 끝까지 1회 따라감([시연 데이터 초기화] 뒤 대시보드 재고 합계 118에서 시작) — 영상 재생 확인 + demo 라이브 대비 동선 1회(eple 확인, 시연 순서표와 같은 순서, 걸린 시간 기록 없음)
 - [x] ④ 백업 영상 화면 · 음성 모두 확인(개인정보 · 키 노출 없음) — FINAL_CHECKLIST 기준 약 134초(skygaul v3) · 180초(sorek-charlie) 두 본, 화면 · 음성 확인(eple · skygaul · sorek-charlie)
 - [x] ⑤ 발표 자료 숫자가 결과표 · 병합 기록과 같음, 발표자 배정 확정 — 배정은 v3 원고로 확정. 11/26 오전 원고 숫자를 결과표 · GitHub 병합 기록과 대조해 어긋난 3곳(병합 PR 72개 중 66개 리뷰 · jkspawn 병합 11개 · 응답 지연 1–13초)을 고치고, 근거 없는 숫자 2곳은 뺌(11/26 반영)
-- [ ] ⑥ 제출물(README · DevelopDoc 4개 · 테스트 결과서 · AI 사례 3개 · 회고 · 영상 · 라이선스) 위치가 FINAL_CHECKLIST에 모두 체크 — 미체크: 제출 문서는 11/26 오전 #98에서 정리, FINAL_CHECKLIST 4칸 남음
+- [ ] ⑥ 제출물(README · DevelopDoc 4개 · 테스트 결과서 · AI 사례 3개 · 회고 · 영상 · 라이선스) 위치가 FINAL_CHECKLIST에 모두 체크 — 미체크: 제출 문서는 11/26 오전 #98에서 정리, FINAL_CHECKLIST 4칸 남음 → 11/26 #98 · #101 · #103에서 처리, 남은 칸은 README 재현(부분) 1개와 그에 걸린 '전 항목 체크'
 - [x] ⑦ 합친 버전(main)을 한 번 실행 — `lint` · `typecheck` · `test:unit` — 11/25이 아니라 11/26 오전 WU 사후 확인 때 main(#98 병합 직후) 실행: lint 오류 0 · typecheck 오류 0 · test:unit 49파일 869개 통과
 
 결과(11/25 작성):
